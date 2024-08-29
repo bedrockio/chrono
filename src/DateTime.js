@@ -130,13 +130,14 @@ export default class DateTime {
     };
   }
 
-  constructor(arg, options = {}) {
-    if (arguments.length === 0) {
+  constructor(...args) {
+    if (args.length === 0 || isOptionsObject(args[0])) {
       this.date = new Date();
+      this.options = args[0] || {};
     } else {
-      this.date = new Date(arg ?? Date.now());
+      this.date = new Date(args[0] ?? Date.now());
+      this.options = args[1];
     }
-    this.options = options;
     this.offset = null;
     this.utc = null;
   }
@@ -458,6 +459,14 @@ export default class DateTime {
     const offset = dt.getTimezoneOffset();
     return dt.setTime(dt.getTime() + offset * ONE_MINUTE);
   }
+}
+
+function isOptionsObject(arg) {
+  return arg && typeof arg === 'object' && !isDateClass(arg);
+}
+
+function isDateClass(arg) {
+  return arg instanceof Date || arg instanceof DateTime;
 }
 
 function advanceDate(dt, dir, by, unit) {

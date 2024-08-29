@@ -1,7 +1,7 @@
 # Chrono
 
 Chrono is a minimal library to simplify working with dates in Javascript. It has
-built-in local and timezone support.
+built-in locale and timezone support.
 
 Concepts
 
@@ -40,7 +40,7 @@ const dt = new DateTime({
 });
 
 DateTime.setTimeZone('America/New_York');
-DateTime.setLocal('en-US');
+DateTime.setLocale('en-US');
 ```
 
 ## Interval

@@ -13,6 +13,14 @@ describe('DateTime', () => {
       expect(new DateTime(undefined).getTime()).toBeCloseTo(Date.now(), -1);
     });
 
+    it('should allow passing a single options object', async () => {
+      const dt = new DateTime({
+        timeZone: 'America/New_York',
+      });
+      expect(dt.getTime()).toBeCloseTo(Date.now(), -2);
+      expect(dt.options.timeZone).toBe('America/New_York');
+    });
+
     it('should accept a string value', async () => {
       expect(new DateTime('2020-01-01T00:00:00.000Z').toISOString()).toBe(
         '2020-01-01T00:00:00.000Z'
