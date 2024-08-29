@@ -409,6 +409,11 @@ export default class DateTime {
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
 
+  // Shortcut for setFullYear
+  setYear(year) {
+    return this.setFullYear(year);
+  }
+
   // Create a new date from arguments. This is identical
   // to using the overloaded constructor, however where
   // numeric values there are relative to the system time,

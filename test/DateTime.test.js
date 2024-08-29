@@ -938,6 +938,11 @@ describe('DateTime', () => {
   });
 
   describe('setters', () => {
+    it('should have setYear a shortcut', async () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.setYear(2019).toISOString()).toBe('2019-01-01T00:00:00.000Z');
+    });
+
     it('should set the correct year for timezone', async () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {
         timeZone: 'America/New_York',
