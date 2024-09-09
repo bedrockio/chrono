@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/chrono",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Minimal library for working with dates.",
   "scripts": {
     "test": "jest",
@@ -9,7 +9,6 @@
     "types": "tsc",
     "prepublishOnly": "yarn build && yarn types"
   },
-  "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./src/index.js",
   "types": "./types/index.d.ts",
