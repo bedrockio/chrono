@@ -4,37 +4,62 @@
 // - Intl.DateTimeFormat
 // - Intl.RelativeTimeFormat
 
+import { normalizeUnit, getUnitIndex } from './units';
+import { isAmbiguousTimeZone } from './timezone';
+
 const ONE_SECOND = 1000;
 const ONE_MINUTE = 60 * ONE_SECOND;
 const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
 
-const UNITS = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'];
-
 export default class DateTime {
-  // January 1, 2020
+  /**
+   * A medium date format.
+   *
+   * @constant
+   * @example
+   * January 1, 2020
+   */
   static DATE_MED = {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   };
 
-  // Jan 1, 2020
+  /**
+   * A short date format.
+   *
+   * @constant
+   * @example
+   * Jan 1, 2020
+   */
   static DATE_SHORT = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   };
 
-  // 1/1/2020
+  /**
+   * A narrow date format.
+   *
+   * @constant
+   * @example
+   * 1/1/2020
+   */
   static DATE_NARROW = {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
   };
 
-  // Wednesday, January 1, 2020
+  /**
+   * A medium date format that includes the weekday.
+   *
+   * @constant
+   * @example
+   * Wednesday, January 1, 2020
+   */
   static DATE_MED_WEEKDAY = {
     year: 'numeric',
     month: 'long',
@@ -42,68 +67,134 @@ export default class DateTime {
     weekday: 'long',
   };
 
-  // 9:00am
+  /**
+   * A medium time format.
+   *
+   * @constant
+   * @example
+   * 9:00am
+   */
   static TIME_MED = {
     hour: 'numeric',
     minute: '2-digit',
   };
 
-  // 9:00a
+  /**
+   * A short time format.
+   *
+   * @constant
+   * @example
+   * 9:00a
+   */
   static TIME_SHORT = {
     hour: 'numeric',
     minute: '2-digit',
     shortDayPeriod: true,
   };
 
-  // 9pm
+  /**
+   * A medium hour format.
+   *
+   * @constant
+   * @example
+   * 9pm
+   */
   static TIME_HOUR = {
     hour: 'numeric',
   };
 
-  // 9p
+  /**
+   * A short hour format.
+   *
+   * @constant
+   * @example
+   * 9p
+   */
   static TIME_SHORT_HOUR = {
     hour: 'numeric',
     shortDayPeriod: true,
   };
 
-  // 9:00am Japan Standard Time
+  /**
+   * A time format that includes the timezone.
+   *
+   * @constant
+   * @example
+   * 9:00am Japan Standard Time
+   */
   static TIME_TIMEZONE = {
     hour: 'numeric',
     minute: '2-digit',
     timeZoneName: 'long',
   };
 
-  // January 1, 2020 9:00pm
+  /**
+   * A medium datetime format.
+   *
+   * @constant
+   * @example
+   * January 1, 2020 9:00pm
+   */
   static DATETIME_MED = {
     ...this.DATE_MED,
     ...this.TIME_MED,
   };
 
-  // Jan 1, 2020 9:00pm
+  /**
+   * A short datetime format.
+   *
+   * @constant
+   * @example
+   * Jan 1, 2020 9:00pm
+   */
   static DATETIME_SHORT = {
     ...this.DATE_SHORT,
     ...this.TIME_MED,
   };
 
-  // 1/1/2020 9:00pm
+  /**
+   * A narrow datetime format.
+   *
+   * @constant
+   * @example
+   * 1/1/2020 9:00pm
+   */
   static DATETIME_NARROW = {
     ...this.DATE_NARROW,
     ...this.TIME_MED,
   };
 
-  // Wednesday, January 1, 2020 9:00pm
+  /**
+   * A medium datetime format that includes the weekday.
+   *
+   * @constant
+   * @example
+   * Wednesday, January 1, 2020 9:00pm
+   */
   static DATETIME_MED_WEEKDAY = {
     ...this.DATE_MED_WEEKDAY,
     ...this.TIME_MED,
   };
 
-  // January 2020
+  /**
+   * A medium month and year format.
+   *
+   * @constant
+   * @example
+   * January 2020
+   */
   static MONTH_YEAR = {
     year: 'numeric',
     month: 'long',
   };
 
-  // Jan 2020
+  /**
+   * A short month and year format.
+   *
+   * @constant
+   * @example
+   * Jan 2020
+   */
   static MONTH_YEAR_SHORT = {
     year: 'numeric',
     month: 'short',
@@ -111,18 +202,36 @@ export default class DateTime {
 
   static options = {};
 
+  /**
+   * Sets the global timezone.
+   *
+   * @param {string} timeZone
+   * @static
+   */
   static setTimeZone(timeZone) {
     this.setOptions({
       timeZone,
     });
   }
 
+  /**
+   * Sets the global locale.
+   *
+   * @param {string} locale
+   * @static
+   */
   static setLocale(locale) {
     this.setOptions({
       locale,
     });
   }
 
+  /**
+   * Sets global options.
+   *
+   * @param {Object} options
+   * @static
+   */
   static setOptions(options) {
     this.options = {
       ...this.options,
@@ -130,13 +239,85 @@ export default class DateTime {
     };
   }
 
+  /**
+   * Returns the minimum value passed in as a DateTime.
+   *
+   * @param {...(DateTime|Date|number|string)} args
+   * @static
+   */
+  static min(...args) {
+    if (!args.length) {
+      return null;
+    }
+    return args
+      .map((arg) => {
+        return new DateTime(arg);
+      })
+      .reduce((dt1, dt2) => {
+        return dt1 < dt2 ? dt1 : dt2;
+      });
+  }
+
+  /**
+   * Returns the maximum value passed in as a DateTime.
+   *
+   * @param {...(DateTime|Date|number|string)} args
+   * @static
+   */
+  static max(...args) {
+    if (!args.length) {
+      return null;
+    }
+    return args
+      .map((arg) => {
+        return new DateTime(arg);
+      })
+      .reduce((dt1, dt2) => {
+        return dt1 > dt2 ? dt1 : dt2;
+      });
+  }
+
+  /**
+   * Creates a DateTime from various input. A single argument may be date input
+   * or an options object. Two arguments represents input and an options object.
+   * If no arguments are passed the DateTime will be the current date.
+   *
+   * If the input is a string that specifies a timezone or offset it will be used
+   * as is. Otherwise if the `timeZone` option is specified or a global timezone
+   * is set it will be parsed in that timezone. If no timezone can be derived the
+   * system offset will be used instead.
+   *
+   * @constructor
+   * @param {...(DateTime|Date|Object|number|string)} args
+   *
+   * @example
+   * new DateTime();
+   * new DateTime('2025-01-01');
+   * new DateTime(1735689600000);
+   * new DateTime({
+   *   locale: 'en-US',
+   *   timeZone: 'America/New_York'
+   * });
+   * new DateTime('Jan 1 2025', {
+   *   locale: 'en-US',
+   *   timeZone: 'America/New_York'
+   * });
+   */
   constructor(...args) {
     if (args.length === 0 || isOptionsObject(args[0])) {
       this.date = new Date();
       this.options = args[0] || {};
     } else {
-      this.date = new Date(args[0] ?? Date.now());
-      this.options = args[1];
+      const [arg, options] = args;
+      if (typeof arg === 'string') {
+        this.date = parseDate(arg, {
+          ...DateTime.options,
+          ...options,
+        });
+      } else {
+        this.date = new Date(arg ?? Date.now());
+      }
+      this.options = options;
     }
     this.offset = null;
     this.utc = null;
@@ -152,42 +333,87 @@ export default class DateTime {
     return this.getTime();
   }
 
+  /**
+   * Returns a default formatted string that represents the DateTime.
+   */
   toString() {
     return this.format();
   }
 
+  /**
+   * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
+   * representation of the DateTime.
+   */
   toISOString() {
     return this.date.toISOString();
   }
 
+  /**
+   * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
+   * representation of the date component of the DateTime in UTC.
+   *
+   * @example
+   * 2025-01-01
+   */
   toISODate() {
     const str = this.toISOString();
     return str.split('T')[0];
   }
 
+  /**
+   * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
+   * representation of the time component of the DateTime in UTC.
+   *
+   * @example
+   * 12:30:00.000
+   */
   toISOTime() {
     const str = this.toISOString();
     return str.split('T')[1].slice(0, -1);
   }
 
+  /**
+   * Returns the date component of the DateTime. The result will
+   * be in the specified timezone, either that passed or set globally.
+   *
+   * @example
+   * 2025-01-01
+   */
   toDate() {
     const str = this.toUTC().toISOString();
     return str.split('T')[0];
   }
 
+  /**
+   * Returns the time component of the DateTime. The result will
+   * be in the specified timezone, either that passed or set globally.
+   *
+   * @example
+   * 12:30:00.000
+   */
   toTime() {
     const str = this.toUTC().toISOString();
     return str.split('T')[1].slice(0, -1);
   }
 
+  /**
+   * Returns the unix timestamp of the DateTime.
+   */
   getTime() {
     return this.date.getTime();
   }
 
+  /**
+   * Sets the unix timestamp of the DateTime.
+   * @param {number} time
+   */
   setTime(time) {
     return new DateTime(time, this.options);
   }
 
+  /**
+   * Equivalent to `toISOString`.
+   */
   toJSON() {
     return this.date.toISOString();
   }
@@ -195,6 +421,9 @@ export default class DateTime {
   // Formatting
 
   /**
+   * Formats the DateTime using various formats accessible as static
+   * members of the DateTime class.
+   *
    * @param {Object} format
    * @param {Object} options
    */
@@ -226,28 +455,82 @@ export default class DateTime {
     return str;
   }
 
+  /**
+   * Formats the date component of the DateTime using a standard
+   * representation. The local or global locale will be used when
+   * specified.
+   *
+   * @example
+   * January 1, 2025
+   */
   formatDate() {
     return this.format(DateTime.DATE_MED);
   }
 
+  /**
+   * Formats the time component of the DateTime using a standard
+   * representation. The local or global locale will be used when
+   * specified.
+   *
+   * @example
+   * 9:00am
+   */
   formatTime() {
     return this.format(DateTime.TIME_MED);
   }
 
+  /**
+   * Formats the hours component of the DateTime. The local or
+   * global locale will be used when specified.
+   *
+   * @example
+   * 9am
+   */
   formatHours() {
     return this.format(DateTime.TIME_HOUR);
   }
 
+  /**
+   * Formats the month and year components of the DateTime. The
+   * local or global locale will be used when specified.
+   *
+   * @example
+   * January 2025
+   */
   formatMonthYear() {
     return this.format(DateTime.MONTH_YEAR);
   }
 
+  /**
+   * Formats the month and year components of the DateTime in a
+   * shortened format. The local or global locale will be used
+   * when specified.
+   *
+   * @example
+   * Jan 2025
+   */
   formatMonthYearShort() {
     return this.format(DateTime.MONTH_YEAR_SHORT);
   }
 
   // Relative Formatting
 
+  /**
+   * Formats the DateTime in a relative format. Allowed options are:
+   *
+   * - `now`     - Offset to format relative to. Defaults to the current time.
+   * - `min`     - When set will return undefined if the DateTime is before this date.
+   * - `max`     - When set will return undefined if the DateTime is after this date.
+   * - `numeric` - Passed to Intl.RelativeTimeFormat. Defaults to `auto` but may
+   *               also be `always`.
+   *
+   * @param {Object} [options]
+   * @param {DateTime|Date|number} [options.now]
+   * @param {DateTime|Date|number} [options.min]
+   * @param {DateTime|Date|number} [options.max]
+   * @param {string} [options.numeric]
+   *
+   */
   relative(options) {
     return formatRelative(this, {
       ...DateTime.options,
@@ -258,158 +541,308 @@ export default class DateTime {
 
   // Advancing
 
+  /**
+   * Advances the DateTime. When the first argument is a number it must
+   * be followed by a unit advancing by that many units. If the first
+   * argument is an object it will advance the date by multiple units.
+   *
+   * @param {number|Object.<string, number>} by
+   * @param {("years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds")} [unit]
+   *
+   * @example
+   * new DateTime().advance(6, 'months')
+   * new DateTime().advance({
+   *   months: 6,
+   *   days: 15
+   * })
+   */
   advance(by, unit) {
     return advanceDate(this, 1, by, unit);
   }
 
+  /**
+   * Rewinds the DateTime. When the first argument is a number it must
+   * be followed by a unit rewinding by that many units. If the first
+   * argument is an object it will rewind the date by multiple units.
+   *
+   * @param {number|Object.<string, number>} by
+   * @param {("years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds")} [unit]
+   *
+   * @example
+   * new DateTime().rewind(6, 'months')
+   * new DateTime().rewind({
+   *   months: 6,
+   *   days: 15
+   * })
+   */
   rewind(by, unit) {
     return advanceDate(this, -1, by, unit);
   }
 
   // Edges
 
+  /**
+   * Rewinds the DateTime to the start of the specified unit.
+   * @param {("year"|"month"|"week"|"day"|"hour"|"minute"|"second")} unit
+   */
   startOf(unit) {
     return startOf(this, unit);
   }
 
+  /**
+   * Advances the DateTime to the end of the specified unit.
+   * @param {("year"|"month"|"week"|"day"|"hour"|"minute"|"second")} unit
+   */
   endOf(unit) {
     return endOf(this, unit);
   }
 
   // Convenience methods
 
+  /**
+   * Rewinds the DateTime to the start of the year.
+   */
   startOfYear() {
     return this.startOf('year');
   }
 
+  /**
+   * Rewinds the DateTime to the start of the month.
+   */
   startOfMonth() {
     return this.startOf('month');
   }
 
+  /**
+   * Rewinds the DateTime to the start of the calendar month.
+   * This may push the date into the previous month.
+   */
   startOfCalendarMonth() {
     return this.startOfMonth().startOfWeek();
   }
 
+  /**
+   * Rewinds the DateTime to the start of the week.
+   */
   startOfWeek() {
     return this.startOf('week');
   }
 
+  /**
+   * Rewinds the DateTime to the start of the day.
+   */
   startOfDay() {
     return this.startOf('day');
   }
 
+  /**
+   * Advances the DateTime to the end of the year.
+   */
   endOfYear() {
     return this.endOf('year');
   }
 
+  /**
+   * Advances the DateTime to the end of the month.
+   */
   endOfMonth() {
     return this.endOf('month');
   }
 
+  /**
+   * Advances the DateTime to the end of the calendar month.
+   * This may push the date into the next month.
+   */
   endOfCalendarMonth() {
     return this.endOfMonth().endOfWeek();
   }
 
+  /**
+   * Advances the DateTime to the end of the week.
+   */
   endOfWeek() {
     return this.endOf('week');
   }
 
+  /**
+   * Advances the DateTime to the end of the day.
+   */
   endOfDay() {
     return this.endOf('day');
   }
 
   // Other
 
+  /**
+   * Returns the number of days in the month.
+   */
   daysInMonth() {
     return daysInMonth(this);
   }
 
+  /**
+   * Resets the time to 00:00:00.000. Equivalent to `startOfDay`.
+   */
   resetTime() {
     return this.setArgs(this.getFullYear(), this.getMonth(), this.getDate());
   }
 
+  /**
+   * Returns true if the DateTime is invalid.
+   */
   isInvalid() {
     return isNaN(this.getTime());
   }
 
+  /**
+   * Returns true if the DateTime is valid.
+   */
   isValid() {
     return !this.isInvalid();
   }
 
+  /**
+   * Returns true if the DateTime is equivalent to the passed value..
+   *
+   * @param {DateTime|Date|number|string} arg
+   */
+  isEqual(arg) {
+    return this.getTime() === new DateTime(arg).getTime();
+  }
+
+  /**
+   * Returns a clone of the DateTime.
+   */
   clone() {
     return new DateTime(this.date, this.options);
   }
 
   // Getters
 
+  /**
+   * Gets the year of the DateTime.
+   */
   getFullYear() {
     return this.toUTC().getUTCFullYear();
   }
 
+  /**
+   * Gets the month of the DateTime. Note that months are zero based so
+   * January is 0.
+   */
   getMonth() {
     return this.toUTC().getUTCMonth();
   }
 
+  /**
+   * Gets the date of the DateTime.
+   */
   getDate() {
     return this.toUTC().getUTCDate();
   }
 
+  /**
+   * Gets the day of week of the DateTime from 0 to 6.
+   */
   getDay() {
     return this.toUTC().getUTCDay();
   }
 
+  /**
+   * Gets the hours of the DateTime.
+   */
   getHours() {
     return this.toUTC().getUTCHours();
   }
 
+  /**
+   * Gets the minutes of the DateTime.
+   */
   getMinutes() {
     return this.toUTC().getUTCMinutes();
   }
 
+  /**
+   * Gets the seconds of the DateTime.
+   */
   getSeconds() {
     return this.toUTC().getUTCSeconds();
   }
 
+  /**
+   * Gets the milliseconds of the DateTime.
+   */
   getMilliseconds() {
     return this.toUTC().getUTCMilliseconds();
   }
 
+  /**
+   * Sets the year of the DateTime.
+   */
   setFullYear(year) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCFullYear(year));
   }
 
+  /**
+   * Sets the month of the DateTime. Note that months are zero based so
+   * January is 0.
+   */
   setMonth(month) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCMonth(month));
   }
 
+  /**
+   * Sets the date of the DateTime.
+   */
   setDate(date) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCDate(date));
   }
 
+  /**
+   * Sets the hours of the DateTime.
+   */
   setHours(hours) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCHours(hours));
   }
 
+  /**
+   * Sets the minutes of the DateTime.
+   */
   setMinutes(minutes) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCMinutes(minutes));
   }
 
+  /**
+   * Sets the seconds of the DateTime.
+   */
   setSeconds(seconds) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCSeconds(seconds));
   }
 
+  /**
+   * Sets the milliseconds of the DateTime.
+   */
   setMilliseconds(milliseconds) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
 
-  // Shortcut for setFullYear
+  /**
+   * Alias for `getFullYear`.
+   */
+  getYear() {
+    return this.getFullYear();
+  }
+
+  /**
+   * Alias for `setFullYear`.
+   */
   setYear(year) {
     return this.setFullYear(year);
   }
@@ -444,6 +877,13 @@ export default class DateTime {
     return this.setUTCTime(Date.UTC(...args));
   }
 
+  /**
+   * Gets the timezone offset of the DateTime in minutes. This may
+   * be the offset of the local or global timezone if one is set,
+   * otherwise will be the system offset.
+   *
+   * @returns {number}
+   */
   getTimezoneOffset() {
     this.offset ||= getTimezoneOffset(this.date, {
       ...DateTime.options,
@@ -474,6 +914,28 @@ function isDateClass(arg) {
   return arg instanceof Date || arg instanceof DateTime;
 }
 
+function parseDate(str, options) {
+  const { timeZone } = options;
+
+  const date = new Date(str);
+
+  // There is no way to determine if the incoming string
+  // contains timezone information or not simply by parsing
+  // so passing off to utility method to determine this by
+  // regex check. If no timezone is specified or the string
+  // itself contains timezone information then it is ok to
+  // use the system parsed date.
+  if (!timeZone || !isAmbiguousTimeZone(str)) {
+    return date;
+  }
+
+  const localOffset = getTimezoneOffset(date, options);
+  const systemOffset = date.getTimezoneOffset();
+
+  date.setMinutes(date.getMinutes() - systemOffset + localOffset);
+  return date;
+}
+
 function advanceDate(dt, dir, by, unit) {
   if (typeof by === 'number' && typeof unit === 'string') {
     return advanceDate(dt, dir, {
@@ -493,37 +955,31 @@ function advanceDate(dt, dir, by, unit) {
   for (let [key, val] of Object.entries(by)) {
     val *= dir;
 
+    key = normalizeUnit(key);
+
     switch (key) {
       case 'year':
-      case 'years':
         date.setFullYear(date.getFullYear() + val);
         break;
       case 'month':
-      case 'months':
         advanceMonthSafe(date, val);
         break;
       case 'week':
-      case 'weeks':
         date.setDate(date.getDate() + val * 7);
         break;
       case 'day':
-      case 'days':
         date.setDate(date.getDate() + val);
         break;
       case 'hour':
-      case 'hours':
         date.setHours(date.getHours() + val);
         break;
       case 'minute':
-      case 'minutes':
         date.setMinutes(date.getMinutes() + val);
         break;
       case 'second':
-      case 'seconds':
         date.setSeconds(date.getSeconds() + val);
         break;
       case 'millisecond':
-      case 'milliseconds':
         date.setMilliseconds(date.getMilliseconds() + val);
         break;
     }
@@ -708,7 +1164,7 @@ function advanceMonthSafe(date, amt) {
 }
 
 function startOf(dt, unit) {
-  const index = UNITS.indexOf(unit);
+  const index = getUnitIndex(unit);
 
   const year = dt.getFullYear();
   const month = index < 1 ? 0 : dt.getMonth();
@@ -730,7 +1186,7 @@ function startOf(dt, unit) {
 }
 
 function endOf(dt, unit) {
-  const index = UNITS.indexOf(unit);
+  const index = getUnitIndex(unit);
 
   const year = dt.getFullYear();
   const month = index < 1 ? 11 : dt.getMonth();
