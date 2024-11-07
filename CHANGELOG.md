@@ -1,3 +1,9 @@
+## 0.2.1
+
+- Added DateTime.getMonths.
+- Added DateTime.getWeekdays.
+- Added DateTime.getMeridiem.
+
 ## 0.2.0
 
 - Strings in DateTime constructor that do not specify a timezone will now

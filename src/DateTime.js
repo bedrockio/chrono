@@ -6,6 +6,7 @@
 
 import { normalizeUnit, getUnitIndex } from './units';
 import { isAmbiguousTimeZone } from './timezone';
+import { getFirstDayOfWeek } from './intl';
 
 const ONE_SECOND = 1000;
 const ONE_MINUTE = 60 * ONE_SECOND;
@@ -275,6 +276,105 @@ export default class DateTime {
       .reduce((dt1, dt2) => {
         return dt1 > dt2 ? dt1 : dt2;
       });
+  }
+
+  /**
+   * Gets the months of the year for a given locale. Options are:
+   *
+   * - `locale` - If not passed will use the global locale or fall
+   *              back to the system locale.
+   * - `style` -  Will be passed as `month` to Intl.DateTimeFormat. Default `long`.
+   *
+   * @param {Object} options
+   * @param {string} [options.locale]
+   * @param {"long"|"short"|"narrow"} [options.style]
+   * @static
+   */
+  static getMonths(options = {}) {
+    let { locale, style = 'long' } = options;
+
+    locale ||= DateTime.options.locale;
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+      month: style,
+    });
+
+    return Array.from(new Array(12), (_, i) => {
+      return formatter.format(new Date(2020, i));
+    });
+  }
+
+  /**
+   * Gets the weekday names for a given locale. Options are:
+   *
+   * - `locale` - If not passed will use the global locale or fall
+   *              back to the system locale.
+   * - `start` -  An explicit start day of the week, 0 for sunday, 6 for Saturday.
+   *              Will fall back to the locale defined first day.
+   * - `style` -  Will be passed as `weekday` to Intl.DateTimeFormat. Default `long`.
+   *
+   * @param {Object} options
+   * @param {string} [options.locale]
+   * @param {number} [options.start]
+   * @param {"long"|"short"|"narrow"} [options.style]
+   * @static
+   */
+  static getWeekdays(options = {}) {
+    let { locale, start, style = 'long' } = options;
+
+    locale ||= DateTime.options.locale;
+    start ||= getFirstDayOfWeek(locale);
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+      weekday: style,
+    });
+
+    return Array.from(new Array(7), (_, i) => {
+      const day = (1 + i + start) % 7;
+      return formatter.format(new Date(2017, 0, day));
+    });
+  }
+
+  /**
+   * Gets the meridiem tokens (am/pm) a given locale. Options are:
+   *
+   * - `locale` - If not passed will use the global locale or fall
+   *              back to the system locale.
+   * - `lower` -  Return the tokens in lower case.
+   * - `style` -  When "short" will return a/p for am/pm tokens only.
+   *
+   * @param {Object} options
+   * @param {string} [options.locale]
+   * @param {number} [options.lower]
+   * @param {"long"|"short"} [options.style]
+   * @static
+   */
+  static getMeridiem(options = {}) {
+    let { locale, lower = false, style = 'long' } = options;
+
+    locale ||= DateTime.options.locale;
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+      hourCycle: 'h12',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+
+    return Array.from(new Array(2), (_, i) => {
+      const parts = formatter.formatToParts(new Date(2020, 0, 1, i * 12));
+      const period = parts.find((part) => {
+        return part.type === 'dayPeriod';
+      });
+      let token = period?.value || '';
+      const isLatin = /^[a|p]m$/i.test(token);
+      if (style === 'short' && isLatin) {
+        token = token.slice(0, 1);
+      }
+      if (lower) {
+        token = token.toLowerCase();
+      }
+      return token;
+    });
   }
 
   /**
