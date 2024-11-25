@@ -512,6 +512,17 @@ export default class DateTime {
   }
 
   /**
+   * Sets the internal timezone of the DateTime.
+   * @param {string} timeZone
+   */
+  setZone(timeZone) {
+    return new DateTime(this.date, {
+      ...this.options,
+      timeZone,
+    });
+  }
+
+  /**
    * Equivalent to `toISOString`.
    */
   toJSON() {

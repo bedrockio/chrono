@@ -949,6 +949,15 @@ describe('DateTime', () => {
     });
   });
 
+  describe('setZone', () => {
+    it('should set the internal timezone', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.setZone('UTC').endOf('month').toISOString()).toBe(
+        '2020-01-31T23:59:59.999Z'
+      );
+    });
+  });
+
   describe('isValid', () => {
     it('should correctly identify valid input', () => {
       expect(new DateTime(NaN).isValid()).toBe(false);
