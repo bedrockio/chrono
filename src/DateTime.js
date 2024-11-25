@@ -827,6 +827,13 @@ export default class DateTime {
   }
 
   /**
+   * Alias for `getFullYear`.
+   */
+  getYear() {
+    return this.getFullYear();
+  }
+
+  /**
    * Gets the month of the DateTime. Note that months are zero based so
    * January is 0.
    */
@@ -877,11 +884,74 @@ export default class DateTime {
   }
 
   /**
+   * Gets the year in UTC.
+   */
+  getUTCFullYear() {
+    return this.date.getUTCFullYear();
+  }
+
+  /**
+   * Gets the month in UTC.
+   */
+  getUTCMonth() {
+    return this.date.getUTCMonth();
+  }
+
+  /**
+   * Gets the date in UTC.
+   */
+  getUTCDate() {
+    return this.date.getUTCDate();
+  }
+
+  /**
+   * Gets the day in UTC.
+   */
+  getUTCDay() {
+    return this.date.getUTCDay();
+  }
+
+  /**
+   * Gets the hours in UTC.
+   */
+  getUTCHours() {
+    return this.date.getUTCHours();
+  }
+
+  /**
+   * Gets the minutes in UTC.
+   */
+  getUTCMinutes() {
+    return this.date.getUTCMinutes();
+  }
+
+  /**
+   * Gets the seconds in UTC.
+   */
+  getUTCSeconds() {
+    return this.date.getUTCSeconds();
+  }
+
+  /**
+   * Gets the milliseconds in UTC.
+   */
+  getUTCMilliseconds() {
+    return this.date.getUTCMilliseconds();
+  }
+
+  /**
    * Sets the year of the DateTime.
    */
   setFullYear(year) {
     const utc = this.toUTC();
     return this.setUTCTime(utc.setUTCFullYear(year));
+  }
+
+  /**
+   * Alias for `setFullYear`.
+   */
+  setYear(year) {
+    return this.setFullYear(year);
   }
 
   /**
@@ -933,18 +1003,62 @@ export default class DateTime {
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
 
+  // UTC Setters
+
   /**
-   * Alias for `getFullYear`.
+   * Sets full year of the DateTime in UTC.
    */
-  getYear() {
-    return this.getFullYear();
+  setUTCFullYear(year) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCFullYear(year));
   }
 
   /**
-   * Alias for `setFullYear`.
+   * Sets month of the DateTime in UTC.
    */
-  setYear(year) {
-    return this.setFullYear(year);
+  setUTCMonth(month) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCMonth(month));
+  }
+
+  /**
+   * Sets date of the DateTime in UTC.
+   */
+  setUTCDate(utcDate) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCDate(utcDate));
+  }
+
+  /**
+   * Sets hours of the DateTime in UTC.
+   */
+  setUTCHours(hours) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCHours(hours));
+  }
+
+  /**
+   * Sets minutes of the DateTime in UTC.
+   */
+  setUTCMinutes(minutes) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCMinutes(minutes));
+  }
+
+  /**
+   * Sets seconds of the DateTime in UTC.
+   */
+  setUTCSeconds(seconds) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCSeconds(seconds));
+  }
+
+  /**
+   * Sets milliseconds of the DateTime in UTC.
+   */
+  setUTCMilliseconds(milliseconds) {
+    const date = new Date(this.date);
+    return this.setTime(date.setUTCMilliseconds(milliseconds));
   }
 
   // Create a new date from arguments. This is identical
@@ -995,14 +1109,12 @@ export default class DateTime {
   // Private
 
   toUTC() {
-    this.utc ||= toUTC(this);
-    return this.utc;
+    return toUTC(this);
   }
 
   setUTCTime(time) {
-    const dt = this.setTime(time);
-    const offset = dt.getTimezoneOffset();
-    return dt.setTime(dt.getTime() + offset * ONE_MINUTE);
+    const offset = this.getTimezoneOffset();
+    return this.setTime(time + offset * ONE_MINUTE);
   }
 }
 

@@ -1528,5 +1528,46 @@ describe('DateTime', () => {
       const d2 = new DateTime('2020-01-02T00:00:00.000Z');
       expect(d2 - d1).toBe(24 * 60 * 60 * 1000);
     });
+
+    describe('UTC getters', () => {
+      it('should have correct UTC getters', () => {
+        const dt = new DateTime('2020-01-01T15:16:17.400Z');
+        expect(dt.getUTCFullYear()).toBe(2020);
+        expect(dt.getUTCMonth()).toBe(0);
+        expect(dt.getUTCDate()).toBe(1);
+        expect(dt.getUTCDay()).toBe(3);
+        expect(dt.getUTCHours()).toBe(15);
+        expect(dt.getUTCMinutes()).toBe(16);
+        expect(dt.getUTCSeconds()).toBe(17);
+        expect(dt.getUTCMilliseconds()).toBe(400);
+      });
+    });
+
+    describe('UTC setters', () => {
+      it('should have correct UTC setters', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.setUTCFullYear(2022).toISOString()).toBe(
+          '2022-01-01T00:00:00.000Z'
+        );
+        expect(dt.setUTCMonth(1).toISOString()).toBe(
+          '2020-02-01T00:00:00.000Z'
+        );
+        expect(dt.setUTCDate(15).toISOString()).toBe(
+          '2020-01-15T00:00:00.000Z'
+        );
+        expect(dt.setUTCHours(10).toISOString()).toBe(
+          '2020-01-01T10:00:00.000Z'
+        );
+        expect(dt.setUTCMinutes(20).toISOString()).toBe(
+          '2020-01-01T00:20:00.000Z'
+        );
+        expect(dt.setUTCSeconds(30).toISOString()).toBe(
+          '2020-01-01T00:00:30.000Z'
+        );
+        expect(dt.setUTCMilliseconds(400).toISOString()).toBe(
+          '2020-01-01T00:00:00.400Z'
+        );
+      });
+    });
   });
 });
