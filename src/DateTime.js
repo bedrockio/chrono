@@ -480,7 +480,7 @@ export default class DateTime {
    * 2025-01-01
    */
   toDate() {
-    const str = this.toUTC().toISOString();
+    const str = toUTC(this).toISOString();
     return str.split('T')[0];
   }
 
@@ -492,7 +492,7 @@ export default class DateTime {
    * 12:30:00.000
    */
   toTime() {
-    const str = this.toUTC().toISOString();
+    const str = toUTC(this).toISOString();
     return str.split('T')[1].slice(0, -1);
   }
 
@@ -823,7 +823,7 @@ export default class DateTime {
    * Gets the year of the DateTime.
    */
   getFullYear() {
-    return this.toUTC().getUTCFullYear();
+    return toUTC(this).getUTCFullYear();
   }
 
   /**
@@ -838,49 +838,49 @@ export default class DateTime {
    * January is 0.
    */
   getMonth() {
-    return this.toUTC().getUTCMonth();
+    return toUTC(this).getUTCMonth();
   }
 
   /**
    * Gets the date of the DateTime.
    */
   getDate() {
-    return this.toUTC().getUTCDate();
+    return toUTC(this).getUTCDate();
   }
 
   /**
    * Gets the day of week of the DateTime from 0 to 6.
    */
   getDay() {
-    return this.toUTC().getUTCDay();
+    return toUTC(this).getUTCDay();
   }
 
   /**
    * Gets the hours of the DateTime.
    */
   getHours() {
-    return this.toUTC().getUTCHours();
+    return toUTC(this).getUTCHours();
   }
 
   /**
    * Gets the minutes of the DateTime.
    */
   getMinutes() {
-    return this.toUTC().getUTCMinutes();
+    return toUTC(this).getUTCMinutes();
   }
 
   /**
    * Gets the seconds of the DateTime.
    */
   getSeconds() {
-    return this.toUTC().getUTCSeconds();
+    return toUTC(this).getUTCSeconds();
   }
 
   /**
    * Gets the milliseconds of the DateTime.
    */
   getMilliseconds() {
-    return this.toUTC().getUTCMilliseconds();
+    return toUTC(this).getUTCMilliseconds();
   }
 
   /**
@@ -943,7 +943,7 @@ export default class DateTime {
    * Sets the year of the DateTime.
    */
   setFullYear(year) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCFullYear(year));
   }
 
@@ -959,7 +959,7 @@ export default class DateTime {
    * January is 0.
    */
   setMonth(month) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMonth(month));
   }
 
@@ -967,7 +967,7 @@ export default class DateTime {
    * Sets the date of the DateTime.
    */
   setDate(date) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCDate(date));
   }
 
@@ -975,7 +975,7 @@ export default class DateTime {
    * Sets the hours of the DateTime.
    */
   setHours(hours) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCHours(hours));
   }
 
@@ -983,7 +983,7 @@ export default class DateTime {
    * Sets the minutes of the DateTime.
    */
   setMinutes(minutes) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMinutes(minutes));
   }
 
@@ -991,7 +991,7 @@ export default class DateTime {
    * Sets the seconds of the DateTime.
    */
   setSeconds(seconds) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCSeconds(seconds));
   }
 
@@ -999,7 +999,7 @@ export default class DateTime {
    * Sets the milliseconds of the DateTime.
    */
   setMilliseconds(milliseconds) {
-    const utc = this.toUTC();
+    const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
 
@@ -1104,12 +1104,6 @@ export default class DateTime {
       ...this.options,
     });
     return this.offset;
-  }
-
-  // Private
-
-  toUTC() {
-    return toUTC(this);
   }
 
   setUTCTime(time) {
