@@ -1,6 +1,7 @@
 ## 0.3.0
 
 - Added basic token formatting.
+- Added setting datetime components.
 
 ## 0.2.1
 

@@ -735,6 +735,54 @@ describe('DateTime', () => {
     });
   });
 
+  describe('set', () => {
+    it('should be able to set components', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'UTC',
+      });
+      expect(
+        dt
+          .set({
+            hours: 5,
+            minutes: 30,
+          })
+          .toISOString()
+      ).toBe('2020-01-01T05:30:00.000Z');
+      expect(
+        dt
+          .set({
+            year: 2028,
+            month: 12,
+            minutes: 30,
+          })
+          .toISOString()
+      ).toBe('2028-12-01T00:30:00.000Z');
+    });
+
+    it('should be able to set components in a timezone', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(
+        dt
+          .set({
+            hours: 5,
+            minutes: 30,
+          })
+          .toISOString()
+      ).toBe('2019-12-31T10:30:00.000Z');
+      expect(
+        dt
+          .set({
+            year: 2028,
+            month: 12,
+            minutes: 30,
+          })
+          .toISOString()
+      ).toBe('2029-01-01T00:30:00.000Z');
+    });
+  });
+
   describe('advance', () => {
     it('should advance by a year', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');

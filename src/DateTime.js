@@ -894,6 +894,26 @@ export default class DateTime {
     return this.setTime(date.setUTCMilliseconds(milliseconds));
   }
 
+  /**
+   * Sets components of the DateTime by name.
+   *
+   * @param {Object} components
+   * @param {number} [components.year] - The year to set.
+   * @param {number} [components.month] - The month to set.
+   * @param {number} [components.day] - The day of the month to set.
+   * @param {number} [components.hour] - The hours to set.
+   * @param {number} [components.hours] - The hours to set.
+   * @param {number} [components.minute] - The minutes to set.
+   * @param {number} [components.minutes] - The minutes to set.
+   * @param {number} [components.second] - The seconds to set.
+   * @param {number} [components.seconds] - The seconds to set.
+   * @param {number} [components.millisecond] - The milliseconds to set.
+   * @param {number} [components.milliseconds] - The milliseconds to set.
+   */
+  set(components) {
+    return setComponents(this, components);
+  }
+
   // Create a new date from arguments. This is identical
   // to using the overloaded constructor, however where
   // numeric values there are relative to the system time,
@@ -991,35 +1011,35 @@ function advanceDate(dt, dir, by, unit) {
   const localOffset = getTimezoneOffset(date, options);
   const systemOffset = date.getTimezoneOffset();
 
-  for (let [key, val] of Object.entries(by)) {
-    val *= dir;
+  for (let [name, value] of Object.entries(by)) {
+    value *= dir;
 
-    key = normalizeUnit(key);
+    name = normalizeUnit(name);
 
-    switch (key) {
+    switch (name) {
       case 'year':
-        date.setFullYear(date.getFullYear() + val);
+        date.setFullYear(date.getFullYear() + value);
         break;
       case 'month':
-        advanceMonthSafe(date, val);
+        advanceMonthSafe(date, value);
         break;
       case 'week':
-        date.setDate(date.getDate() + val * 7);
+        date.setDate(date.getDate() + value * 7);
         break;
       case 'day':
-        date.setDate(date.getDate() + val);
+        date.setDate(date.getDate() + value);
         break;
       case 'hour':
-        date.setHours(date.getHours() + val);
+        date.setHours(date.getHours() + value);
         break;
       case 'minute':
-        date.setMinutes(date.getMinutes() + val);
+        date.setMinutes(date.getMinutes() + value);
         break;
       case 'second':
-        date.setSeconds(date.getSeconds() + val);
+        date.setSeconds(date.getSeconds() + value);
         break;
       case 'millisecond':
-        date.setMilliseconds(date.getMilliseconds() + val);
+        date.setMilliseconds(date.getMilliseconds() + value);
         break;
     }
   }
@@ -1042,6 +1062,38 @@ function advanceDate(dt, dir, by, unit) {
   }
 
   return new DateTime(date, dt.options);
+}
+
+function setComponents(dt, components) {
+  for (let [name, value] of Object.entries(components)) {
+    name = normalizeUnit(name);
+
+    switch (name) {
+      case 'year':
+        dt = dt.setFullYear(value);
+        break;
+      case 'month':
+        dt = dt.setMonth(value - 1);
+        break;
+      case 'day':
+        dt = dt.setDate(value);
+        break;
+      case 'hour':
+        dt = dt.setHours(value);
+        break;
+      case 'minute':
+        dt = dt.setMinutes(value);
+        break;
+      case 'second':
+        dt = dt.setSeconds(value);
+        break;
+      case 'millisecond':
+        dt = dt.setMilliseconds(value);
+        break;
+    }
+  }
+
+  return dt;
 }
 
 function formatRelative(date, options = {}) {
