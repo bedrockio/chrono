@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Added basic token formatting.
+
 ## 0.2.1
 
 - Added DateTime.getMonths.

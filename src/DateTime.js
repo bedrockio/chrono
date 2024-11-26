@@ -6,7 +6,27 @@
 
 import { normalizeUnit, getUnitIndex } from './units';
 import { isAmbiguousTimeZone } from './timezone';
-import { getFirstDayOfWeek } from './intl';
+import { getFirstDayOfWeek, getMeridiem } from './intl';
+import { formatWithLocale } from './locale';
+import { formatWithTokens } from './tokens';
+
+import {
+  DATE_MED,
+  DATE_SHORT,
+  DATE_NARROW,
+  DATE_MED_WEEKDAY,
+  TIME_MED,
+  TIME_SHORT,
+  TIME_HOUR,
+  TIME_SHORT_HOUR,
+  TIME_WITH_ZONE,
+  DATETIME_MED,
+  DATETIME_SHORT,
+  DATETIME_NARROW,
+  DATETIME_MED_WEEKDAY,
+  MONTH_YEAR,
+  MONTH_YEAR_SHORT,
+} from './locale';
 
 const ONE_SECOND = 1000;
 const ONE_MINUTE = 60 * ONE_SECOND;
@@ -15,191 +35,21 @@ const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
 
 export default class DateTime {
-  /**
-   * A medium date format.
-   *
-   * @constant
-   * @example
-   * January 1, 2020
-   */
-  static DATE_MED = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-
-  /**
-   * A short date format.
-   *
-   * @constant
-   * @example
-   * Jan 1, 2020
-   */
-  static DATE_SHORT = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  };
-
-  /**
-   * A narrow date format.
-   *
-   * @constant
-   * @example
-   * 1/1/2020
-   */
-  static DATE_NARROW = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-  };
-
-  /**
-   * A medium date format that includes the weekday.
-   *
-   * @constant
-   * @example
-   * Wednesday, January 1, 2020
-   */
-  static DATE_MED_WEEKDAY = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  };
-
-  /**
-   * A medium time format.
-   *
-   * @constant
-   * @example
-   * 9:00am
-   */
-  static TIME_MED = {
-    hour: 'numeric',
-    minute: '2-digit',
-  };
-
-  /**
-   * A short time format.
-   *
-   * @constant
-   * @example
-   * 9:00a
-   */
-  static TIME_SHORT = {
-    hour: 'numeric',
-    minute: '2-digit',
-    shortDayPeriod: true,
-  };
-
-  /**
-   * A medium hour format.
-   *
-   * @constant
-   * @example
-   * 9pm
-   */
-  static TIME_HOUR = {
-    hour: 'numeric',
-  };
-
-  /**
-   * A short hour format.
-   *
-   * @constant
-   * @example
-   * 9p
-   */
-  static TIME_SHORT_HOUR = {
-    hour: 'numeric',
-    shortDayPeriod: true,
-  };
-
-  /**
-   * A time format that includes the timezone.
-   *
-   * @constant
-   * @example
-   * 9:00am Japan Standard Time
-   */
-  static TIME_TIMEZONE = {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'long',
-  };
-
-  /**
-   * A medium datetime format.
-   *
-   * @constant
-   * @example
-   * January 1, 2020 9:00pm
-   */
-  static DATETIME_MED = {
-    ...this.DATE_MED,
-    ...this.TIME_MED,
-  };
-
-  /**
-   * A short datetime format.
-   *
-   * @constant
-   * @example
-   * Jan 1, 2020 9:00pm
-   */
-  static DATETIME_SHORT = {
-    ...this.DATE_SHORT,
-    ...this.TIME_MED,
-  };
-
-  /**
-   * A narrow datetime format.
-   *
-   * @constant
-   * @example
-   * 1/1/2020 9:00pm
-   */
-  static DATETIME_NARROW = {
-    ...this.DATE_NARROW,
-    ...this.TIME_MED,
-  };
-
-  /**
-   * A medium datetime format that includes the weekday.
-   *
-   * @constant
-   * @example
-   * Wednesday, January 1, 2020 9:00pm
-   */
-  static DATETIME_MED_WEEKDAY = {
-    ...this.DATE_MED_WEEKDAY,
-    ...this.TIME_MED,
-  };
-
-  /**
-   * A medium month and year format.
-   *
-   * @constant
-   * @example
-   * January 2020
-   */
-  static MONTH_YEAR = {
-    year: 'numeric',
-    month: 'long',
-  };
-
-  /**
-   * A short month and year format.
-   *
-   * @constant
-   * @example
-   * Jan 2020
-   */
-  static MONTH_YEAR_SHORT = {
-    year: 'numeric',
-    month: 'short',
-  };
+  static DATE_MED = DATE_MED;
+  static DATE_SHORT = DATE_SHORT;
+  static DATE_NARROW = DATE_NARROW;
+  static DATE_MED_WEEKDAY = DATE_MED_WEEKDAY;
+  static TIME_MED = TIME_MED;
+  static TIME_SHORT = TIME_SHORT;
+  static TIME_HOUR = TIME_HOUR;
+  static TIME_SHORT_HOUR = TIME_SHORT_HOUR;
+  static TIME_WITH_ZONE = TIME_WITH_ZONE;
+  static DATETIME_MED = DATETIME_MED;
+  static DATETIME_SHORT = DATETIME_SHORT;
+  static DATETIME_NARROW = DATETIME_NARROW;
+  static DATETIME_MED_WEEKDAY = DATETIME_MED_WEEKDAY;
+  static MONTH_YEAR = MONTH_YEAR;
+  static MONTH_YEAR_SHORT = MONTH_YEAR_SHORT;
 
   static options = {};
 
@@ -350,30 +200,12 @@ export default class DateTime {
    * @static
    */
   static getMeridiem(options = {}) {
-    let { locale, lower = false, style = 'long' } = options;
-
-    locale ||= DateTime.options.locale;
-
-    const formatter = new Intl.DateTimeFormat(locale, {
-      hourCycle: 'h12',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-
     return Array.from(new Array(2), (_, i) => {
-      const parts = formatter.formatToParts(new Date(2020, 0, 1, i * 12));
-      const period = parts.find((part) => {
-        return part.type === 'dayPeriod';
+      return getMeridiem(new Date(2020, 0, 1, i * 12), {
+        ...DateTime.options,
+        ...options,
+        timeZone: 'UTC',
       });
-      let token = period?.value || '';
-      const isLatin = /^[a|p]m$/i.test(token);
-      if (style === 'short' && isLatin) {
-        token = token.slice(0, 1);
-      }
-      if (lower) {
-        token = token.toLowerCase();
-      }
-      return token;
     });
   }
 
@@ -544,26 +376,16 @@ export default class DateTime {
       ...DateTime.options,
       ...this.options,
       ...options,
-      ...format,
     };
 
-    // Note that Intl.DateTimeFormat which Date uses can be
-    // passed unknown options without complaining.
-    let str = this.date.toLocaleString(options.locale, options);
-
-    // Make AM/PM prettier.
-    // Note: node environments may format with
-    // U+202F NARROW NO BREAK SPACE
-    // https://unicode-explorer.com/c/202F
-    str = str.replace(/\s(AM|PM)/, (match, ampm) => {
-      return ampm.toLowerCase();
-    });
-
-    if (format.shortDayPeriod) {
-      str = str.replace(/(a|p)m/, '$1');
+    if (typeof format === 'string') {
+      return formatWithTokens(this, format, options);
+    } else {
+      return formatWithLocale(this, {
+        ...options,
+        ...format,
+      });
     }
-
-    return str;
   }
 
   /**

@@ -443,7 +443,6 @@ describe('DateTime', () => {
     });
 
     describe('other', () => {
-      DateTime.getMeridiem();
       it('should get respect the global locale', async () => {
         DateTime.setLocale('ko-KR');
         expect(DateTime.getMeridiem()).toEqual(['오전', '오후']);
@@ -459,13 +458,15 @@ describe('DateTime', () => {
     });
   });
 
-  describe('formatting', () => {
-    describe('format', () => {
+  describe('Basic Formatting', () => {
+    describe('default', () => {
       it('default is medium datetime', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format()).toBe('January 1, 2020 at 9:00am');
       });
+    });
 
+    describe('presets', () => {
       it('datetime with weekday', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.DATETIME_MED_WEEKDAY)).toBe(
@@ -514,7 +515,7 @@ describe('DateTime', () => {
 
       it('time with timezone', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_TIMEZONE)).toBe(
+        expect(dt.format(DateTime.TIME_WITH_ZONE)).toBe(
           '9:00am Japan Standard Time'
         );
       });
@@ -571,6 +572,53 @@ describe('DateTime', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.MONTH_YEAR_SHORT)).toBe('Jan 2020');
       });
+    });
+  });
+
+  describe('token based formatting', () => {
+    it('should be able to format time with tokens', () => {
+      const dt = new DateTime('2020-01-01T05:05:08.000Z', {
+        timeZone: 'UTC',
+      });
+      expect(dt.format('h:mm a')).toBe('5:05 am');
+      expect(dt.format('H:mm A')).toBe('5:05 AM');
+      expect(dt.format('HH:mm A')).toBe('05:05 AM');
+      expect(dt.format('mm:s')).toBe('05:8');
+      expect(dt.format('mm:ss')).toBe('05:08');
+      expect(dt.format('M/d/yyyy')).toBe('1/1/2020');
+      expect(dt.format('MM/dd/yyyy')).toBe('01/01/2020');
+      expect(dt.format('Z')).toBe('+0');
+      expect(dt.format('ZZ')).toBe('+0000');
+      expect(dt.format('ZZZ')).toBe('+00:00');
+      expect(dt.format('ZZZZ')).toBe('UTC');
+      expect(dt.format('ZZZZZ')).toBe('Coordinated Universal Time');
+    });
+
+    it('should be able to format time with tokens in zone', () => {
+      const dt = new DateTime('2020-01-01T05:05:03.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.format('h:mm a')).toBe('12:05 am');
+      expect(dt.format('H:mm A')).toBe('0:05 AM');
+      expect(dt.format('HH:mm A')).toBe('00:05 AM');
+      expect(dt.format('mm:s')).toBe('05:3');
+      expect(dt.format('mm:ss')).toBe('05:03');
+      expect(dt.format('M/d/yyyy')).toBe('1/1/2020');
+      expect(dt.format('MM/dd/yyyy')).toBe('01/01/2020');
+      expect(dt.format('Z')).toBe('-5');
+      expect(dt.format('ZZ')).toBe('-0500');
+      expect(dt.format('ZZZ')).toBe('-05:00');
+      expect(dt.format('ZZZZ')).toBe('EST');
+      expect(dt.format('ZZZZZ')).toBe('Eastern Standard Time');
+    });
+
+    it('should not interpolate literals in tokens', () => {
+      const dt = new DateTime('2020-01-01T05:55:03.000Z', {
+        timeZone: 'UTC',
+      });
+      expect(dt.format("H 'hours and' mm 'minutes'")).toBe(
+        '5 hours and 55 minutes'
+      );
     });
   });
 
