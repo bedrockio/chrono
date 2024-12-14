@@ -1,3 +1,10 @@
+## 0.4.0
+
+- Added custom "compact" style to `DateTime.getWeekdays`.
+- Handling other DST shifts.
+- Added `normalize` flag to `Interval.getCalendarMonth` to always span 6 weeks.
+- Better documentation.
+
 ## 0.3.0
 
 - Added basic token formatting.

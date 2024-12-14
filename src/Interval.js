@@ -2,13 +2,43 @@ import DateTime from './DateTime';
 import { normalizeUnit } from './units';
 
 export default class Interval {
-  static getCalendarMonth(date) {
-    return new Interval(
+  /**
+   * Gets an interval representing the full calendar
+   * month from the first day of the week at the start
+   * to the last day of the week at the end.
+   *
+   * @param {DateTime|Date|number|string} date
+   * @param {Object} options
+   * @param {string} [options.normalize] - Normalizes output to always have 6 weeks.
+   */
+  static getCalendarMonth(date, options = {}) {
+    const { normalize } = options;
+
+    let interval = new Interval(
       new DateTime(date).startOfCalendarMonth(),
       new DateTime(date).endOfCalendarMonth()
     );
+
+    if (normalize) {
+      const weeks = Math.round(interval.duration('weeks'));
+      if (weeks < 6) {
+        const offset = 6 - weeks;
+        interval = new Interval(
+          interval.start,
+          interval.end.advance(offset, 'weeks')
+        );
+      }
+    }
+
+    return interval;
   }
 
+  /**
+   * Gets an interval representing the month of the
+   * input date.
+   *
+   * @param {DateTime|Date|number|string} date
+   */
   static getMonth(date) {
     return new Interval(
       new DateTime(date).startOfMonth(),
@@ -16,6 +46,12 @@ export default class Interval {
     );
   }
 
+  /**
+   * Gets an interval representing the week of the
+   * input date.
+   *
+   * @param {DateTime|Date|number|string} date
+   */
   static getWeek(date) {
     return new Interval(
       new DateTime(date).startOfWeek(),
@@ -23,6 +59,12 @@ export default class Interval {
     );
   }
 
+  /**
+   * Gets an interval representing the full day of
+   * the input date.
+   *
+   * @param {DateTime|Date|number|string} date
+   */
   static getDay(date) {
     return new Interval(
       new DateTime(date).startOfDay(),

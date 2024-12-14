@@ -4,6 +4,455 @@ DateTime.setLocale('en-US');
 DateTime.setTimeZone('Asia/Tokyo');
 
 describe('DateTime', () => {
+  describe('static', () => {
+    describe('min', () => {
+      it('should find the minimum datetime', async () => {
+        expect(
+          DateTime.min(
+            new DateTime('2025-01-02'),
+            new DateTime('2025-01-03'),
+            new DateTime('2025-01-01')
+          )
+        ).toEqual(new DateTime('2025-01-01'));
+      });
+
+      it('should coerce non DateTimes', async () => {
+        expect(
+          DateTime.min(
+            new Date('2025-01-02'),
+            new Date('2025-01-03'),
+            new Date('2025-01-01')
+          )
+        ).toEqual(new DateTime('2025-01-01'));
+      });
+
+      it('should return null when no arguments', async () => {
+        expect(DateTime.min()).toBe(null);
+      });
+    });
+
+    describe('max', () => {
+      it('should find the maximum datetime', async () => {
+        expect(
+          DateTime.max(
+            new DateTime('2025-01-02'),
+            new DateTime('2025-01-03'),
+            new DateTime('2025-01-01')
+          )
+        ).toEqual(new DateTime('2025-01-03'));
+      });
+
+      it('should coerce non DateTimes', async () => {
+        expect(
+          DateTime.max(
+            new Date('2025-01-02'),
+            new Date('2025-01-03'),
+            new Date('2025-01-01')
+          )
+        ).toEqual(new DateTime('2025-01-03'));
+      });
+
+      it('should return null when no arguments', async () => {
+        expect(DateTime.max()).toBe(null);
+      });
+    });
+
+    describe('getMonths', () => {
+      describe('English', () => {
+        it('should get long months', async () => {
+          expect(
+            DateTime.getMonths({
+              locale: 'en-US',
+            })
+          ).toEqual([
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+          ]);
+        });
+
+        it('should get short months', async () => {
+          expect(
+            DateTime.getMonths({
+              style: 'short',
+              locale: 'en-US',
+            })
+          ).toEqual([
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ]);
+        });
+
+        it('should get narrow months', async () => {
+          expect(
+            DateTime.getMonths({
+              style: 'narrow',
+              locale: 'en-US',
+            })
+          ).toEqual([
+            'J',
+            'F',
+            'M',
+            'A',
+            'M',
+            'J',
+            'J',
+            'A',
+            'S',
+            'O',
+            'N',
+            'D',
+          ]);
+        });
+      });
+
+      describe('Japanese', () => {
+        it('should get long months', async () => {
+          expect(
+            DateTime.getMonths({
+              locale: 'ja-JP',
+            })
+          ).toEqual([
+            '1月',
+            '2月',
+            '3月',
+            '4月',
+            '5月',
+            '6月',
+            '7月',
+            '8月',
+            '9月',
+            '10月',
+            '11月',
+            '12月',
+          ]);
+        });
+
+        it('should get short months', async () => {
+          expect(
+            DateTime.getMonths({
+              style: 'short',
+              locale: 'ja-JP',
+            })
+          ).toEqual([
+            '1月',
+            '2月',
+            '3月',
+            '4月',
+            '5月',
+            '6月',
+            '7月',
+            '8月',
+            '9月',
+            '10月',
+            '11月',
+            '12月',
+          ]);
+        });
+
+        it('should get narrow months', async () => {
+          expect(
+            DateTime.getMonths({
+              style: 'narrow',
+              locale: 'ja-JP',
+            })
+          ).toEqual([
+            '1月',
+            '2月',
+            '3月',
+            '4月',
+            '5月',
+            '6月',
+            '7月',
+            '8月',
+            '9月',
+            '10月',
+            '11月',
+            '12月',
+          ]);
+        });
+      });
+
+      describe('other', () => {
+        it('should get respect the global locale', async () => {
+          DateTime.setLocale('es-ES');
+          expect(DateTime.getMonths()).toEqual([
+            'enero',
+            'febrero',
+            'marzo',
+            'abril',
+            'mayo',
+            'junio',
+            'julio',
+            'agosto',
+            'septiembre',
+            'octubre',
+            'noviembre',
+            'diciembre',
+          ]);
+          DateTime.setLocale('en-US');
+        });
+      });
+    });
+
+    describe('getWeekdays', () => {
+      describe('English', () => {
+        it('should get long weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              locale: 'en-US',
+            })
+          ).toEqual([
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+          ]);
+        });
+
+        it('should get short weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'short',
+              locale: 'en-US',
+            })
+          ).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+        });
+
+        it('should get compact weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'compact',
+              locale: 'en-US',
+            })
+          ).toEqual(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
+        });
+
+        it('should get narrow weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'narrow',
+              locale: 'en-US',
+            })
+          ).toEqual(['S', 'M', 'T', 'W', 'T', 'F', 'S']);
+        });
+      });
+
+      describe('Japanese', () => {
+        it('should get long weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              locale: 'ja-JP',
+            })
+          ).toEqual([
+            '日曜日',
+            '月曜日',
+            '火曜日',
+            '水曜日',
+            '木曜日',
+            '金曜日',
+            '土曜日',
+          ]);
+        });
+
+        it('should get short weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'short',
+              locale: 'ja-JP',
+            })
+          ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
+        });
+
+        it('should get compact weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'compact',
+              locale: 'ja-JP',
+            })
+          ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
+        });
+
+        it('should get narrow weekdays', async () => {
+          expect(
+            DateTime.getWeekdays({
+              style: 'narrow',
+              locale: 'ja-JP',
+            })
+          ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
+        });
+      });
+
+      describe('compact', () => {
+        it('should have correct compact forms for other languages', async () => {
+          function assertCompact(locale, expected) {
+            expect(
+              DateTime.getWeekdays({
+                style: 'compact',
+                locale,
+              })
+            ).toEqual(expected);
+          }
+
+          assertCompact('en-GB', ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']);
+
+          assertCompact('fr', ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']);
+          assertCompact('es', ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']);
+          assertCompact('it', ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do']);
+          assertCompact('pt', ['Do', 'Se', 'Te', 'Qu', 'Qu', 'Se', 'Sá']);
+
+          assertCompact('de', ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']);
+          assertCompact('nl', ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']);
+          assertCompact('ru', ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']);
+
+          assertCompact('sv', ['Må', 'Ti', 'On', 'To', 'Fr', 'Lö', 'Sö']);
+          assertCompact('da', ['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø']);
+          assertCompact('no', ['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø']);
+          assertCompact('fi', ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su']);
+          assertCompact('is', ['Má', 'Þr', 'Mi', 'Fi', 'Fö', 'La', 'Su']);
+
+          // Note that Ni appears to be just N but this is an exception.
+          assertCompact('pl', ['Po', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Ni']);
+          assertCompact('cs', ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']);
+          assertCompact('sk', ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne']);
+
+          // Not supported. Should be "narrow".
+          assertCompact('he', ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']);
+          assertCompact('hu', ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V']);
+          assertCompact('zh', ['一', '二', '三', '四', '五', '六', '日']);
+          assertCompact('ja', ['日', '月', '火', '水', '木', '金', '土']);
+          assertCompact('ko', ['일', '월', '화', '수', '목', '금', '토']);
+        });
+      });
+
+      describe('other', () => {
+        it('should get respect the global locale', async () => {
+          DateTime.setLocale('es-ES');
+          expect(DateTime.getWeekdays()).toEqual([
+            'lunes',
+            'martes',
+            'miércoles',
+            'jueves',
+            'viernes',
+            'sábado',
+            'domingo',
+          ]);
+          DateTime.setLocale('en-US');
+        });
+
+        it('should allow an explicit start offset', async () => {
+          expect(
+            DateTime.getWeekdays({
+              start: 5,
+            })
+          ).toEqual([
+            'Friday',
+            'Saturday',
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+          ]);
+        });
+
+        it('should get Satuday as the starting day of the week', async () => {
+          DateTime.setLocale('fa-AF');
+          expect(DateTime.getWeekdays()).toEqual([
+            // Saturday
+            'شنبه',
+            'یکشنبه',
+            'دوشنبه',
+            'سه‌شنبه',
+            'چهارشنبه',
+            'پنجشنبه',
+            'جمعه',
+          ]);
+          DateTime.setLocale('en-US');
+        });
+      });
+    });
+
+    describe('getMeridiem', () => {
+      describe('English', () => {
+        it('should get long meridiem', async () => {
+          expect(
+            DateTime.getMeridiem({
+              locale: 'en-US',
+            })
+          ).toEqual(['AM', 'PM']);
+        });
+
+        it('should get short meridiem', async () => {
+          expect(
+            DateTime.getMeridiem({
+              style: 'short',
+              locale: 'en-US',
+            })
+          ).toEqual(['A', 'P']);
+        });
+
+        it('should use lower case', async () => {
+          expect(
+            DateTime.getMeridiem({
+              lower: true,
+              locale: 'en-US',
+            })
+          ).toEqual(['am', 'pm']);
+        });
+      });
+
+      describe('Japanese', () => {
+        it('should get long meridiem', async () => {
+          expect(
+            DateTime.getMeridiem({
+              locale: 'ja-JP',
+            })
+          ).toEqual(['午前', '午後']);
+        });
+
+        it('should get short meridiem', async () => {
+          expect(
+            DateTime.getMeridiem({
+              style: 'short',
+              locale: 'ja-JP',
+            })
+          ).toEqual(['午前', '午後']);
+        });
+      });
+
+      describe('other', () => {
+        it('should get respect the global locale', async () => {
+          DateTime.setLocale('ko-KR');
+          expect(DateTime.getMeridiem()).toEqual(['오전', '오후']);
+          DateTime.setLocale('en-US');
+        });
+      });
+    });
+  });
+
   describe('constructor', () => {
     it('should be the current time when no argument passed', () => {
       expect(new DateTime().getTime()).toBeCloseTo(Date.now(), -1);
@@ -73,380 +522,6 @@ describe('DateTime', () => {
           new Date('2020-01-01T00:00:00.000').toISOString()
         );
         DateTime.setTimeZone('Asia/Tokyo');
-      });
-    });
-  });
-
-  describe('min', () => {
-    it('should find the minimum datetime', async () => {
-      expect(
-        DateTime.min(
-          new DateTime('2025-01-02'),
-          new DateTime('2025-01-03'),
-          new DateTime('2025-01-01')
-        )
-      ).toEqual(new DateTime('2025-01-01'));
-    });
-
-    it('should coerce non DateTimes', async () => {
-      expect(
-        DateTime.min(
-          new Date('2025-01-02'),
-          new Date('2025-01-03'),
-          new Date('2025-01-01')
-        )
-      ).toEqual(new DateTime('2025-01-01'));
-    });
-
-    it('should return null when no arguments', async () => {
-      expect(DateTime.min()).toBe(null);
-    });
-  });
-
-  describe('max', () => {
-    it('should find the maximum datetime', async () => {
-      expect(
-        DateTime.max(
-          new DateTime('2025-01-02'),
-          new DateTime('2025-01-03'),
-          new DateTime('2025-01-01')
-        )
-      ).toEqual(new DateTime('2025-01-03'));
-    });
-
-    it('should coerce non DateTimes', async () => {
-      expect(
-        DateTime.max(
-          new Date('2025-01-02'),
-          new Date('2025-01-03'),
-          new Date('2025-01-01')
-        )
-      ).toEqual(new DateTime('2025-01-03'));
-    });
-
-    it('should return null when no arguments', async () => {
-      expect(DateTime.max()).toBe(null);
-    });
-  });
-
-  describe('getMonths', () => {
-    describe('English', () => {
-      it('should get long months', async () => {
-        expect(
-          DateTime.getMonths({
-            locale: 'en-US',
-          })
-        ).toEqual([
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ]);
-      });
-
-      it('should get short months', async () => {
-        expect(
-          DateTime.getMonths({
-            style: 'short',
-            locale: 'en-US',
-          })
-        ).toEqual([
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ]);
-      });
-
-      it('should get narrow months', async () => {
-        expect(
-          DateTime.getMonths({
-            style: 'narrow',
-            locale: 'en-US',
-          })
-        ).toEqual(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']);
-      });
-    });
-
-    describe('Japanese', () => {
-      it('should get long months', async () => {
-        expect(
-          DateTime.getMonths({
-            locale: 'ja-JP',
-          })
-        ).toEqual([
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月',
-        ]);
-      });
-
-      it('should get short months', async () => {
-        expect(
-          DateTime.getMonths({
-            style: 'short',
-            locale: 'ja-JP',
-          })
-        ).toEqual([
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月',
-        ]);
-      });
-
-      it('should get narrow months', async () => {
-        expect(
-          DateTime.getMonths({
-            style: 'narrow',
-            locale: 'ja-JP',
-          })
-        ).toEqual([
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月',
-        ]);
-      });
-    });
-
-    describe('other', () => {
-      it('should get respect the global locale', async () => {
-        DateTime.setLocale('es-ES');
-        expect(DateTime.getMonths()).toEqual([
-          'enero',
-          'febrero',
-          'marzo',
-          'abril',
-          'mayo',
-          'junio',
-          'julio',
-          'agosto',
-          'septiembre',
-          'octubre',
-          'noviembre',
-          'diciembre',
-        ]);
-        DateTime.setLocale('en-US');
-      });
-    });
-  });
-
-  describe('getWeekdays', () => {
-    describe('English', () => {
-      it('should get long weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            locale: 'en-US',
-          })
-        ).toEqual([
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-        ]);
-      });
-
-      it('should get short weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            style: 'short',
-            locale: 'en-US',
-          })
-        ).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
-      });
-
-      it('should get narrow weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            style: 'narrow',
-            locale: 'en-US',
-          })
-        ).toEqual(['S', 'M', 'T', 'W', 'T', 'F', 'S']);
-      });
-    });
-
-    describe('Japanese', () => {
-      it('should get long weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            locale: 'ja-JP',
-          })
-        ).toEqual([
-          '日曜日',
-          '月曜日',
-          '火曜日',
-          '水曜日',
-          '木曜日',
-          '金曜日',
-          '土曜日',
-        ]);
-      });
-
-      it('should get short weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            style: 'short',
-            locale: 'ja-JP',
-          })
-        ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
-      });
-
-      it('should get narrow weekdays', async () => {
-        expect(
-          DateTime.getWeekdays({
-            style: 'narrow',
-            locale: 'ja-JP',
-          })
-        ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
-      });
-    });
-
-    describe('other', () => {
-      it('should get respect the global locale', async () => {
-        DateTime.setLocale('es-ES');
-        expect(DateTime.getWeekdays()).toEqual([
-          'lunes',
-          'martes',
-          'miércoles',
-          'jueves',
-          'viernes',
-          'sábado',
-          'domingo',
-        ]);
-        DateTime.setLocale('en-US');
-      });
-
-      it('should allow an explicit start offset', async () => {
-        expect(
-          DateTime.getWeekdays({
-            start: 5,
-          })
-        ).toEqual([
-          'Friday',
-          'Saturday',
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-        ]);
-      });
-
-      it('should get Satuday as the starting day of the week', async () => {
-        DateTime.setLocale('fa-AF');
-        expect(DateTime.getWeekdays()).toEqual([
-          // Saturday
-          'شنبه',
-          'یکشنبه',
-          'دوشنبه',
-          'سه‌شنبه',
-          'چهارشنبه',
-          'پنجشنبه',
-          'جمعه',
-        ]);
-        DateTime.setLocale('en-US');
-      });
-    });
-  });
-
-  describe('getMeridiem', () => {
-    describe('English', () => {
-      it('should get long meridiem', async () => {
-        expect(
-          DateTime.getMeridiem({
-            locale: 'en-US',
-          })
-        ).toEqual(['AM', 'PM']);
-      });
-
-      it('should get short meridiem', async () => {
-        expect(
-          DateTime.getMeridiem({
-            style: 'short',
-            locale: 'en-US',
-          })
-        ).toEqual(['A', 'P']);
-      });
-
-      it('should use lower case', async () => {
-        expect(
-          DateTime.getMeridiem({
-            lower: true,
-            locale: 'en-US',
-          })
-        ).toEqual(['am', 'pm']);
-      });
-    });
-
-    describe('Japanese', () => {
-      it('should get long meridiem', async () => {
-        expect(
-          DateTime.getMeridiem({
-            locale: 'ja-JP',
-          })
-        ).toEqual(['午前', '午後']);
-      });
-
-      it('should get short meridiem', async () => {
-        expect(
-          DateTime.getMeridiem({
-            style: 'short',
-            locale: 'ja-JP',
-          })
-        ).toEqual(['午前', '午後']);
-      });
-    });
-
-    describe('other', () => {
-      it('should get respect the global locale', async () => {
-        DateTime.setLocale('ko-KR');
-        expect(DateTime.getMeridiem()).toEqual(['오전', '오후']);
-        DateTime.setLocale('en-US');
       });
     });
   });
@@ -1603,6 +1678,33 @@ describe('DateTime', () => {
         '2023-11-06T05:00:00.000Z'
       );
       DateTime.setTimeZone('Asia/Tokyo');
+    });
+
+    it('should compensate for a DST shift when setting week', () => {
+      // Note that the DST changed at April 29th at 2am in 1973.
+
+      let dt;
+
+      // The start of May 1st at 12:00am
+      dt = new DateTime('1973-05-01T04:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.startOfWeek().toISOString()).toBe('1973-04-29T05:00:00.000Z');
+
+      // The start of Apr 29st at 12:00am
+      dt = new DateTime('1973-04-29T05:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.endOfWeek().toISOString()).toBe('1973-05-06T03:59:59.999Z');
+    });
+
+    it('should compensate for a DST shift when setting components', () => {
+      const dt = new DateTime('2025-03-09T05:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.set({ day: 10 }).toISOString()).toBe(
+        '2025-03-10T04:00:00.000Z'
+      );
     });
   });
 

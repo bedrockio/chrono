@@ -4,6 +4,41 @@ import Interval from '../src/Interval';
 DateTime.setTimeZone('Asia/Tokyo');
 
 describe('Interval', () => {
+  describe('static', () => {
+    describe('getCalendarMonth', () => {
+      it('should get the correct calendar month', () => {
+        const interval = Interval.getCalendarMonth('2024-12-01');
+        expect(interval.toISOString()).toBe(
+          '2024-11-30T15:00:00.000Z/2025-01-04T14:59:59.999Z'
+        );
+      });
+
+      it('should normalize to 6 weeks', () => {
+        let interval;
+
+        interval = Interval.getCalendarMonth('2024-12-01', {
+          normalize: true,
+        });
+        expect(interval.toISOString()).toBe(
+          '2024-11-30T15:00:00.000Z/2025-01-11T14:59:59.999Z'
+        );
+
+        interval = Interval.getCalendarMonth('2026-02-01', {
+          normalize: true,
+        });
+        expect(interval.toISOString()).toBe(
+          '2026-01-31T15:00:00.000Z/2026-03-14T14:59:59.999Z'
+        );
+      });
+
+      it('should handle DST shift within calendar month', () => {
+        DateTime.setTimeZone('America/New_York');
+        const interval = Interval.getCalendarMonth('1973-05-14T04:00:00.000Z');
+        expect(interval.start.toISOString()).toBe('1973-04-29T05:00:00.000Z');
+      });
+    });
+  });
+
   describe('constructor', () => {
     it('should be able to create from strings', () => {
       const interval = new Interval(

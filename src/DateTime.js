@@ -6,7 +6,7 @@
 
 import { normalizeUnit, getUnitIndex } from './units';
 import { isAmbiguousTimeZone } from './timezone';
-import { getFirstDayOfWeek, getMeridiem } from './intl';
+import { getWeekdays, getMeridiem } from './intl';
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
 
@@ -33,6 +33,11 @@ const ONE_MINUTE = 60 * ONE_SECOND;
 const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
+
+/**
+ * @typedef {"year"|"years"|"month"|"months"|"week"|"weeks"|"day"|"days"|
+ *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
+ */
 
 export default class DateTime {
   static DATE_MED = DATE_MED;
@@ -170,18 +175,9 @@ export default class DateTime {
    * @static
    */
   static getWeekdays(options = {}) {
-    let { locale, start, style = 'long' } = options;
-
-    locale ||= DateTime.options.locale;
-    start ||= getFirstDayOfWeek(locale);
-
-    const formatter = new Intl.DateTimeFormat(locale, {
-      weekday: style,
-    });
-
-    return Array.from(new Array(7), (_, i) => {
-      const day = (1 + i + start) % 7;
-      return formatter.format(new Date(2017, 0, day));
+    return getWeekdays({
+      ...DateTime.options,
+      ...options,
     });
   }
 
@@ -480,7 +476,7 @@ export default class DateTime {
    * argument is an object it will advance the date by multiple units.
    *
    * @param {number|Object.<string, number>} by
-   * @param {("years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds")} [unit]
+   * @param {TimeUnit} [unit]
    *
    * @example
    * new DateTime().advance(6, 'months')
@@ -499,7 +495,7 @@ export default class DateTime {
    * argument is an object it will rewind the date by multiple units.
    *
    * @param {number|Object.<string, number>} by
-   * @param {("years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds")} [unit]
+   * @param {TimeUnit} [unit]
    *
    * @example
    * new DateTime().rewind(6, 'months')
@@ -1070,13 +1066,13 @@ function setComponents(dt, components) {
 
     switch (name) {
       case 'year':
-        dt = dt.setFullYear(value);
+        dt = checkOffsetShift(dt, dt.setFullYear(value));
         break;
       case 'month':
-        dt = dt.setMonth(value - 1);
+        dt = checkOffsetShift(dt, dt.setMonth(value - 1));
         break;
       case 'day':
-        dt = dt.setDate(value);
+        dt = checkOffsetShift(dt, dt.setDate(value));
         break;
       case 'hour':
         dt = dt.setHours(value);
@@ -1254,6 +1250,10 @@ function advanceMonthSafe(date, amt) {
   }
 }
 
+// Units
+
+const HIGHER_UNITS = ['year', 'month', 'week', 'day'];
+
 function startOf(dt, unit) {
   const index = getUnitIndex(unit);
 
@@ -1273,7 +1273,9 @@ function startOf(dt, unit) {
   const minutes = index < 5 ? 0 : dt.getMinutes();
   const seconds = index < 6 ? 0 : dt.getSeconds();
 
-  return dt.setArgs(year, month, day, hours, minutes, seconds);
+  const result = dt.setArgs(year, month, day, hours, minutes, seconds);
+
+  return checkOffsetShiftForUnit(unit, dt, result);
 }
 
 function endOf(dt, unit) {
@@ -1295,7 +1297,29 @@ function endOf(dt, unit) {
   const minutes = index < 5 ? 59 : dt.getMinutes();
   const seconds = index < 6 ? 59 : dt.getSeconds();
 
-  return dt.setArgs(year, month, day, hours, minutes, seconds, 999);
+  const result = dt.setArgs(year, month, day, hours, minutes, seconds, 999);
+
+  return checkOffsetShiftForUnit(unit, dt, result);
+}
+
+function checkOffsetShiftForUnit(unit, prev, next) {
+  if (!HIGHER_UNITS.includes(unit)) {
+    return next;
+  }
+
+  return checkOffsetShift(prev, next);
+}
+
+function checkOffsetShift(prev, next) {
+  const shift = next.getTimezoneOffset() - prev.getTimezoneOffset();
+
+  // If a DST transition has occurred, compensate for this by adding
+  // back the shifted amount.
+  if (shift) {
+    return next.setTime(next.getTime() + shift * ONE_MINUTE);
+  }
+
+  return next;
 }
 
 function daysInMonth(dt) {
