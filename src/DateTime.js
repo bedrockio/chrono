@@ -998,15 +998,6 @@ function advanceDate(dt, dir, by, unit) {
     });
   }
 
-  const options = {
-    ...DateTime.options,
-    ...dt.options,
-  };
-
-  const date = new Date(dt.date);
-  const localOffset = getTimezoneOffset(date, options);
-  const systemOffset = date.getTimezoneOffset();
-
   for (let [name, value] of Object.entries(by)) {
     value *= dir;
 
@@ -1014,50 +1005,33 @@ function advanceDate(dt, dir, by, unit) {
 
     switch (name) {
       case 'year':
-        date.setFullYear(date.getFullYear() + value);
+        dt = checkOffsetShift(dt, dt.setYear(dt.getYear() + value));
         break;
       case 'month':
-        advanceMonthSafe(date, value);
+        dt = checkOffsetShift(dt, advanceMonthSafe(dt, value));
         break;
       case 'week':
-        date.setDate(date.getDate() + value * 7);
+        dt = checkOffsetShift(dt, dt.setDate(dt.getDate() + value * 7));
         break;
       case 'day':
-        date.setDate(date.getDate() + value);
+        dt = checkOffsetShift(dt, dt.setDate(dt.getDate() + value));
         break;
       case 'hour':
-        date.setHours(date.getHours() + value);
+        dt = dt.setHours(dt.getHours() + value);
         break;
       case 'minute':
-        date.setMinutes(date.getMinutes() + value);
+        dt = dt.setMinutes(dt.getMinutes() + value);
         break;
       case 'second':
-        date.setSeconds(date.getSeconds() + value);
+        dt = dt.setSeconds(dt.getSeconds() + value);
         break;
       case 'millisecond':
-        date.setMilliseconds(date.getMilliseconds() + value);
+        dt = dt.setMilliseconds(dt.getMilliseconds() + value);
         break;
     }
   }
 
-  // If the timezone offset has shifted due to a
-  // DST transition, then add advance the date by
-  // the shifted amount to compensate. For example
-  // in America/New_York 2023-11-05T04:00:00.000Z
-  // will become 2023-11-06T05:00:00.000Z when
-  // advancing by one day. In this case the offset
-  // will have shifted from 240 to 300. Note that
-  // the system may also have shifted and these may
-  // cancel out.
-  const localShift = getTimezoneOffset(date, options) - localOffset;
-  const systemShift = date.getTimezoneOffset() - systemOffset;
-  const shift = localShift - systemShift;
-
-  if (shift) {
-    date.setTime(date.getTime() + shift * ONE_MINUTE);
-  }
-
-  return new DateTime(date, dt.options);
+  return dt;
 }
 
 function setComponents(dt, components) {
@@ -1228,11 +1202,11 @@ function toUTC(dt) {
 // we "fall back" instead of falling forward. For
 // example when rewinding one month from 12-31 we
 // should land on 11-30, not 12-01.
-function advanceMonthSafe(date, amt) {
-  const isRewind = amt < 0;
-  const targetDate = date.getDate();
+function advanceMonthSafe(dt, by) {
+  const isRewind = by < 0;
+  const targetDate = dt.getDate();
 
-  date.setMonth(date.getMonth() + amt);
+  dt = dt.setMonth(dt.getMonth() + by);
 
   // If the current date is the 1st and the target
   // was more than the maximum days in any month,
@@ -1242,12 +1216,14 @@ function advanceMonthSafe(date, amt) {
     // may fall ahead into a new month. For example setting
     // the month to 1 on March 31 will result in February 31,
     // which effectively falls head to March 3rd.
-    if (date.getDate() < 4) {
+    if (dt.getDate() < 4) {
       // Setting the date to 0 ensures that we will
       // land on the last date of the previous month.
-      date.setDate(0);
+      dt = dt.setDate(0);
     }
   }
+
+  return dt;
 }
 
 // Units
@@ -1313,8 +1289,13 @@ function checkOffsetShiftForUnit(unit, prev, next) {
 function checkOffsetShift(prev, next) {
   const shift = next.getTimezoneOffset() - prev.getTimezoneOffset();
 
-  // If a DST transition has occurred, compensate for this by adding
-  // back the shifted amount.
+  // If the timezone offset has shifted due to a
+  // DST transition, then add advance the date by
+  // the shifted amount to compensate. For example
+  // in America/New_York 2023-11-05T04:00:00.000Z
+  // will become 2023-11-06T05:00:00.000Z when
+  // advancing by one day. In this case the offset
+  // will have shifted from 240 to 300.
   if (shift) {
     return next.setTime(next.getTime() + shift * ONE_MINUTE);
   }
