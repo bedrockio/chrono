@@ -4,11 +4,11 @@
 // - Intl.DateTimeFormat
 // - Intl.RelativeTimeFormat
 
-import { normalizeUnit, getUnitIndex } from './units';
-import { isAmbiguousTimeZone } from './timezone';
-import { getWeekdays, getMeridiem } from './intl';
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
+import { isAmbiguousTimeZone } from './timezone';
+import { getWeekdays, getMeridiem } from './intl';
+import { normalizeUnit, getUnitIndex } from './units';
 
 import {
   DATE_MED,
@@ -1035,7 +1035,15 @@ function advanceDate(dt, dir, by, unit) {
 }
 
 function setComponents(dt, components) {
-  for (let [name, value] of Object.entries(components)) {
+  const names = Object.keys(components);
+
+  names.sort((a, b) => {
+    return getUnitIndex(a) - getUnitIndex(b);
+  });
+
+  for (let name of names) {
+    const value = components[name];
+
     name = normalizeUnit(name);
 
     switch (name) {
@@ -1226,10 +1234,6 @@ function advanceMonthSafe(dt, by) {
   return dt;
 }
 
-// Units
-
-const HIGHER_UNITS = ['year', 'month', 'week', 'day'];
-
 function startOf(dt, unit) {
   const index = getUnitIndex(unit);
 
@@ -1278,8 +1282,11 @@ function endOf(dt, unit) {
   return checkOffsetShiftForUnit(unit, dt, result);
 }
 
+// DST Shift
+
 function checkOffsetShiftForUnit(unit, prev, next) {
-  if (!HIGHER_UNITS.includes(unit)) {
+  const index = getUnitIndex(unit);
+  if (index > 3) {
     return next;
   }
 

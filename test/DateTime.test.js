@@ -856,6 +856,18 @@ describe('DateTime', () => {
           .toISOString()
       ).toBe('2029-01-01T00:30:00.000Z');
     });
+
+    it('should set components in intended order', () => {
+      const dt = new DateTime('2020-02-15T00:00:00.000Z');
+      expect(
+        dt
+          .set({
+            day: 30,
+            month: 3,
+          })
+          .toISOString()
+      ).toBe('2020-03-30T00:00:00.000Z');
+    });
   });
 
   describe('advance', () => {
@@ -1644,7 +1656,7 @@ describe('DateTime', () => {
   });
 
   describe('DST', () => {
-    it('should compensate for DST forward shift', () => {
+    it('should fix forward shift', () => {
       const dt = new DateTime('2023-03-12T05:00:00.000Z', {
         timeZone: 'America/New_York',
       });
@@ -1653,7 +1665,7 @@ describe('DateTime', () => {
       );
     });
 
-    it('should compensate for DST forward shift with global timezone', () => {
+    it('should fix forward shift with global timezone', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2023-03-12T05:00:00.000Z');
       expect(dt.advance(1, 'day').toISOString()).toBe(
@@ -1662,7 +1674,7 @@ describe('DateTime', () => {
       DateTime.setTimeZone('Asia/Tokyo');
     });
 
-    it('should compensate for DST backward shift', () => {
+    it('should fix backward shift', () => {
       const dt = new DateTime('2023-11-05T04:00:00.000Z', {
         timeZone: 'America/New_York',
       });
@@ -1671,7 +1683,7 @@ describe('DateTime', () => {
       );
     });
 
-    it('should compensate for DST backward shift with global timezone', () => {
+    it('should fix backward shift with global timezone', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2023-11-05T04:00:00.000Z');
       expect(dt.advance(1, 'day').toISOString()).toBe(
@@ -1680,7 +1692,7 @@ describe('DateTime', () => {
       DateTime.setTimeZone('Asia/Tokyo');
     });
 
-    it('should compensate for a DST shift when setting week', () => {
+    it('should fix shifts when setting week', () => {
       // Note that the DST changed at April 29th at 2am in 1973.
 
       let dt;
@@ -1698,7 +1710,7 @@ describe('DateTime', () => {
       expect(dt.endOfWeek().toISOString()).toBe('1973-05-06T03:59:59.999Z');
     });
 
-    it('should compensate for a DST shift when setting components', () => {
+    it('should fix forward shift when setting components', () => {
       const dt = new DateTime('2025-03-09T05:00:00.000Z', {
         timeZone: 'America/New_York',
       });
