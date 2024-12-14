@@ -3,6 +3,8 @@
 - Added custom "compact" style to `DateTime.getWeekdays`.
 - Handling other DST shifts.
 - Added `normalize` flag to `Interval.getCalendarMonth` to always span 6 weeks.
+- Added `DateTime.clamp`.
+- Handle inclusive intervals.
 - Handle setting components in unintended order.
 - Better documentation.
 

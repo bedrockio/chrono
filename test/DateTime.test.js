@@ -1,7 +1,9 @@
 import DateTime from '../src/DateTime';
 
-DateTime.setLocale('en-US');
-DateTime.setTimeZone('Asia/Tokyo');
+beforeEach(() => {
+  DateTime.setLocale('en-US');
+  DateTime.setTimeZone('Asia/Tokyo');
+});
 
 describe('DateTime', () => {
   describe('static', () => {
@@ -54,6 +56,32 @@ describe('DateTime', () => {
 
       it('should return null when no arguments', async () => {
         expect(DateTime.max()).toBe(null);
+      });
+    });
+
+    describe('clamp', () => {
+      it('should clamp the datetime', async () => {
+        expect(
+          DateTime.clamp(
+            new DateTime('2025-01-03'),
+            new DateTime('2025-01-01'),
+            new DateTime('2025-01-02')
+          )
+        ).toEqual(new DateTime('2025-01-02'));
+      });
+
+      it('should coerce non DateTimes', async () => {
+        expect(
+          DateTime.clamp(
+            new Date('2025-01-03'),
+            new Date('2025-01-01'),
+            new Date('2025-01-02')
+          )
+        ).toEqual(new DateTime('2025-01-02'));
+      });
+
+      it('should return null when no arguments', async () => {
+        expect(DateTime.clamp()).toBe(null);
       });
     });
 
@@ -512,7 +540,6 @@ describe('DateTime', () => {
         DateTime.setTimeZone('America/New_York');
         const dt = new DateTime('2020-01-01T00:00:00.000');
         expect(dt.toISOString()).toBe('2020-01-01T05:00:00.000Z');
-        DateTime.setTimeZone('Asia/Tokyo');
       });
 
       it('should respect the system time when no timezone is set', () => {
@@ -521,7 +548,6 @@ describe('DateTime', () => {
         expect(dt.toISOString()).toBe(
           new Date('2020-01-01T00:00:00.000').toISOString()
         );
-        DateTime.setTimeZone('Asia/Tokyo');
       });
     });
   });
@@ -702,7 +728,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.toString()).toBe('December 31, 2019 at 7:00pm');
-      DateTime.setTimeZone('Asia/Tokyo');
     });
 
     it('allow passing timezone in constructor', () => {
@@ -749,7 +774,6 @@ describe('DateTime', () => {
           day: 'numeric',
         }).format(new Date(str))
       );
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1043,7 +1067,6 @@ describe('DateTime', () => {
       expect(dt.rewind(1, 'month').toISOString()).toBe(
         '2023-06-30T12:00:00.000Z'
       );
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1088,6 +1111,11 @@ describe('DateTime', () => {
     it('should move to the end of the year', () => {
       const dt = new DateTime('2020-03-04T05:06:07.000Z');
       expect(dt.endOfYear().toISOString()).toBe('2020-12-31T14:59:59.999Z');
+    });
+
+    it('should move to the end of the year from a month with less days', () => {
+      const dt = new DateTime('2024-11-01T00:00:00.000Z');
+      expect(dt.endOfYear().toISOString()).toBe('2024-12-31T14:59:59.999Z');
     });
 
     it('should move to the end of the month', () => {
@@ -1225,7 +1253,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.toDate()).toBe('2019-12-31');
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1239,7 +1266,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:10:20.300Z');
       expect(dt.toTime()).toBe('19:10:20.300');
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1253,7 +1279,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.toISODate()).toBe('2020-01-01');
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1267,7 +1292,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T12:10:20.300Z');
       expect(dt.toISOTime()).toBe('12:10:20.300');
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1518,7 +1542,6 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.getTimezoneOffset()).toBe(300);
-      DateTime.setTimeZone('Asia/Tokyo');
     });
 
     it('should report the system offset when not timezone set', () => {
@@ -1526,7 +1549,6 @@ describe('DateTime', () => {
       expect(new DateTime().getTimezoneOffset()).toBe(
         new Date().getTimezoneOffset()
       );
-      DateTime.setTimeZone('Asia/Tokyo');
     });
   });
 
@@ -1671,7 +1693,6 @@ describe('DateTime', () => {
       expect(dt.advance(1, 'day').toISOString()).toBe(
         '2023-03-13T04:00:00.000Z'
       );
-      DateTime.setTimeZone('Asia/Tokyo');
     });
 
     it('should fix backward shift', () => {
@@ -1689,7 +1710,6 @@ describe('DateTime', () => {
       expect(dt.advance(1, 'day').toISOString()).toBe(
         '2023-11-06T05:00:00.000Z'
       );
-      DateTime.setTimeZone('Asia/Tokyo');
     });
 
     it('should fix shifts when setting week', () => {

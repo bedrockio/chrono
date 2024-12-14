@@ -1,7 +1,10 @@
 import DateTime from '../src/DateTime';
 import Interval from '../src/Interval';
 
-DateTime.setTimeZone('Asia/Tokyo');
+beforeEach(() => {
+  DateTime.setLocale('en-US');
+  DateTime.setTimeZone('Asia/Tokyo');
+});
 
 describe('Interval', () => {
   describe('static', () => {
@@ -609,11 +612,23 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2027-01-01T00:00:00.000Z'
+        '2026-12-31T00:00:00.000Z'
       );
       expect(interval.getYears()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-12-31T23:59:59.999Z'),
         new Interval('2026-01-01T00:00:00.000Z', '2026-12-31T23:59:59.999Z'),
+      ]);
+    });
+
+    it('should get the years spanning the new year', () => {
+      DateTime.setTimeZone('UTC');
+      const interval = new Interval(
+        '2024-11-01T00:00:00.000Z',
+        '2025-01-15T00:00:00.000Z'
+      );
+      expect(interval.getYears()).toEqual([
+        new Interval('2024-01-01T00:00:00.000Z', '2024-12-31T23:59:59.999Z'),
+        new Interval('2025-01-01T00:00:00.000Z', '2025-12-31T23:59:59.999Z'),
       ]);
     });
   });
@@ -623,7 +638,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
+        '2025-12-31T00:00:00.000Z'
       );
       expect(interval.getMonths()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-31T23:59:59.999Z'),
@@ -664,7 +679,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-08T00:00:00.000Z'
+        '2025-01-07T00:00:00.000Z'
       );
       expect(interval.getDays()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T23:59:59.999Z'),
@@ -683,7 +698,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T06:00:00.000Z'
+        '2025-01-01T05:00:00.000Z'
       );
       expect(interval.getHours()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:59:59.999Z'),
@@ -701,7 +716,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T00:05:00.000Z'
+        '2025-01-01T00:04:00.000Z'
       );
       expect(interval.getMinutes()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:00:59.999Z'),
@@ -718,7 +733,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T00:00:05.000Z'
+        '2025-01-01T00:00:04.000Z'
       );
       expect(interval.getSeconds()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:00:00.999Z'),
@@ -735,7 +750,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2027-01-01T00:00:00.000Z'
+        '2026-12-01T00:00:00.000Z'
       );
       expect(interval.getUnits('year')).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-12-31T23:59:59.999Z'),

@@ -39,6 +39,10 @@ const ONE_WEEK = 7 * ONE_DAY;
  *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
  */
 
+/**
+ * @typedef {DateTime|Date|number|string} DateLike
+ */
+
 export default class DateTime {
   static DATE_MED = DATE_MED;
   static DATE_SHORT = DATE_SHORT;
@@ -98,7 +102,8 @@ export default class DateTime {
   /**
    * Returns the minimum value passed in as a DateTime.
    *
-   * @param {...(DateTime|Date|number|string)} args
+   * @param {...DateLike} args
+   * @returns DateTime
    * @static
    */
   static min(...args) {
@@ -117,7 +122,8 @@ export default class DateTime {
   /**
    * Returns the maximum value passed in as a DateTime.
    *
-   * @param {...(DateTime|Date|number|string)} args
+   * @param {...DateLike} args
+   * @returns DateTime
    * @static
    */
   static max(...args) {
@@ -131,6 +137,22 @@ export default class DateTime {
       .reduce((dt1, dt2) => {
         return dt1 > dt2 ? dt1 : dt2;
       });
+  }
+
+  /**
+   * Clamps the value passed to the minimum and maximum.
+   *
+   * @param {DateLike} arg
+   * @param {DateLike} min
+   * @param {DateLike} max
+   * @returns DateTime
+   * @static
+   */
+  static clamp(arg, min, max) {
+    if (!arg) {
+      return null;
+    }
+    return this.min(this.max(arg, min), max);
   }
 
   /**
@@ -176,7 +198,7 @@ export default class DateTime {
    */
   static getWeekdays(options = {}) {
     return getWeekdays({
-      ...DateTime.options,
+      ...this.options,
       ...options,
     });
   }
@@ -198,7 +220,7 @@ export default class DateTime {
   static getMeridiem(options = {}) {
     return Array.from(new Array(2), (_, i) => {
       return getMeridiem(new Date(2020, 0, 1, i * 12), {
-        ...DateTime.options,
+        ...this.options,
         ...options,
         timeZone: 'UTC',
       });
@@ -216,7 +238,7 @@ export default class DateTime {
    * system offset will be used instead.
    *
    * @constructor
-   * @param {...(DateTime|Date|Object|number|string)} args
+   * @param {...DateLike|Object} args
    *
    * @example
    * new DateTime();
@@ -232,23 +254,31 @@ export default class DateTime {
    * });
    */
   constructor(...args) {
+    let arg;
+    let options;
+
+    this.date = new Date();
     if (args.length === 0 || isOptionsObject(args[0])) {
-      this.date = new Date();
-      this.options = args[0] || {};
+      options = args[0];
     } else {
-      const [arg, options] = args;
-      if (typeof arg === 'string') {
-        this.date = parseDate(arg, {
-          ...DateTime.options,
-          ...options,
-        });
-      } else {
-        this.date = new Date(arg ?? Date.now());
-      }
-      this.options = options;
+      arg = args[0];
+      options = args[1];
     }
-    this.offset = null;
+
+    options = {
+      ...DateTime.options,
+      ...options,
+    };
+
+    if (typeof arg === 'string') {
+      this.date = parseDate(arg, options);
+    } else {
+      this.date = new Date(arg ?? Date.now());
+    }
+
     this.utc = null;
+    this.options = options;
+    this.offset = getTimezoneOffset(this.date, options);
   }
 
   // Compatibility
@@ -369,7 +399,6 @@ export default class DateTime {
   format(format = DateTime.DATETIME_MED, options) {
     // Merge everything with defaults.
     options = {
-      ...DateTime.options,
       ...this.options,
       ...options,
     };
@@ -454,15 +483,14 @@ export default class DateTime {
    *               also be `always`.
    *
    * @param {Object} [options]
-   * @param {DateTime|Date|number} [options.now]
-   * @param {DateTime|Date|number} [options.min]
-   * @param {DateTime|Date|number} [options.max]
+   * @param {DateLike} [options.now]
+   * @param {DateLike} [options.min]
+   * @param {DateLike} [options.max]
    * @param {string} [options.numeric]
    *
    */
   relative(options) {
     return formatRelative(this, {
-      ...DateTime.options,
       ...this.options,
       ...options,
     });
@@ -532,14 +560,14 @@ export default class DateTime {
    * Rewinds the DateTime to the start of the year.
    */
   startOfYear() {
-    return this.startOf('year');
+    return startOf(this, 'year');
   }
 
   /**
    * Rewinds the DateTime to the start of the month.
    */
   startOfMonth() {
-    return this.startOf('month');
+    return startOf(this, 'month');
   }
 
   /**
@@ -554,28 +582,28 @@ export default class DateTime {
    * Rewinds the DateTime to the start of the week.
    */
   startOfWeek() {
-    return this.startOf('week');
+    return startOf(this, 'week');
   }
 
   /**
    * Rewinds the DateTime to the start of the day.
    */
   startOfDay() {
-    return this.startOf('day');
+    return startOf(this, 'day');
   }
 
   /**
    * Advances the DateTime to the end of the year.
    */
   endOfYear() {
-    return this.endOf('year');
+    return endOf(this, 'year');
   }
 
   /**
    * Advances the DateTime to the end of the month.
    */
   endOfMonth() {
-    return this.endOf('month');
+    return endOf(this, 'month');
   }
 
   /**
@@ -590,14 +618,14 @@ export default class DateTime {
    * Advances the DateTime to the end of the week.
    */
   endOfWeek() {
-    return this.endOf('week');
+    return endOf(this, 'week');
   }
 
   /**
    * Advances the DateTime to the end of the day.
    */
   endOfDay() {
-    return this.endOf('day');
+    return endOf(this, 'day');
   }
 
   // Other
@@ -633,7 +661,7 @@ export default class DateTime {
   /**
    * Returns true if the DateTime is equivalent to the passed value..
    *
-   * @param {DateTime|Date|number|string} arg
+   * @param {DateLike} arg
    */
   isEqual(arg) {
     return this.getTime() === new DateTime(arg).getTime();
@@ -948,10 +976,6 @@ export default class DateTime {
    * @returns {number}
    */
   getTimezoneOffset() {
-    this.offset ||= getTimezoneOffset(this.date, {
-      ...DateTime.options,
-      ...this.options,
-    });
     return this.offset;
   }
 
@@ -1268,7 +1292,7 @@ function endOf(dt, unit) {
   if (unit === 'week') {
     day = dt.getDate() + (6 - dt.getDay());
   } else if (index < 3) {
-    day = daysInMonth(dt);
+    day = daysInMonth(dt.setMonth(month));
   } else {
     day = dt.getDate();
   }

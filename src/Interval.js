@@ -340,10 +340,22 @@ export default class Interval {
   getUnits(unit) {
     unit = normalizeUnit(unit);
 
+    let last;
     let result = [];
+
     walkUnits(this, unit, (current) => {
-      result.push(new Interval(current.startOf(unit), current.endOf(unit)));
+      const interval = new Interval(current.startOf(unit), current.endOf(unit));
+      result.push(interval);
+      last = interval;
     });
+
+    // @ts-ignore
+    if (last?.end < this.end) {
+      // @ts-ignore
+      const dt = last.start.advance(1, unit);
+      result.push(new Interval(dt.startOf(unit), dt.endOf(unit)));
+    }
+
     return result;
   }
 }
