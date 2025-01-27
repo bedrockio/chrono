@@ -219,7 +219,8 @@ export default class DateTime {
    */
   static getMeridiem(options = {}) {
     return Array.from(new Array(2), (_, i) => {
-      return getMeridiem(new Date(2020, 0, 1, i * 12), {
+      const date = new Date(Date.UTC(2020, 0, 1, i * 12));
+      return getMeridiem(date, {
         ...this.options,
         ...options,
         timeZone: 'UTC',
