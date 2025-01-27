@@ -1,13 +1,30 @@
 import DateTime from './DateTime';
 import { normalizeUnit } from './units';
 
+/**
+ * @typedef {DateTime|Date|number|string} DateLike
+ */
+
 export default class Interval {
+  /**
+   * Gets an interval representing the year of the
+   * input.
+   *
+   * @param {DateLike} date
+   */
+  static getYear(date) {
+    return new Interval(
+      new DateTime(date).startOfYear(),
+      new DateTime(date).endOfYear()
+    );
+  }
+
   /**
    * Gets an interval representing the full calendar
    * month from the first day of the week at the start
    * to the last day of the week at the end.
    *
-   * @param {DateTime|Date|number|string} date
+   * @param {DateLike} date
    * @param {Object} options
    * @param {string} [options.normalize] - Normalizes output to always have 6 weeks.
    */
@@ -35,9 +52,9 @@ export default class Interval {
 
   /**
    * Gets an interval representing the month of the
-   * input date.
+   * input.
    *
-   * @param {DateTime|Date|number|string} date
+   * @param {DateLike} date
    */
   static getMonth(date) {
     return new Interval(
@@ -48,9 +65,9 @@ export default class Interval {
 
   /**
    * Gets an interval representing the week of the
-   * input date.
+   * input.
    *
-   * @param {DateTime|Date|number|string} date
+   * @param {DateLike} date
    */
   static getWeek(date) {
     return new Interval(
@@ -61,9 +78,9 @@ export default class Interval {
 
   /**
    * Gets an interval representing the full day of
-   * the input date.
+   * the input.
    *
-   * @param {DateTime|Date|number|string} date
+   * @param {DateLike} date
    */
   static getDay(date) {
     return new Interval(
@@ -80,7 +97,7 @@ export default class Interval {
    * or another interval.
    *
    * @constructor
-   * @param {...(Interval|DateTime|Date|number|string)} args
+   * @param {...(Interval|DateLike)} args
    *
    * @example
    * new Interval('2023-01-01/2023-01-02');
@@ -137,7 +154,7 @@ export default class Interval {
   /**
    * Returns true if the interval overlaps the passed argument.
    *
-   * @param {Interval|DateTime|Date|number|string} arg
+   * @param {Interval|DateLike} arg
    */
   overlaps(arg) {
     if (arg instanceof Interval) {
@@ -151,7 +168,7 @@ export default class Interval {
   /**
    * Returns true if the argument passed is contained by the interval.
    *
-   * @param {Interval|DateTime|Date|number|string} arg
+   * @param {Interval|DateLike} arg
    */
   contains(arg) {
     if (arg instanceof Interval) {
@@ -222,7 +239,7 @@ export default class Interval {
    * either end of the interval, a single element will be returned which
    * is the difference between the interval and the passed argument.
    *
-   * @param {Interval|DateTime|Date|number|string} arg
+   * @param {Interval|DateLike} arg
    */
   split(arg) {
     let interval;

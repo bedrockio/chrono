@@ -8,6 +8,15 @@ beforeEach(() => {
 
 describe('Interval', () => {
   describe('static', () => {
+    describe('getYear', () => {
+      it('should get the year calendar month', () => {
+        const interval = Interval.getYear('2024-12-01');
+        expect(interval.toISOString()).toBe(
+          '2023-12-31T15:00:00.000Z/2024-12-31T14:59:59.999Z'
+        );
+      });
+    });
+
     describe('getCalendarMonth', () => {
       it('should get the correct calendar month', () => {
         const interval = Interval.getCalendarMonth('2024-12-01');

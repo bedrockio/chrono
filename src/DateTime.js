@@ -4,6 +4,15 @@
 // - Intl.DateTimeFormat
 // - Intl.RelativeTimeFormat
 
+/**
+ * @typedef {"year"|"years"|"month"|"months"|"week"|"weeks"|"day"|"days"|
+ *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
+ */
+
+/**
+ * @typedef {DateTime|Date|number|string} DateLike
+ */
+
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
 import { isAmbiguousTimeZone } from './timezone';
@@ -33,15 +42,6 @@ const ONE_MINUTE = 60 * ONE_SECOND;
 const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
-
-/**
- * @typedef {"year"|"years"|"month"|"months"|"week"|"weeks"|"day"|"days"|
- *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
- */
-
-/**
- * @typedef {DateTime|Date|number|string} DateLike
- */
 
 export default class DateTime {
   static DATE_MED = DATE_MED;
