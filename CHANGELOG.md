@@ -6,6 +6,7 @@
 - Added `DateTime.clamp`.
 - Handle inclusive intervals.
 - Handle setting components in unintended order.
+- Fixed `DateTime.getMeridiem` ordering.
 - Better documentation.
 
 ## 0.3.0
