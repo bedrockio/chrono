@@ -147,5 +147,3 @@ const interval = new Interval(lastYear, nextYear);
 // The number of days in this interval.
 const days = interval.getDays();
 ```
-
-1
