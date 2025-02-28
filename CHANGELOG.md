@@ -1,4 +1,4 @@
-## Next
+## 0.4.1
 
 - Added duration shortcuts on interval.
 - DateTime constructor should clone options.
