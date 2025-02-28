@@ -1,9 +1,3 @@
-// A timezone and locale aware DateTime.
-// This class assumes that support exists for:
-//
-// - Intl.DateTimeFormat
-// - Intl.RelativeTimeFormat
-
 /**
  * @typedef {"year"|"years"|"month"|"months"|"week"|"weeks"|"day"|"days"|
  *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
@@ -43,6 +37,15 @@ const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
 
+/**
+ * A timezone and locale aware DateTime.
+ * This class assumes support for:
+ *
+ * - `Intl.DateTimeFormat`
+ * - `Intl.RelativeTimeFormat`
+ *
+ *  @class
+ */
 export default class DateTime {
   static DATE_MED = DATE_MED;
   static DATE_SHORT = DATE_SHORT;
@@ -66,7 +69,6 @@ export default class DateTime {
    * Sets the global timezone.
    *
    * @param {string} timeZone
-   * @static
    */
   static setTimeZone(timeZone) {
     this.setOptions({
@@ -78,7 +80,6 @@ export default class DateTime {
    * Sets the global locale.
    *
    * @param {string} locale
-   * @static
    */
   static setLocale(locale) {
     this.setOptions({
@@ -90,7 +91,6 @@ export default class DateTime {
    * Sets global options.
    *
    * @param {Object} options
-   * @static
    */
   static setOptions(options) {
     this.options = {
@@ -104,7 +104,6 @@ export default class DateTime {
    *
    * @param {...DateLike} args
    * @returns DateTime
-   * @static
    */
   static min(...args) {
     if (!args.length) {
@@ -124,7 +123,6 @@ export default class DateTime {
    *
    * @param {...DateLike} args
    * @returns DateTime
-   * @static
    */
   static max(...args) {
     if (!args.length) {
@@ -146,7 +144,6 @@ export default class DateTime {
    * @param {DateLike} min
    * @param {DateLike} max
    * @returns DateTime
-   * @static
    */
   static clamp(arg, min, max) {
     if (!arg) {
@@ -165,7 +162,6 @@ export default class DateTime {
    * @param {Object} options
    * @param {string} [options.locale]
    * @param {"long"|"short"|"narrow"} [options.style]
-   * @static
    */
   static getMonths(options = {}) {
     let { locale, style = 'long' } = options;
@@ -194,7 +190,6 @@ export default class DateTime {
    * @param {string} [options.locale]
    * @param {number} [options.start]
    * @param {"long"|"short"|"narrow"} [options.style]
-   * @static
    */
   static getWeekdays(options = {}) {
     return getWeekdays({
@@ -215,7 +210,6 @@ export default class DateTime {
    * @param {string} [options.locale]
    * @param {number} [options.lower]
    * @param {"long"|"short"} [options.style]
-   * @static
    */
   static getMeridiem(options = {}) {
     return Array.from(new Array(2), (_, i) => {
@@ -238,7 +232,6 @@ export default class DateTime {
    * is set it will be parsed in that timezone. If no timezone can be derived the
    * system offset will be used instead.
    *
-   * @constructor
    * @param {...DateLike|Object} args
    *
    * @example

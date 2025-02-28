@@ -12,7 +12,7 @@ Concepts
 ## Installation
 
 ```shell
-yarn install @bedrockio/yada
+yarn install @bedrockio/chrono
 ```
 
 ## DateTime

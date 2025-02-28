@@ -96,7 +96,6 @@ export default class Interval {
    * string in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals)
    * or another interval.
    *
-   * @constructor
    * @param {...(Interval|DateLike)} args
    *
    * @example

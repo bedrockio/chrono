@@ -6,6 +6,7 @@
     "test": "jest",
     "lint": "eslint",
     "build": "scripts/build",
+    "build:docs": "typedoc",
     "types": "tsc",
     "prepublishOnly": "yarn build && yarn types"
   },
@@ -24,11 +25,14 @@
     "@babel/preset-env": "^7.20.2",
     "@bedrockio/eslint-plugin": "^1.1.2",
     "@bedrockio/prettier-config": "^1.0.2",
+    "@types/node": "^22.13.5",
     "eslint": "^9.19.0",
     "jest": "^29.6.2",
     "prettier": "^2.7.1",
     "prettier-eslint": "^16.3.0",
-    "typescript": "^4.9.5"
+    "typedoc": "^0.27.9",
+    "typedoc-github-theme": "^0.2.1",
+    "typescript": "^5.7.3"
   },
   "prettier": "@bedrockio/prettier-config",
   "volta": {

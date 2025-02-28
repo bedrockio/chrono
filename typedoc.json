@@ -1,0 +1,15 @@
+{
+  "entryPoints": [
+    "./src/index.js",
+  ],
+  "name": "Chrono",
+  "entryPointStrategy": "expand",
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "disableSources": true,
+  "excludeExternals": true,
+  "excludeProtected": true,
+  "hideGenerator": true,
+  "customCss": "docs.css",
+  "plugin": "typedoc-github-theme"
+}
