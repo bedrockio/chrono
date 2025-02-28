@@ -972,7 +972,7 @@ export default class DateTime {
   }
 
   /**
-   * @alias getTimeZone
+   * Alias for {@link getTimeZone}.
    */
   getTimezone() {
     return this.getTimeZone();
@@ -990,7 +990,7 @@ export default class DateTime {
   }
 
   /**
-   * @alias getTimeZoneOffset
+   * Alias for {@link getTimeZoneOffset}.
    */
   getTimezoneOffset() {
     return this.offset;
