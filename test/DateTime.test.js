@@ -1561,6 +1561,46 @@ describe('DateTime', () => {
     });
   });
 
+  describe('getTimeZoneOffset', () => {
+    it('should be an alias', async () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.getTimeZoneOffset()).toBe(300);
+    });
+  });
+
+  describe('getTimeZone', () => {
+    it('should return the IANA timezone', async () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.getTimeZone()).toBe('America/New_York');
+    });
+
+    it('should return globally set timezone', async () => {
+      DateTime.setTimeZone('America/New_York');
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.getTimeZone()).toBe('America/New_York');
+    });
+
+    it('should return system timezone when none set', async () => {
+      DateTime.setTimeZone(null);
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      const system = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      expect(dt.getTimeZone()).toBe(system);
+    });
+  });
+
+  describe('getTimezone', () => {
+    it('should be alias', async () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      expect(dt.getTimezone()).toBe('America/New_York');
+    });
+  });
+
   describe('getters', () => {
     it('should get the correct year for timezone', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {

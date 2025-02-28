@@ -85,6 +85,18 @@ describe('Interval', () => {
       expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
     });
 
+    it('should preserve DateTime options', () => {
+      const start = new DateTime('2025-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      const end = new DateTime('2026-01-01T00:00:00.000Z', {
+        timeZone: 'Asia/Tokyo',
+      });
+      const interval = new Interval(start, end);
+      expect(interval.start.getTimeZone()).toBe('America/New_York');
+      expect(interval.end.getTimeZone()).toBe('Asia/Tokyo');
+    });
+
     it('should be able to create from timestamp', () => {
       const interval = new Interval(
         new Date('2025-01-01T00:00:00.000Z').getTime(),

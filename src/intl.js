@@ -96,6 +96,10 @@ export function getPart(arg, type, options) {
 
 // Utils
 
-function getSystemLocale() {
+export function getSystemLocale() {
   return new Intl.DateTimeFormat().resolvedOptions().locale;
+}
+
+export function getSystemTimeZone() {
+  return new Intl.DateTimeFormat().resolvedOptions().timeZone;
 }

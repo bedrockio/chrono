@@ -2,6 +2,7 @@
 
 - Added duration shortcuts on interval.
 - DateTime constructor should clone options.
+- Added `getTimeZone` and aliases for caps.
 
 ## 0.4.0
 

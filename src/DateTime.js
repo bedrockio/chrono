@@ -10,7 +10,7 @@
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
 import { isAmbiguousTimeZone } from './timezone';
-import { getWeekdays, getMeridiem } from './intl';
+import { getWeekdays, getMeridiem, getSystemTimeZone } from './intl';
 import { normalizeUnit, getUnitIndex } from './units';
 
 import {
@@ -964,11 +964,33 @@ export default class DateTime {
   }
 
   /**
+   * Returns the IANA timezone.
+   * @returns {string}
+   */
+  getTimeZone() {
+    return this.options.timeZone || getSystemTimeZone();
+  }
+
+  /**
+   * @alias getTimeZone
+   */
+  getTimezone() {
+    return this.getTimeZone();
+  }
+
+  /**
    * Gets the timezone offset of the DateTime in minutes. This may
    * be the offset of the local or global timezone if one is set,
    * otherwise will be the system offset.
    *
    * @returns {number}
+   */
+  getTimeZoneOffset() {
+    return this.offset;
+  }
+
+  /**
+   * @alias getTimeZoneOffset
    */
   getTimezoneOffset() {
     return this.offset;
