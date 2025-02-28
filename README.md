@@ -6,6 +6,7 @@ built-in locale and timezone support.
 Concepts
 
 - [Installation](#installation)
+- [Documentation](#documentation)
 - [DateTime](#datetime)
 - [Interval](#interval)
 
@@ -14,6 +15,10 @@ Concepts
 ```shell
 yarn install @bedrockio/chrono
 ```
+
+## Documentation
+
+https://bedrockio.github.io/chrono/
 
 ## DateTime
 
