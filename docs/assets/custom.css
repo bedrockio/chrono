@@ -1,0 +1,3 @@
+.container-main:has(h1.tsd-anchor-link) .tsd-page-title {
+  display: none;
+}
