@@ -528,6 +528,15 @@ describe('DateTime', () => {
       expect(dt2.toISOString()).toBe('2020-01-01T00:00:00.000Z');
     });
 
+    it('should preserve options on clone', () => {
+      const dt1 = new DateTime('2020-01-01T00:00:00.000Z', {
+        timeZone: 'America/New_York',
+      });
+      const dt2 = new DateTime(dt1);
+      expect(dt2).not.toBe(dt1);
+      expect(dt2.options.timeZone).toBe('America/New_York');
+    });
+
     describe('timezones', () => {
       it('should respect timezone passed in options object', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000', {

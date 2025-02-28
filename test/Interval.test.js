@@ -438,6 +438,22 @@ describe('Interval', () => {
     });
   });
 
+  describe('duration shortcuts', () => {
+    it('should have basic shortcut methods for duration', () => {
+      const interval = new Interval(
+        '2025-01-01T00:00:00.000',
+        '2026-01-01T00:00:00.000'
+      );
+      expect(interval.years()).toBe(1);
+      expect(interval.months()).toBe(12);
+      expect(interval.weeks()).toBe(365 / 7);
+      expect(interval.days()).toBe(365);
+      expect(interval.hours()).toBe(365 * 24);
+      expect(interval.minutes()).toBe(365 * 24 * 60);
+      expect(interval.seconds()).toBe(365 * 24 * 60 * 60);
+    });
+  });
+
   describe('split', () => {
     describe('basic', () => {
       it('should split the interval by a string', () => {

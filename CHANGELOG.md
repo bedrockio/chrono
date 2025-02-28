@@ -1,3 +1,8 @@
+## Next
+
+- Added duration shortcuts on interval.
+- DateTime constructor should clone options.
+
 ## 0.4.0
 
 - Added custom "compact" style to `DateTime.getWeekdays`.

@@ -268,6 +268,7 @@ export default class DateTime {
 
     options = {
       ...DateTime.options,
+      ...arg?.options,
       ...options,
     };
 

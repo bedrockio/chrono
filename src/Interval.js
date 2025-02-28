@@ -232,6 +232,55 @@ export default class Interval {
   }
 
   /**
+   * Gets the duration of the interval in years.
+   */
+  years() {
+    return this.duration('years');
+  }
+
+  /**
+   * Gets the duration of the interval in months.
+   */
+  months() {
+    return this.duration('months');
+  }
+
+  /**
+   * Gets the duration of the interval in weeks.
+   */
+  weeks() {
+    return this.duration('weeks');
+  }
+
+  /**
+   * Gets the duration of the interval in days.
+   */
+  days() {
+    return this.duration('days');
+  }
+
+  /**
+   * Gets the duration of the interval in hours.
+   */
+  hours() {
+    return this.duration('hours');
+  }
+
+  /**
+   * Gets the duration of the interval in minutes.
+   */
+  minutes() {
+    return this.duration('minutes');
+  }
+
+  /**
+   * Gets the duration of the interval in seconds.
+   */
+  seconds() {
+    return this.duration('seconds');
+  }
+
+  /**
    * Splits the interval into multiple parts by the passed argument.
    * If the passed argument is a specific date and falls outside the
    * bounds of the interval a single element will be returned which is
