@@ -13,9 +13,9 @@
   "type": "module",
   "exports": {
     "import": "./src/index.js",
-    "require": "./dist/cjs/index.js"
+    "require": "./dist/cjs/index.js",
+    "types": "./types/index.d.ts"
   },
-  "types": "./types/index.d.ts",
   "repository": "https://github.com/bedrockio/chrono",
   "author": "Andrew Plummer <plummer.andrew@gmail.com>",
   "license": "MIT",

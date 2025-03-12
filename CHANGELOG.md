@@ -1,3 +1,7 @@
+## 0.4.3
+
+- Moved `types` into exports.
+
 ## 0.4.2
 
 - Added `getMonthName`.
