@@ -10,7 +10,13 @@
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
 import { isAmbiguousTimeZone } from './timezone';
-import { getWeekdays, getMeridiem, getSystemTimeZone } from './intl';
+import {
+  getWeekdays,
+  getMeridiem,
+  getMonthName,
+  getWeekdayName,
+  getSystemTimeZone,
+} from './intl';
 import { normalizeUnit, getUnitIndex } from './units';
 
 import {
@@ -994,6 +1000,26 @@ export default class DateTime {
    */
   getTimezoneOffset() {
     return this.offset;
+  }
+
+  /**
+   * Returns the English name of the month. `style` follows Intl format
+   * with `compact` as a special 2 character form. Default is `long`.
+   *
+   * @param {'long'|'short'|'compact'|'narrow'} [style]
+   */
+  getMonthName(style = 'long') {
+    return getMonthName(this, style);
+  }
+
+  /**
+   * Returns the English name of the weekday. `style` follows Intl format
+   * with `compact` as a special 2 character form. Default is `long`.
+   *
+   * @param {'long'|'short'|'compact'|'narrow'} [style]
+   */
+  getWeekdayName(style = 'long') {
+    return getWeekdayName(this, style);
   }
 
   setUTCTime(time) {

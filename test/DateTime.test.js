@@ -1726,6 +1726,128 @@ describe('DateTime', () => {
     });
   });
 
+  describe('named getters', () => {
+    describe('months', () => {
+      it('should get the long month name by default', () => {
+        expect(new DateTime('2020-01-01').getMonthName()).toBe('January');
+        expect(new DateTime('2020-02-01').getMonthName()).toBe('February');
+        expect(new DateTime('2020-03-01').getMonthName()).toBe('March');
+        expect(new DateTime('2020-04-01').getMonthName()).toBe('April');
+        expect(new DateTime('2020-05-01').getMonthName()).toBe('May');
+        expect(new DateTime('2020-06-01').getMonthName()).toBe('June');
+        expect(new DateTime('2020-07-01').getMonthName()).toBe('July');
+        expect(new DateTime('2020-08-01').getMonthName()).toBe('August');
+        expect(new DateTime('2020-09-01').getMonthName()).toBe('September');
+        expect(new DateTime('2020-10-01').getMonthName()).toBe('October');
+        expect(new DateTime('2020-11-01').getMonthName()).toBe('November');
+        expect(new DateTime('2020-12-01').getMonthName()).toBe('December');
+      });
+
+      it('should get the short month name', () => {
+        expect(new DateTime('2020-01-01').getMonthName('short')).toBe('Jan');
+        expect(new DateTime('2020-02-01').getMonthName('short')).toBe('Feb');
+        expect(new DateTime('2020-03-01').getMonthName('short')).toBe('Mar');
+        expect(new DateTime('2020-04-01').getMonthName('short')).toBe('Apr');
+        expect(new DateTime('2020-05-01').getMonthName('short')).toBe('May');
+        expect(new DateTime('2020-06-01').getMonthName('short')).toBe('Jun');
+        expect(new DateTime('2020-07-01').getMonthName('short')).toBe('Jul');
+        expect(new DateTime('2020-08-01').getMonthName('short')).toBe('Aug');
+        expect(new DateTime('2020-09-01').getMonthName('short')).toBe('Sep');
+        expect(new DateTime('2020-10-01').getMonthName('short')).toBe('Oct');
+        expect(new DateTime('2020-11-01').getMonthName('short')).toBe('Nov');
+        expect(new DateTime('2020-12-01').getMonthName('short')).toBe('Dec');
+      });
+
+      it('should get the compact month name', () => {
+        expect(new DateTime('2020-01-01').getMonthName('compact')).toBe('Ja');
+        expect(new DateTime('2020-02-01').getMonthName('compact')).toBe('Fe');
+        expect(new DateTime('2020-03-01').getMonthName('compact')).toBe('Ma');
+        expect(new DateTime('2020-04-01').getMonthName('compact')).toBe('Ap');
+        expect(new DateTime('2020-05-01').getMonthName('compact')).toBe('Ma');
+        expect(new DateTime('2020-06-01').getMonthName('compact')).toBe('Ju');
+        expect(new DateTime('2020-07-01').getMonthName('compact')).toBe('Ju');
+        expect(new DateTime('2020-08-01').getMonthName('compact')).toBe('Au');
+        expect(new DateTime('2020-09-01').getMonthName('compact')).toBe('Se');
+        expect(new DateTime('2020-10-01').getMonthName('compact')).toBe('Oc');
+        expect(new DateTime('2020-11-01').getMonthName('compact')).toBe('No');
+        expect(new DateTime('2020-12-01').getMonthName('compact')).toBe('De');
+      });
+
+      it('should get the narrow month name', () => {
+        expect(new DateTime('2020-01-01').getMonthName('narrow')).toBe('J');
+        expect(new DateTime('2020-02-01').getMonthName('narrow')).toBe('F');
+        expect(new DateTime('2020-03-01').getMonthName('narrow')).toBe('M');
+        expect(new DateTime('2020-04-01').getMonthName('narrow')).toBe('A');
+        expect(new DateTime('2020-05-01').getMonthName('narrow')).toBe('M');
+        expect(new DateTime('2020-06-01').getMonthName('narrow')).toBe('J');
+        expect(new DateTime('2020-07-01').getMonthName('narrow')).toBe('J');
+        expect(new DateTime('2020-08-01').getMonthName('narrow')).toBe('A');
+        expect(new DateTime('2020-09-01').getMonthName('narrow')).toBe('S');
+        expect(new DateTime('2020-10-01').getMonthName('narrow')).toBe('O');
+        expect(new DateTime('2020-11-01').getMonthName('narrow')).toBe('N');
+        expect(new DateTime('2020-12-01').getMonthName('narrow')).toBe('D');
+      });
+
+      it('should return english regardless of locale', () => {
+        const dt = new DateTime('2020-01-01', {
+          locale: 'ja-JP',
+        });
+
+        expect(dt.getMonthName()).toBe('January');
+      });
+    });
+
+    describe('weekdays', () => {
+      it('should get the long weekday name', () => {
+        expect(new DateTime('2020-01-05').getWeekdayName()).toBe('Sunday');
+        expect(new DateTime('2020-01-06').getWeekdayName()).toBe('Monday');
+        expect(new DateTime('2020-01-07').getWeekdayName()).toBe('Tuesday');
+        expect(new DateTime('2020-01-08').getWeekdayName()).toBe('Wednesday');
+        expect(new DateTime('2020-01-09').getWeekdayName()).toBe('Thursday');
+        expect(new DateTime('2020-01-10').getWeekdayName()).toBe('Friday');
+        expect(new DateTime('2020-01-11').getWeekdayName()).toBe('Saturday');
+      });
+
+      it('should get the short weekday name', () => {
+        expect(new DateTime('2020-01-05').getWeekdayName('short')).toBe('Sun');
+        expect(new DateTime('2020-01-06').getWeekdayName('short')).toBe('Mon');
+        expect(new DateTime('2020-01-07').getWeekdayName('short')).toBe('Tue');
+        expect(new DateTime('2020-01-08').getWeekdayName('short')).toBe('Wed');
+        expect(new DateTime('2020-01-09').getWeekdayName('short')).toBe('Thu');
+        expect(new DateTime('2020-01-10').getWeekdayName('short')).toBe('Fri');
+        expect(new DateTime('2020-01-11').getWeekdayName('short')).toBe('Sat');
+      });
+
+      it('should get the compact weekday name', () => {
+        expect(new DateTime('2020-01-05').getWeekdayName('compact')).toBe('Su');
+        expect(new DateTime('2020-01-06').getWeekdayName('compact')).toBe('Mo');
+        expect(new DateTime('2020-01-07').getWeekdayName('compact')).toBe('Tu');
+        expect(new DateTime('2020-01-08').getWeekdayName('compact')).toBe('We');
+        expect(new DateTime('2020-01-09').getWeekdayName('compact')).toBe('Th');
+        expect(new DateTime('2020-01-10').getWeekdayName('compact')).toBe('Fr');
+        expect(new DateTime('2020-01-11').getWeekdayName('compact')).toBe('Sa');
+      });
+
+      it('should get the narrow weekday name', () => {
+        expect(new DateTime('2020-01-05').getWeekdayName('narrow')).toBe('S');
+        expect(new DateTime('2020-01-06').getWeekdayName('narrow')).toBe('M');
+        expect(new DateTime('2020-01-07').getWeekdayName('narrow')).toBe('T');
+        expect(new DateTime('2020-01-08').getWeekdayName('narrow')).toBe('W');
+        expect(new DateTime('2020-01-09').getWeekdayName('narrow')).toBe('T');
+        expect(new DateTime('2020-01-10').getWeekdayName('narrow')).toBe('F');
+        expect(new DateTime('2020-01-11').getWeekdayName('narrow')).toBe('S');
+      });
+
+      it('should return english regardless of locale', () => {
+        const dt = new DateTime('2020-01-01', {
+          locale: 'ja-JP',
+        });
+
+        expect(dt.getWeekdayName()).toBe('Wednesday');
+      });
+    });
+  });
+
   describe('DST', () => {
     it('should fix forward shift', () => {
       const dt = new DateTime('2023-03-12T05:00:00.000Z', {

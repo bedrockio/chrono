@@ -1,5 +1,7 @@
 ## 0.4.2
 
+- Added `getMonthName`.
+- Added `getWeekdayName`.
 - Removed checkOffsetShift helper.
 
 ## 0.4.1

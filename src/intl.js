@@ -1,24 +1,35 @@
-// Weekday
+// Months
+
+export function getMonthName(date, style = 'long') {
+  return getPart(date, 'month', {
+    style,
+    month: style,
+  });
+}
+
+// Weekdays
+
+export function getWeekdayName(date, style = 'long') {
+  return getPart(date, 'weekday', {
+    style,
+    weekday: style,
+  });
+}
 
 export function getWeekdays(options) {
-  let { locale, start, style = 'long' } = options;
+  let { start, locale, style = 'long' } = options;
 
-  locale ||= getSystemLocale();
   start ||= getFirstDayOfWeek(locale);
-
-  const formatter = new Intl.DateTimeFormat(locale, {
-    weekday: getIntlWeekdayStyle(locale, style),
-  });
+  locale ||= getSystemLocale();
 
   return Array.from(new Array(7), (_, i) => {
     const day = (1 + i + start) % 7;
-    let token = formatter.format(new Date(2017, 0, day));
-    if (style === 'compact') {
-      const caps = token.charAt(0).toUpperCase();
-      const rest = token.charAt(1);
-      token = caps + rest;
-    }
-    return token;
+
+    return getPart(new Date(2017, 0, day), 'weekday', {
+      locale,
+      style,
+      weekday: style,
+    });
   });
 }
 
@@ -41,7 +52,7 @@ const HAS_COMPACT = [
   'sk',
 ];
 
-function getIntlWeekdayStyle(locale, style) {
+function normalizeCompact(locale, style) {
   if (style === 'compact') {
     const lang = locale.slice(0, 2);
     return HAS_COMPACT.includes(lang) ? 'short' : 'narrow';
@@ -82,16 +93,30 @@ export function getMeridiem(arg, options = {}) {
 
 // Accepts an instance of either Date or DateTime.
 export function getPart(arg, type, options) {
-  const { locale, timeZone, ...rest } = options;
+  const { timeZone, style, locale = 'en', ...rest } = options;
   const formatter = new Intl.DateTimeFormat(locale, {
-    ...rest,
+    ...normalizeIntlOptions(locale, rest),
     timeZone,
   });
   const parts = formatter.formatToParts(arg);
   const part = parts.find((p) => {
     return p.type === type;
   });
-  return part?.value || '';
+  let value = part?.value || '';
+
+  if (style === 'compact') {
+    const caps = value.charAt(0).toUpperCase();
+    const rest = value.charAt(1);
+    value = caps + rest;
+  }
+
+  return value;
+}
+
+function normalizeIntlOptions(locale, options) {
+  options.month = normalizeCompact(locale, options.month);
+  options.weekday = normalizeCompact(locale, options.weekday);
+  return options;
 }
 
 // Utils
