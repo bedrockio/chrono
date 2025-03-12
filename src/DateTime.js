@@ -997,8 +997,11 @@ export default class DateTime {
   }
 
   setUTCTime(time) {
-    const offset = this.getTimezoneOffset();
-    return this.setTime(time + offset * ONE_MINUTE);
+    // Note the target time may have a different offset
+    // so do an initial set before adding the offset.
+    const dt = this.setTime(time);
+    const offset = dt.getTimezoneOffset();
+    return dt.setTime(time + offset * ONE_MINUTE);
   }
 }
 
@@ -1046,16 +1049,16 @@ function advanceDate(dt, dir, by, unit) {
 
     switch (name) {
       case 'year':
-        dt = checkOffsetShift(dt, dt.setYear(dt.getYear() + value));
+        dt = dt.setYear(dt.getYear() + value);
         break;
       case 'month':
-        dt = checkOffsetShift(dt, advanceMonthSafe(dt, value));
+        dt = advanceMonthSafe(dt, value);
         break;
       case 'week':
-        dt = checkOffsetShift(dt, dt.setDate(dt.getDate() + value * 7));
+        dt = dt.setDate(dt.getDate() + value * 7);
         break;
       case 'day':
-        dt = checkOffsetShift(dt, dt.setDate(dt.getDate() + value));
+        dt = dt.setDate(dt.getDate() + value);
         break;
       case 'hour':
         dt = dt.setHours(dt.getHours() + value);
@@ -1089,13 +1092,13 @@ function setComponents(dt, components) {
 
     switch (name) {
       case 'year':
-        dt = checkOffsetShift(dt, dt.setFullYear(value));
+        dt = dt.setFullYear(value);
         break;
       case 'month':
-        dt = checkOffsetShift(dt, dt.setMonth(value - 1));
+        dt = dt.setMonth(value - 1);
         break;
       case 'day':
-        dt = checkOffsetShift(dt, dt.setDate(value));
+        dt = dt.setDate(value);
         break;
       case 'hour':
         dt = dt.setHours(value);
@@ -1294,9 +1297,7 @@ function startOf(dt, unit) {
   const minutes = index < 5 ? 0 : dt.getMinutes();
   const seconds = index < 6 ? 0 : dt.getSeconds();
 
-  const result = dt.setArgs(year, month, day, hours, minutes, seconds);
-
-  return checkOffsetShiftForUnit(unit, dt, result);
+  return dt.setArgs(year, month, day, hours, minutes, seconds);
 }
 
 function endOf(dt, unit) {
@@ -1318,37 +1319,7 @@ function endOf(dt, unit) {
   const minutes = index < 5 ? 59 : dt.getMinutes();
   const seconds = index < 6 ? 59 : dt.getSeconds();
 
-  const result = dt.setArgs(year, month, day, hours, minutes, seconds, 999);
-
-  return checkOffsetShiftForUnit(unit, dt, result);
-}
-
-// DST Shift
-
-function checkOffsetShiftForUnit(unit, prev, next) {
-  const index = getUnitIndex(unit);
-  if (index > 3) {
-    return next;
-  }
-
-  return checkOffsetShift(prev, next);
-}
-
-function checkOffsetShift(prev, next) {
-  const shift = next.getTimezoneOffset() - prev.getTimezoneOffset();
-
-  // If the timezone offset has shifted due to a
-  // DST transition, then add advance the date by
-  // the shifted amount to compensate. For example
-  // in America/New_York 2023-11-05T04:00:00.000Z
-  // will become 2023-11-06T05:00:00.000Z when
-  // advancing by one day. In this case the offset
-  // will have shifted from 240 to 300.
-  if (shift) {
-    return next.setTime(next.getTime() + shift * ONE_MINUTE);
-  }
-
-  return next;
+  return dt.setArgs(year, month, day, hours, minutes, seconds, 999);
 }
 
 function daysInMonth(dt) {

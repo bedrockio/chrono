@@ -1,3 +1,7 @@
+## 0.4.2
+
+- Removed checkOffsetShift helper.
+
 ## 0.4.1
 
 - Added duration shortcuts on interval.
