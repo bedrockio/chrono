@@ -1,3 +1,10 @@
+## 0.4.4
+
+- Better options handling.
+- Added `DateTime.getTimeZone`.
+- Added `DateTime.getLocale`.
+- Added `DateTime.getOptions`.
+
 ## 0.4.3
 
 - Moved `types` into exports.

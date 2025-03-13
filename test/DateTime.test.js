@@ -479,6 +479,54 @@ describe('DateTime', () => {
         });
       });
     });
+
+    describe('setOptions', () => {
+      it('should set options together', async () => {
+        DateTime.setOptions({
+          locale: 'ja-JP',
+          timeZone: 'America/New_York',
+        });
+        expect(DateTime.getTimeZone()).toBe('America/New_York');
+        expect(DateTime.getLocale()).toBe('ja-JP');
+        expect(DateTime.getOptions()).toEqual({
+          locale: 'ja-JP',
+          timeZone: 'America/New_York',
+        });
+      });
+
+      it('should unset options', async () => {
+        DateTime.setOptions({
+          locale: 'ja-JP',
+          timeZone: 'America/New_York',
+        });
+        DateTime.setOptions({
+          locale: null,
+          timeZone: 'America/New_York',
+        });
+        expect(DateTime.getTimeZone()).toBe('America/New_York');
+        expect(DateTime.getLocale()).toBe(undefined);
+        expect(DateTime.getOptions()).toEqual({
+          timeZone: 'America/New_York',
+        });
+      });
+
+      it('should not unset with undefined', async () => {
+        DateTime.setOptions({
+          locale: 'ja-JP',
+          timeZone: 'America/New_York',
+        });
+        DateTime.setOptions({
+          locale: undefined,
+          timeZone: 'America/New_York',
+        });
+        expect(DateTime.getTimeZone()).toBe('America/New_York');
+        expect(DateTime.getLocale()).toBe('ja-JP');
+        expect(DateTime.getOptions()).toEqual({
+          locale: 'ja-JP',
+          timeZone: 'America/New_York',
+        });
+      });
+    });
   });
 
   describe('constructor', () => {
@@ -686,7 +734,7 @@ describe('DateTime', () => {
   });
 
   describe('token based formatting', () => {
-    it('should be able to format time with tokens', () => {
+    it('should format time with tokens', () => {
       const dt = new DateTime('2020-01-01T05:05:08.000Z', {
         timeZone: 'UTC',
       });
@@ -704,7 +752,7 @@ describe('DateTime', () => {
       expect(dt.format('ZZZZZ')).toBe('Coordinated Universal Time');
     });
 
-    it('should be able to format time with tokens in zone', () => {
+    it('should format time with tokens in zone', () => {
       const dt = new DateTime('2020-01-01T05:05:03.000Z', {
         timeZone: 'America/New_York',
       });
@@ -733,20 +781,29 @@ describe('DateTime', () => {
   });
 
   describe('timezones', () => {
-    it('allow setting a global timezone', () => {
+    it('should allow setting a global timezone', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.toString()).toBe('December 31, 2019 at 7:00pm');
     });
 
-    it('allow passing timezone in constructor', () => {
+    it('should get the globally set timezone', () => {
+      expect(DateTime.getTimeZone()).toBe('Asia/Tokyo');
+    });
+
+    it('should not unset global timezone with undefined', () => {
+      DateTime.setTimeZone();
+      expect(DateTime.getTimeZone()).toBe('Asia/Tokyo');
+    });
+
+    it('should allow passing timezone in constructor', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {
         timeZone: 'America/New_York',
       });
       expect(dt.toString()).toBe('December 31, 2019 at 7:00pm');
     });
 
-    it('allow passing timezone in datetime format', () => {
+    it('should allow passing timezone in datetime format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.DATETIME_MED, {
@@ -755,7 +812,7 @@ describe('DateTime', () => {
       ).toBe('December 31, 2019 at 7:00pm');
     });
 
-    it('allow passing timezone in date format', () => {
+    it('should allow passing timezone in date format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.DATE_MED, {
@@ -764,7 +821,7 @@ describe('DateTime', () => {
       ).toBe('December 31, 2019');
     });
 
-    it('allow passing timezone in time format', () => {
+    it('should allow passing timezone in time format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.TIME_MED, {
@@ -774,7 +831,7 @@ describe('DateTime', () => {
     });
 
     it('use system time when not set', () => {
-      DateTime.setTimeZone();
+      DateTime.setTimeZone(null);
       const str = '2020-01-01T00:00:00.000Z';
       expect(new DateTime(str).toString()).toMatch(
         new Intl.DateTimeFormat('en-US', {
@@ -787,21 +844,29 @@ describe('DateTime', () => {
   });
 
   describe('locales', () => {
-    it('allow setting a global locale', () => {
+    it('should allow setting a global locale', () => {
       DateTime.setLocale('ja-JP');
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.toString()).toBe('2020年1月1日 9:00');
-      DateTime.setLocale('en-US');
     });
 
-    it('allow passing locale in constructor', () => {
+    it('should get the globally set locale', () => {
+      expect(DateTime.getLocale()).toBe('en-US');
+    });
+
+    it('should not unset global timezone with undefined', () => {
+      DateTime.setLocale();
+      expect(DateTime.getLocale()).toBe('en-US');
+    });
+
+    it('should allow passing locale in constructor', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {
         locale: 'ja-JP',
       });
       expect(dt.toString()).toBe('2020年1月1日 9:00');
     });
 
-    it('allow passing locale in datetime format', () => {
+    it('should allow passing locale in datetime format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.DATETIME_MED, {
@@ -810,7 +875,7 @@ describe('DateTime', () => {
       ).toBe('2020年1月1日 9:00');
     });
 
-    it('allow passing locale in date format', () => {
+    it('should allow passing locale in date format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.DATE_MED, {
@@ -819,7 +884,7 @@ describe('DateTime', () => {
       ).toBe('2020年1月1日');
     });
 
-    it('allow passing locale in time format', () => {
+    it('should allow passing locale in time format', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
         dt.format(DateTime.TIME_MED, {
@@ -844,7 +909,7 @@ describe('DateTime', () => {
   });
 
   describe('set', () => {
-    it('should be able to set components', () => {
+    it('should set components', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {
         timeZone: 'UTC',
       });
@@ -867,7 +932,7 @@ describe('DateTime', () => {
       ).toBe('2028-12-01T00:30:00.000Z');
     });
 
-    it('should be able to set components in a timezone', () => {
+    it('should set components in a timezone', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z', {
         timeZone: 'America/New_York',
       });
@@ -1152,7 +1217,7 @@ describe('DateTime', () => {
   });
 
   describe('setArgs', () => {
-    it('should be able to set by arguments', () => {
+    it('should set by arguments', () => {
       const dt = new DateTime();
       expect(dt.setArgs(2020, 1, 2).toISOString()).toBe(
         '2020-02-01T15:00:00.000Z'

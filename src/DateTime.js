@@ -72,6 +72,13 @@ export default class DateTime {
   static options = {};
 
   /**
+   * Gets the global timezone.
+   */
+  static getTimeZone() {
+    return this.options.timeZone;
+  }
+
+  /**
    * Sets the global timezone.
    *
    * @param {string} timeZone
@@ -80,6 +87,13 @@ export default class DateTime {
     this.setOptions({
       timeZone,
     });
+  }
+
+  /**
+   * Gets the global locale.
+   */
+  static getLocale() {
+    return this.options.locale;
   }
 
   /**
@@ -94,15 +108,25 @@ export default class DateTime {
   }
 
   /**
+   * Gets global options.
+   */
+  static getOptions() {
+    return this.options;
+  }
+
+  /**
    * Sets global options.
    *
    * @param {Object} options
    */
   static setOptions(options) {
-    this.options = {
-      ...this.options,
-      ...options,
-    };
+    for (let [key, value] of Object.entries(options)) {
+      if (value === null) {
+        delete this.options[key];
+      } else if (value) {
+        this.options[key] = value;
+      }
+    }
   }
 
   /**
