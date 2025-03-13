@@ -1,5 +1,5 @@
 #!/bin/bash
+
 rm -rf dist
-mkdir -p dist/cjs
-echo "{ \"type\": \"commonjs\" }" > dist/cjs/package.json
-babel src -d dist/cjs $@
+tsc --project tsconfig.cjs.json
+tsc --project tsconfig.esm.json
