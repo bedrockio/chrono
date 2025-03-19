@@ -1,3 +1,7 @@
+## 0.4.5
+
+- Moved to TS based build system.
+
 ## 0.4.4
 
 - Better options handling.
