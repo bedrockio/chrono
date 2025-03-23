@@ -1,3 +1,7 @@
+## Next
+
+- Don't allow odd parsing of 2001 for basic date parsing.
+
 ## 0.4.5
 
 - Moved to TS based build system.

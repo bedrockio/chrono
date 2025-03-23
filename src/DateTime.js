@@ -7,9 +7,6 @@
  * @typedef {DateTime|Date|number|string} DateLike
  */
 
-import { formatWithLocale } from './locale';
-import { formatWithTokens } from './tokens';
-import { isAmbiguousTimeZone } from './timezone';
 import {
   getWeekdays,
   getMeridiem,
@@ -17,6 +14,11 @@ import {
   getWeekdayName,
   getSystemTimeZone,
 } from './intl';
+
+import { parseDate } from './parse';
+import { formatWithLocale } from './locale';
+import { formatWithTokens } from './tokens';
+import { getTimezoneOffset } from './timezone';
 import { normalizeUnit, getUnitIndex } from './units';
 
 import {
@@ -1063,28 +1065,6 @@ function isDateClass(arg) {
   return arg instanceof Date || arg instanceof DateTime;
 }
 
-function parseDate(str, options) {
-  const { timeZone } = options;
-
-  const date = new Date(str);
-
-  // There is no way to determine if the incoming string
-  // contains timezone information or not simply by parsing
-  // so passing off to utility method to determine this by
-  // regex check. If no timezone is specified or the string
-  // itself contains timezone information then it is ok to
-  // use the system parsed date.
-  if (!timeZone || !isAmbiguousTimeZone(str)) {
-    return date;
-  }
-
-  const localOffset = getTimezoneOffset(date, options);
-  const systemOffset = date.getTimezoneOffset();
-
-  date.setMinutes(date.getMinutes() - systemOffset + localOffset);
-  return date;
-}
-
 function advanceDate(dt, dir, by, unit) {
   if (typeof by === 'number' && typeof unit === 'string') {
     return advanceDate(dt, dir, {
@@ -1250,49 +1230,6 @@ function getMonthOffset(d1, d2) {
   const yearOffset = d1.getFullYear() - d2.getFullYear();
   const monthOffset = d1.getMonth() - d2.getMonth();
   return yearOffset * 12 + monthOffset;
-}
-
-// This method returns the offset for a given timezone,
-// otherwise falling back to the system offset.
-function getTimezoneOffset(date, options) {
-  const { timeZone } = options;
-  const systemOffset = date.getTimezoneOffset();
-
-  if (!timeZone) {
-    return systemOffset;
-  }
-
-  // The string formatted in a given timezone.
-  // For example if the moment is 2020-01-01T00:00:00.000Z
-  // and the timezone is America/New_York, this will return
-  // "12/31/2019, 7:00:00 PM".
-  const inZone = date.toLocaleString('en-US', {
-    timeZone: options.timeZone,
-  });
-
-  // The offset in minutes between the local date and the
-  // parsed date. In the above example this will return 300
-  // if the system is in UTC time. Note that offets are
-  // negative when the timezone is ahead of GMT so GMT+9 is
-  // -540. Note also that round is needed as the output
-  // format will not contain milliseconds, however this can
-  // be disregarded when rounding to the nearest minute.
-  // @ts-ignore
-  let offset = Math.round((date - new Date(inZone)) / 60000);
-
-  // If the system is NOT in UTC time, we need to add its
-  // offset so that it is not taken into account. In the
-  // above example if our system time is GMT+9 then the
-  // output string will be parsed as "2019-12-31T10:00:00Z",
-  // or 19:00 minus a 9 hour offset and the delta will be
-  // 5 hours + 9 hours = 14 hours (840)
-  // Adding the system offset will result in:
-  // 14 hours (840) + -9 hours (-540) = 5 hours (300)
-  // which is our intended offset of GMT-5 for
-  // America/New_York in EST.
-  offset += systemOffset;
-
-  return offset;
 }
 
 function toUTC(dt) {

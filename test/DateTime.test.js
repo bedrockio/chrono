@@ -13,8 +13,8 @@ describe('DateTime', () => {
           DateTime.min(
             new DateTime('2025-01-02'),
             new DateTime('2025-01-03'),
-            new DateTime('2025-01-01')
-          )
+            new DateTime('2025-01-01'),
+          ),
         ).toEqual(new DateTime('2025-01-01'));
       });
 
@@ -23,8 +23,8 @@ describe('DateTime', () => {
           DateTime.min(
             new Date('2025-01-02'),
             new Date('2025-01-03'),
-            new Date('2025-01-01')
-          )
+            new Date('2025-01-01'),
+          ),
         ).toEqual(new DateTime('2025-01-01'));
       });
 
@@ -39,8 +39,8 @@ describe('DateTime', () => {
           DateTime.max(
             new DateTime('2025-01-02'),
             new DateTime('2025-01-03'),
-            new DateTime('2025-01-01')
-          )
+            new DateTime('2025-01-01'),
+          ),
         ).toEqual(new DateTime('2025-01-03'));
       });
 
@@ -49,8 +49,8 @@ describe('DateTime', () => {
           DateTime.max(
             new Date('2025-01-02'),
             new Date('2025-01-03'),
-            new Date('2025-01-01')
-          )
+            new Date('2025-01-01'),
+          ),
         ).toEqual(new DateTime('2025-01-03'));
       });
 
@@ -65,8 +65,8 @@ describe('DateTime', () => {
           DateTime.clamp(
             new DateTime('2025-01-03'),
             new DateTime('2025-01-01'),
-            new DateTime('2025-01-02')
-          )
+            new DateTime('2025-01-02'),
+          ),
         ).toEqual(new DateTime('2025-01-02'));
       });
 
@@ -75,8 +75,8 @@ describe('DateTime', () => {
           DateTime.clamp(
             new Date('2025-01-03'),
             new Date('2025-01-01'),
-            new Date('2025-01-02')
-          )
+            new Date('2025-01-02'),
+          ),
         ).toEqual(new DateTime('2025-01-02'));
       });
 
@@ -91,7 +91,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getMonths({
               locale: 'en-US',
-            })
+            }),
           ).toEqual([
             'January',
             'February',
@@ -113,7 +113,7 @@ describe('DateTime', () => {
             DateTime.getMonths({
               style: 'short',
               locale: 'en-US',
-            })
+            }),
           ).toEqual([
             'Jan',
             'Feb',
@@ -135,7 +135,7 @@ describe('DateTime', () => {
             DateTime.getMonths({
               style: 'narrow',
               locale: 'en-US',
-            })
+            }),
           ).toEqual([
             'J',
             'F',
@@ -158,7 +158,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getMonths({
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual([
             '1月',
             '2月',
@@ -180,7 +180,7 @@ describe('DateTime', () => {
             DateTime.getMonths({
               style: 'short',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual([
             '1月',
             '2月',
@@ -202,7 +202,7 @@ describe('DateTime', () => {
             DateTime.getMonths({
               style: 'narrow',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual([
             '1月',
             '2月',
@@ -248,7 +248,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getWeekdays({
               locale: 'en-US',
-            })
+            }),
           ).toEqual([
             'Sunday',
             'Monday',
@@ -265,7 +265,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'short',
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
         });
 
@@ -274,7 +274,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'compact',
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
         });
 
@@ -283,7 +283,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'narrow',
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['S', 'M', 'T', 'W', 'T', 'F', 'S']);
         });
       });
@@ -293,7 +293,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getWeekdays({
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual([
             '日曜日',
             '月曜日',
@@ -310,7 +310,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'short',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
         });
 
@@ -319,7 +319,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'compact',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
         });
 
@@ -328,7 +328,7 @@ describe('DateTime', () => {
             DateTime.getWeekdays({
               style: 'narrow',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual(['日', '月', '火', '水', '木', '金', '土']);
         });
       });
@@ -340,7 +340,7 @@ describe('DateTime', () => {
               DateTime.getWeekdays({
                 style: 'compact',
                 locale,
-              })
+              }),
             ).toEqual(expected);
           }
 
@@ -394,7 +394,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getWeekdays({
               start: 5,
-            })
+            }),
           ).toEqual([
             'Friday',
             'Saturday',
@@ -429,7 +429,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getMeridiem({
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['AM', 'PM']);
         });
 
@@ -438,7 +438,7 @@ describe('DateTime', () => {
             DateTime.getMeridiem({
               style: 'short',
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['A', 'P']);
         });
 
@@ -447,7 +447,7 @@ describe('DateTime', () => {
             DateTime.getMeridiem({
               lower: true,
               locale: 'en-US',
-            })
+            }),
           ).toEqual(['am', 'pm']);
         });
       });
@@ -457,7 +457,7 @@ describe('DateTime', () => {
           expect(
             DateTime.getMeridiem({
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual(['午前', '午後']);
         });
 
@@ -466,7 +466,7 @@ describe('DateTime', () => {
             DateTime.getMeridiem({
               style: 'short',
               locale: 'ja-JP',
-            })
+            }),
           ).toEqual(['午前', '午後']);
         });
       });
@@ -546,10 +546,15 @@ describe('DateTime', () => {
       expect(dt.options.timeZone).toBe('America/New_York');
     });
 
-    it('should accept a string value', () => {
+    it('should parse a string value', () => {
       expect(new DateTime('2020-01-01T00:00:00.000Z').toISOString()).toBe(
-        '2020-01-01T00:00:00.000Z'
+        '2020-01-01T00:00:00.000Z',
       );
+    });
+
+    it('should not parse incomplete dates as 2001', () => {
+      const dt = new DateTime();
+      expect(new DateTime('08')).toEqual(dt.setArgs(dt.getYear(), 7));
     });
 
     it('should accept a numeric value', () => {
@@ -603,7 +608,7 @@ describe('DateTime', () => {
         DateTime.setTimeZone();
         const dt = new DateTime('2020-01-01T00:00:00.000');
         expect(dt.toISOString()).toBe(
-          new Date('2020-01-01T00:00:00.000').toISOString()
+          new Date('2020-01-01T00:00:00.000').toISOString(),
         );
       });
     });
@@ -628,14 +633,14 @@ describe('DateTime', () => {
       it('datetime with weekday', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.DATETIME_MED_WEEKDAY)).toBe(
-          'Wednesday, January 1, 2020 at 9:00am'
+          'Wednesday, January 1, 2020 at 9:00am',
         );
       });
 
       it('medium datetime', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.DATETIME_MED)).toBe(
-          'January 1, 2020 at 9:00am'
+          'January 1, 2020 at 9:00am',
         );
       });
 
@@ -652,7 +657,7 @@ describe('DateTime', () => {
       it('date with weekday', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.DATE_MED_WEEKDAY)).toBe(
-          'Wednesday, January 1, 2020'
+          'Wednesday, January 1, 2020',
         );
       });
 
@@ -674,7 +679,7 @@ describe('DateTime', () => {
       it('time with timezone', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format(DateTime.TIME_WITH_ZONE)).toBe(
-          '9:00am Japan Standard Time'
+          '9:00am Japan Standard Time',
         );
       });
 
@@ -775,7 +780,7 @@ describe('DateTime', () => {
         timeZone: 'UTC',
       });
       expect(dt.format("H 'hours and' mm 'minutes'")).toBe(
-        '5 hours and 55 minutes'
+        '5 hours and 55 minutes',
       );
     });
   });
@@ -808,7 +813,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.DATETIME_MED, {
           timeZone: 'America/New_York',
-        })
+        }),
       ).toBe('December 31, 2019 at 7:00pm');
     });
 
@@ -817,7 +822,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.DATE_MED, {
           timeZone: 'America/New_York',
-        })
+        }),
       ).toBe('December 31, 2019');
     });
 
@@ -826,7 +831,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.TIME_MED, {
           timeZone: 'America/New_York',
-        })
+        }),
       ).toBe('7:00pm');
     });
 
@@ -838,7 +843,7 @@ describe('DateTime', () => {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
-        }).format(new Date(str))
+        }).format(new Date(str)),
       );
     });
   });
@@ -871,7 +876,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.DATETIME_MED, {
           locale: 'ja-JP',
-        })
+        }),
       ).toBe('2020年1月1日 9:00');
     });
 
@@ -880,7 +885,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.DATE_MED, {
           locale: 'ja-JP',
-        })
+        }),
       ).toBe('2020年1月1日');
     });
 
@@ -889,7 +894,7 @@ describe('DateTime', () => {
       expect(
         dt.format(DateTime.TIME_MED, {
           locale: 'ja-JP',
-        })
+        }),
       ).toBe('9:00');
     });
 
@@ -902,7 +907,7 @@ describe('DateTime', () => {
           month: 'long',
           day: 'numeric',
           timeZone: 'Asia/Tokyo',
-        }).format(new Date(str))
+        }).format(new Date(str)),
       );
       DateTime.setLocale('en-US');
     });
@@ -919,7 +924,7 @@ describe('DateTime', () => {
             hours: 5,
             minutes: 30,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2020-01-01T05:30:00.000Z');
       expect(
         dt
@@ -928,7 +933,7 @@ describe('DateTime', () => {
             month: 12,
             minutes: 30,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2028-12-01T00:30:00.000Z');
     });
 
@@ -942,7 +947,7 @@ describe('DateTime', () => {
             hours: 5,
             minutes: 30,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2019-12-31T10:30:00.000Z');
       expect(
         dt
@@ -951,7 +956,7 @@ describe('DateTime', () => {
             month: 12,
             minutes: 30,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2029-01-01T00:30:00.000Z');
     });
 
@@ -963,7 +968,7 @@ describe('DateTime', () => {
             day: 30,
             month: 3,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2020-03-30T00:00:00.000Z');
     });
   });
@@ -972,56 +977,56 @@ describe('DateTime', () => {
     it('should advance by a year', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'year').toISOString()).toBe(
-        '2021-01-01T00:00:00.000Z'
+        '2021-01-01T00:00:00.000Z',
       );
     });
 
     it('should advance by a month', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'month').toISOString()).toBe(
-        '2020-02-01T00:00:00.000Z'
+        '2020-02-01T00:00:00.000Z',
       );
     });
 
     it('should advance by a week', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'week').toISOString()).toBe(
-        '2020-01-08T00:00:00.000Z'
+        '2020-01-08T00:00:00.000Z',
       );
     });
 
     it('should advance by a day', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'day').toISOString()).toBe(
-        '2020-01-02T00:00:00.000Z'
+        '2020-01-02T00:00:00.000Z',
       );
     });
 
     it('should advance by an hour', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'hour').toISOString()).toBe(
-        '2020-01-01T01:00:00.000Z'
+        '2020-01-01T01:00:00.000Z',
       );
     });
 
     it('should advance by a minute', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'minute').toISOString()).toBe(
-        '2020-01-01T00:01:00.000Z'
+        '2020-01-01T00:01:00.000Z',
       );
     });
 
     it('should advance by a second', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'second').toISOString()).toBe(
-        '2020-01-01T00:00:01.000Z'
+        '2020-01-01T00:00:01.000Z',
       );
     });
 
     it('should advance by a millisecond', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(1, 'millisecond').toISOString()).toBe(
-        '2020-01-01T00:00:00.001Z'
+        '2020-01-01T00:00:00.001Z',
       );
     });
 
@@ -1034,7 +1039,7 @@ describe('DateTime', () => {
             months: 3,
             days: 4,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2022-04-05T00:00:00.000Z');
     });
 
@@ -1047,7 +1052,7 @@ describe('DateTime', () => {
     it('should advance by negative value', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.advance(-2, 'years').toISOString()).toBe(
-        '2018-01-01T00:00:00.000Z'
+        '2018-01-01T00:00:00.000Z',
       );
     });
   });
@@ -1056,56 +1061,56 @@ describe('DateTime', () => {
     it('should rewind by a year', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'year').toISOString()).toBe(
-        '2019-01-01T00:00:00.000Z'
+        '2019-01-01T00:00:00.000Z',
       );
     });
 
     it('should rewind by a month', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'month').toISOString()).toBe(
-        '2019-12-01T00:00:00.000Z'
+        '2019-12-01T00:00:00.000Z',
       );
     });
 
     it('should rewind by a week', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'week').toISOString()).toBe(
-        '2019-12-25T00:00:00.000Z'
+        '2019-12-25T00:00:00.000Z',
       );
     });
 
     it('should rewind by a day', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'day').toISOString()).toBe(
-        '2019-12-31T00:00:00.000Z'
+        '2019-12-31T00:00:00.000Z',
       );
     });
 
     it('should rewind by an hour', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'hour').toISOString()).toBe(
-        '2019-12-31T23:00:00.000Z'
+        '2019-12-31T23:00:00.000Z',
       );
     });
 
     it('should rewind by a minute', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'minute').toISOString()).toBe(
-        '2019-12-31T23:59:00.000Z'
+        '2019-12-31T23:59:00.000Z',
       );
     });
 
     it('should rewind by a second', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'second').toISOString()).toBe(
-        '2019-12-31T23:59:59.000Z'
+        '2019-12-31T23:59:59.000Z',
       );
     });
 
     it('should rewind by a millisecond', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(1, 'millisecond').toISOString()).toBe(
-        '2019-12-31T23:59:59.999Z'
+        '2019-12-31T23:59:59.999Z',
       );
     });
 
@@ -1118,7 +1123,7 @@ describe('DateTime', () => {
             months: 3,
             days: 4,
           })
-          .toISOString()
+          .toISOString(),
       ).toBe('2017-09-27T00:00:00.000Z');
     });
 
@@ -1131,7 +1136,7 @@ describe('DateTime', () => {
     it('should rewind by negative value', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.rewind(-2, 'years').toISOString()).toBe(
-        '2022-01-01T00:00:00.000Z'
+        '2022-01-01T00:00:00.000Z',
       );
     });
 
@@ -1139,7 +1144,7 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2023-07-30T12:00:00.000Z');
       expect(dt.rewind(1, 'month').toISOString()).toBe(
-        '2023-06-30T12:00:00.000Z'
+        '2023-06-30T12:00:00.000Z',
       );
     });
   });
@@ -1163,7 +1168,7 @@ describe('DateTime', () => {
     it('should move to the start of the calendar month', () => {
       const dt = new DateTime('2020-04-01T05:06:07.000Z');
       expect(dt.startOfCalendarMonth().toISOString()).toBe(
-        '2020-03-28T15:00:00.000Z'
+        '2020-03-28T15:00:00.000Z',
       );
     });
 
@@ -1205,7 +1210,7 @@ describe('DateTime', () => {
     it('should move to the end of the calendar month', () => {
       const dt = new DateTime('2020-04-01T05:06:07.000Z');
       expect(dt.endOfCalendarMonth().toISOString()).toBe(
-        '2020-05-02T14:59:59.999Z'
+        '2020-05-02T14:59:59.999Z',
       );
     });
 
@@ -1220,7 +1225,7 @@ describe('DateTime', () => {
     it('should set by arguments', () => {
       const dt = new DateTime();
       expect(dt.setArgs(2020, 1, 2).toISOString()).toBe(
-        '2020-02-01T15:00:00.000Z'
+        '2020-02-01T15:00:00.000Z',
       );
     });
 
@@ -1229,7 +1234,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.setArgs(2020, 1, 2).toISOString()).toBe(
-        '2020-02-02T05:00:00.000Z'
+        '2020-02-02T05:00:00.000Z',
       );
     });
   });
@@ -1238,7 +1243,7 @@ describe('DateTime', () => {
     it('should set the internal timezone', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.setZone('UTC').endOf('month').toISOString()).toBe(
-        '2020-01-31T23:59:59.999Z'
+        '2020-01-31T23:59:59.999Z',
       );
     });
   });
@@ -1266,38 +1271,38 @@ describe('DateTime', () => {
   describe('isEqual', () => {
     it('equal', () => {
       expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01'))
+        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-01'))).toBe(
-        true
+        true,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime())
+        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime()),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
     });
 
     it('not equal', () => {
       expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01'))
+        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-01'))).toBe(
-        true
+        true,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime())
+        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime()),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
 
       // Not equal
       expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-02'))
+        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-02')),
       ).toBe(false);
       expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-02'))).toBe(
-        false
+        false,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-02').getTime())
+        new DateTime('2025-01-01').isEqual(new Date('2025-01-02').getTime()),
       ).toBe(false);
       expect(new DateTime('2025-01-01').isEqual('2025-01-02')).toBe(false);
     });
@@ -1397,7 +1402,7 @@ describe('DateTime', () => {
     describe('basic', () => {
       it('5 years ago', () => {
         expect(new DateTime().rewind(5, 'years').relative()).toBe(
-          '5 years ago'
+          '5 years ago',
         );
       });
 
@@ -1407,7 +1412,7 @@ describe('DateTime', () => {
 
       it('11 months ago', () => {
         expect(new DateTime().rewind(11, 'months').relative()).toBe(
-          '11 months ago'
+          '11 months ago',
         );
       });
 
@@ -1417,7 +1422,7 @@ describe('DateTime', () => {
 
       it('3 weeks ago', () => {
         expect(new DateTime().rewind(21, 'days').relative()).toBe(
-          '3 weeks ago'
+          '3 weeks ago',
         );
       });
 
@@ -1435,7 +1440,7 @@ describe('DateTime', () => {
 
       it('23 hours ago', () => {
         expect(new DateTime().rewind(23, 'hours').relative()).toBe(
-          '23 hours ago'
+          '23 hours ago',
         );
       });
 
@@ -1445,31 +1450,31 @@ describe('DateTime', () => {
 
       it('59 minutes ago', () => {
         expect(new DateTime().rewind(59, 'minutes').relative()).toBe(
-          '59 minutes ago'
+          '59 minutes ago',
         );
       });
 
       it('1 minute ago', () => {
         expect(new DateTime().rewind(1, 'minute').relative()).toBe(
-          '1 minute ago'
+          '1 minute ago',
         );
       });
 
       it('59 seconds ago', () => {
         expect(new DateTime().rewind(59, 'seconds').relative()).toBe(
-          '59 seconds ago'
+          '59 seconds ago',
         );
       });
 
       it('1 seconds ago', () => {
         expect(new DateTime().rewind(1, 'second').relative()).toBe(
-          '1 second ago'
+          '1 second ago',
         );
       });
 
       it('now', () => {
         expect(new DateTime().rewind(500, 'milliseconds').relative()).toBe(
-          'now'
+          'now',
         );
       });
     });
@@ -1477,7 +1482,7 @@ describe('DateTime', () => {
     describe('advancing', () => {
       it('next year', () => {
         expect(new DateTime().advance(13, 'months').relative()).toBe(
-          'next year'
+          'next year',
         );
       });
 
@@ -1504,7 +1509,7 @@ describe('DateTime', () => {
         expect(
           new DateTime().rewind(1, 'day').relative({
             locale: 'ja-JP',
-          })
+          }),
         ).toBe('昨日');
       });
     });
@@ -1530,7 +1535,7 @@ describe('DateTime', () => {
           expect(
             d1.relative({
               now: d2,
-            })
+            }),
           ).toBe('6 months ago');
         });
       });
@@ -1540,7 +1545,7 @@ describe('DateTime', () => {
           expect(
             new DateTime().rewind(1, 'year').relative({
               min: new DateTime().rewind(6, 'months'),
-            })
+            }),
           ).toBeUndefined();
 
           const now = new DateTime();
@@ -1550,13 +1555,13 @@ describe('DateTime', () => {
           expect(
             next.relative({
               min: new DateTime().rewind(8, 'months'),
-            })
+            }),
           ).toBe(`${months} months ago`);
 
           expect(
             new DateTime().rewind(2, 'days').relative({
               min: new DateTime().rewind(6, 'months'),
-            })
+            }),
           ).toBe('2 days ago');
         });
       });
@@ -1566,7 +1571,7 @@ describe('DateTime', () => {
           expect(
             new DateTime().advance(1, 'year').relative({
               max: new DateTime().advance(6, 'months'),
-            })
+            }),
           ).toBeUndefined();
 
           const now = new DateTime();
@@ -1575,7 +1580,7 @@ describe('DateTime', () => {
           expect(
             next.relative({
               max: next,
-            })
+            }),
           ).toBe(`in ${months} months`);
 
           // Small offset to prevent 1ms lag in testing.
@@ -1587,7 +1592,7 @@ describe('DateTime', () => {
               })
               .relative({
                 max: new DateTime().advance(6, 'months'),
-              })
+              }),
           ).toBe('in 2 days');
         });
       });
@@ -1597,7 +1602,7 @@ describe('DateTime', () => {
           expect(
             new DateTime().rewind(1, 'day').relative({
               numeric: 'always',
-            })
+            }),
           ).toBe('1 day ago');
         });
       });
@@ -1621,7 +1626,7 @@ describe('DateTime', () => {
     it('should report the system offset when not timezone set', () => {
       DateTime.setTimeZone();
       expect(new DateTime().getTimezoneOffset()).toBe(
-        new Date().getTimezoneOffset()
+        new Date().getTimezoneOffset(),
       );
     });
   });
@@ -1742,7 +1747,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.setFullYear(2019).toISOString()).toBe(
-        '2020-01-01T00:00:00.000Z'
+        '2020-01-01T00:00:00.000Z',
       );
     });
 
@@ -1786,7 +1791,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.setMilliseconds(500).toISOString()).toBe(
-        '2020-01-01T00:00:00.500Z'
+        '2020-01-01T00:00:00.500Z',
       );
     });
   });
@@ -1919,7 +1924,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.advance(1, 'day').toISOString()).toBe(
-        '2023-03-13T04:00:00.000Z'
+        '2023-03-13T04:00:00.000Z',
       );
     });
 
@@ -1927,7 +1932,7 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2023-03-12T05:00:00.000Z');
       expect(dt.advance(1, 'day').toISOString()).toBe(
-        '2023-03-13T04:00:00.000Z'
+        '2023-03-13T04:00:00.000Z',
       );
     });
 
@@ -1936,7 +1941,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.advance(1, 'day').toISOString()).toBe(
-        '2023-11-06T05:00:00.000Z'
+        '2023-11-06T05:00:00.000Z',
       );
     });
 
@@ -1944,7 +1949,7 @@ describe('DateTime', () => {
       DateTime.setTimeZone('America/New_York');
       const dt = new DateTime('2023-11-05T04:00:00.000Z');
       expect(dt.advance(1, 'day').toISOString()).toBe(
-        '2023-11-06T05:00:00.000Z'
+        '2023-11-06T05:00:00.000Z',
       );
     });
 
@@ -1971,7 +1976,7 @@ describe('DateTime', () => {
         timeZone: 'America/New_York',
       });
       expect(dt.set({ day: 10 }).toISOString()).toBe(
-        '2025-03-10T04:00:00.000Z'
+        '2025-03-10T04:00:00.000Z',
       );
     });
   });
@@ -2022,25 +2027,25 @@ describe('DateTime', () => {
       it('should have correct UTC setters', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.setUTCFullYear(2022).toISOString()).toBe(
-          '2022-01-01T00:00:00.000Z'
+          '2022-01-01T00:00:00.000Z',
         );
         expect(dt.setUTCMonth(1).toISOString()).toBe(
-          '2020-02-01T00:00:00.000Z'
+          '2020-02-01T00:00:00.000Z',
         );
         expect(dt.setUTCDate(15).toISOString()).toBe(
-          '2020-01-15T00:00:00.000Z'
+          '2020-01-15T00:00:00.000Z',
         );
         expect(dt.setUTCHours(10).toISOString()).toBe(
-          '2020-01-01T10:00:00.000Z'
+          '2020-01-01T10:00:00.000Z',
         );
         expect(dt.setUTCMinutes(20).toISOString()).toBe(
-          '2020-01-01T00:20:00.000Z'
+          '2020-01-01T00:20:00.000Z',
         );
         expect(dt.setUTCSeconds(30).toISOString()).toBe(
-          '2020-01-01T00:00:30.000Z'
+          '2020-01-01T00:00:30.000Z',
         );
         expect(dt.setUTCMilliseconds(400).toISOString()).toBe(
-          '2020-01-01T00:00:00.400Z'
+          '2020-01-01T00:00:00.400Z',
         );
       });
     });

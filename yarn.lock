@@ -914,7 +914,7 @@
     eslint-plugin-react "^7.37.4"
     globals "^15.14.0"
 
-"@bedrockio/prettier-config@^1.0.2":
+"@bedrockio/prettier-config@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@bedrockio/prettier-config/-/prettier-config-1.1.1.tgz#804cb96913e8dab50a237feaabdcd0e1715e34a7"
   integrity sha512-sL8BvR7z3X2z18AyfwgPqBTPPmS3iveJZe65JZk5YbN0s6Akba6W2F4JAygRVx6yueYRKErvpO0pcVMdtfYBSw==
