@@ -1,2 +1,2 @@
-import { recommended, jest } from '@bedrockio/eslint-plugin';
-export default [recommended, jest];
+import { jest, recommended } from '@bedrockio/eslint-plugin';
+export default [jest, recommended];
