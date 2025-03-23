@@ -280,27 +280,30 @@ export default class DateTime {
    * });
    */
   constructor(...args) {
-    let arg;
     let options;
 
     this.date = new Date();
     if (args.length === 0 || isOptionsObject(args[0])) {
       options = args[0];
-    } else {
-      arg = args[0];
-      options = args[1];
+      args = [];
+    } else if (!isEnumeratedArgs(args)) {
+      options = {
+        ...args[0]?.options,
+        ...args[1],
+      };
+      args = [args[0] ?? Date.now()];
     }
 
     options = {
       ...DateTime.options,
-      ...arg?.options,
       ...options,
     };
 
-    if (typeof arg === 'string') {
-      this.date = parseDate(arg, options);
+    if (typeof args[0] === 'string') {
+      this.date = parseDate(args[0], options);
     } else {
-      this.date = new Date(arg ?? Date.now());
+      // @ts-ignore
+      this.date = new Date(...args);
     }
 
     this.utc = null;
@@ -1058,10 +1061,19 @@ export default class DateTime {
 }
 
 function isOptionsObject(arg) {
-  return arg && typeof arg === 'object' && !isDateClass(arg);
+  return arg && typeof arg === 'object' && !isDateLike(arg);
 }
 
-function isDateClass(arg) {
+function isEnumeratedArgs(args) {
+  if (args.length < 2) {
+    return false;
+  }
+  return args.every((arg) => {
+    return typeof arg === 'number';
+  });
+}
+
+function isDateLike(arg) {
   return arg instanceof Date || arg instanceof DateTime;
 }
 

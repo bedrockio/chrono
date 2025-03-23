@@ -1,5 +1,6 @@
 ## Next
 
+- Constructor now accepts enumerated arguments.
 - Don't allow odd parsing of 2001 for basic date parsing.
 
 ## 0.4.5

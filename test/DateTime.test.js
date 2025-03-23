@@ -530,64 +530,92 @@ describe('DateTime', () => {
   });
 
   describe('constructor', () => {
-    it('should be the current time when no argument passed', () => {
-      expect(new DateTime().getTime()).toBeCloseTo(Date.now(), -1);
-    });
-
-    it('should be the current time when undefined passed', () => {
-      expect(new DateTime(undefined).getTime()).toBeCloseTo(Date.now(), -1);
-    });
-
-    it('should allow passing a single options object', () => {
-      const dt = new DateTime({
-        timeZone: 'America/New_York',
+    describe('no arguments', () => {
+      it('should be the current time when no argument passed', () => {
+        expect(new DateTime().getTime()).toBeCloseTo(Date.now(), -1);
       });
-      expect(dt.getTime()).toBeCloseTo(Date.now(), -2);
-      expect(dt.options.timeZone).toBe('America/New_York');
-    });
 
-    it('should parse a string value', () => {
-      expect(new DateTime('2020-01-01T00:00:00.000Z').toISOString()).toBe(
-        '2020-01-01T00:00:00.000Z',
-      );
-    });
-
-    it('should not parse incomplete dates as 2001', () => {
-      const dt = new DateTime();
-      expect(new DateTime('08')).toEqual(dt.setArgs(dt.getYear(), 7));
-    });
-
-    it('should accept a numeric value', () => {
-      const time = Date.parse('2020-01-01T00:00:00.000Z');
-      expect(new DateTime(time).toISOString()).toBe('2020-01-01T00:00:00.000Z');
-    });
-
-    it('should wrap a date', () => {
-      const date = new Date('2020-01-01T00:00:00.000Z');
-      expect(new DateTime(date).toISOString()).toBe('2020-01-01T00:00:00.000Z');
-    });
-
-    it('should clone a wrapped date', () => {
-      const date = new Date('2020-01-01T00:00:00.000Z');
-      const dt = new DateTime(date);
-      date.setDate(15);
-      expect(dt.toISOString()).toBe('2020-01-01T00:00:00.000Z');
-    });
-
-    it('should create a clone when passed another DateTime', () => {
-      const dt1 = new DateTime('2020-01-01T00:00:00.000Z');
-      const dt2 = new DateTime(dt1);
-      expect(dt2).not.toBe(dt1);
-      expect(dt2.toISOString()).toBe('2020-01-01T00:00:00.000Z');
-    });
-
-    it('should preserve options on clone', () => {
-      const dt1 = new DateTime('2020-01-01T00:00:00.000Z', {
-        timeZone: 'America/New_York',
+      it('should be the current time when undefined passed', () => {
+        expect(new DateTime(undefined).getTime()).toBeCloseTo(Date.now(), -1);
       });
-      const dt2 = new DateTime(dt1);
-      expect(dt2).not.toBe(dt1);
-      expect(dt2.options.timeZone).toBe('America/New_York');
+
+      it('should allow passing a single options object', () => {
+        const dt = new DateTime({
+          timeZone: 'America/New_York',
+        });
+        expect(dt.getTime()).toBeCloseTo(Date.now(), -2);
+        expect(dt.options.timeZone).toBe('America/New_York');
+      });
+    });
+
+    describe('string argument', () => {
+      it('should parse a string value', () => {
+        expect(new DateTime('2020-01-01T00:00:00.000Z').toISOString()).toBe(
+          '2020-01-01T00:00:00.000Z',
+        );
+      });
+
+      it('should not parse incomplete dates as 2001', () => {
+        const dt = new DateTime();
+        expect(new DateTime('08')).toEqual(new DateTime(dt.getYear(), 7));
+      });
+    });
+
+    describe('numeric argument', () => {
+      it('should accept a numeric value', () => {
+        const time = Date.parse('2020-01-01T00:00:00.000Z');
+        expect(new DateTime(time).toISOString()).toBe(
+          '2020-01-01T00:00:00.000Z',
+        );
+      });
+    });
+
+    describe('enumerated arguments', () => {
+      it('should allow enumerated arguments', () => {
+        expect(new DateTime(2025, 2, 24).toISOString()).toBe(
+          '2025-03-23T15:00:00.000Z',
+        );
+      });
+
+      it('should respect all enumerated arguments', () => {
+        expect(new DateTime(2025, 1, 2, 3, 4, 5, 6).toISOString()).toBe(
+          '2025-02-01T18:04:05.006Z',
+        );
+      });
+    });
+
+    describe('date argument', () => {
+      it('should wrap a date', () => {
+        const date = new Date('2020-01-01T00:00:00.000Z');
+        expect(new DateTime(date).toISOString()).toBe(
+          '2020-01-01T00:00:00.000Z',
+        );
+      });
+
+      it('should clone a wrapped date', () => {
+        const date = new Date('2020-01-01T00:00:00.000Z');
+        const dt = new DateTime(date);
+        date.setDate(15);
+        expect(dt.toISOString()).toBe('2020-01-01T00:00:00.000Z');
+      });
+    });
+
+    describe('DateTime argument', () => {
+      it('should create a clone when passed another DateTime', () => {
+        const dt1 = new DateTime('2020-01-01T00:00:00.000Z');
+        const dt2 = new DateTime(dt1);
+        expect(dt2).not.toBe(dt1);
+        expect(dt2.toISOString()).toBe('2020-01-01T00:00:00.000Z');
+      });
+
+      it('should preserve options on clone', () => {
+        const dt1 = new DateTime('2020-01-01T00:00:00.000Z', {
+          timeZone: 'America/New_York',
+        });
+        const dt2 = new DateTime(dt1);
+        expect(dt2).not.toBe(dt1);
+        expect(dt2.options.timeZone).toBe('America/New_York');
+      });
     });
 
     describe('timezones', () => {
