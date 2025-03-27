@@ -1,7 +1,8 @@
-## Next
+## 0.5.0
 
 - Constructor now accepts enumerated arguments.
 - Don't allow odd parsing of 2001 for basic date parsing.
+- Fix for CJS build issue.
 
 ## 0.4.5
 
