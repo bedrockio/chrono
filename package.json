@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/chrono",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "Minimal library for working with dates.",
   "scripts": {
     "test": "jest",
