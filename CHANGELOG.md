@@ -1,3 +1,7 @@
+## Next
+
+- Single date-like in Interval constructor assumes ending now.
+
 ## 0.5.0
 
 - Constructor now accepts enumerated arguments.

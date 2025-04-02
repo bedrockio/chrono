@@ -15,7 +15,7 @@ export default class Interval {
   static getYear(date) {
     return new Interval(
       new DateTime(date).startOfYear(),
-      new DateTime(date).endOfYear()
+      new DateTime(date).endOfYear(),
     );
   }
 
@@ -33,7 +33,7 @@ export default class Interval {
 
     let interval = new Interval(
       new DateTime(date).startOfCalendarMonth(),
-      new DateTime(date).endOfCalendarMonth()
+      new DateTime(date).endOfCalendarMonth(),
     );
 
     if (normalize) {
@@ -42,7 +42,7 @@ export default class Interval {
         const offset = 6 - weeks;
         interval = new Interval(
           interval.start,
-          interval.end.advance(offset, 'weeks')
+          interval.end.advance(offset, 'weeks'),
         );
       }
     }
@@ -59,7 +59,7 @@ export default class Interval {
   static getMonth(date) {
     return new Interval(
       new DateTime(date).startOfMonth(),
-      new DateTime(date).endOfMonth()
+      new DateTime(date).endOfMonth(),
     );
   }
 
@@ -72,7 +72,7 @@ export default class Interval {
   static getWeek(date) {
     return new Interval(
       new DateTime(date).startOfWeek(),
-      new DateTime(date).endOfWeek()
+      new DateTime(date).endOfWeek(),
     );
   }
 
@@ -85,7 +85,7 @@ export default class Interval {
   static getDay(date) {
     return new Interval(
       new DateTime(date).startOfDay(),
-      new DateTime(date).endOfDay()
+      new DateTime(date).endOfDay(),
     );
   }
 
@@ -110,8 +110,12 @@ export default class Interval {
       if (arg instanceof Interval) {
         start = arg.start;
         end = arg.end;
-      } else if (typeof arg === 'string') {
+      } else if (isIsoInterval(arg)) {
+        // @ts-ignore
         [start, end] = arg.split('/');
+      } else {
+        start = arg;
+        end = Date.now();
       }
     } else {
       start = args[0];
@@ -188,7 +192,7 @@ export default class Interval {
       // @ts-ignore
       Math.min(this.start, interval.start),
       // @ts-ignore
-      Math.max(this.end, interval.end)
+      Math.max(this.end, interval.end),
     );
   }
 
@@ -430,7 +434,7 @@ function getDurationByUnit(interval, unit) {
 
   const unitInterval = new Interval(
     interval.start,
-    interval.start.advance(1, unit)
+    interval.start.advance(1, unit),
   );
 
   if (unit === 'month' && interval.contains(unitInterval)) {
@@ -458,4 +462,8 @@ function walkUnits(interval, unit, fn) {
     fn(current);
     current = current.advance(1, unit);
   }
+}
+
+function isIsoInterval(arg) {
+  return typeof arg === 'string' && arg.includes('/');
 }

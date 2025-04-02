@@ -1,6 +1,8 @@
 import DateTime from '../src/DateTime';
 import Interval from '../src/Interval';
 
+import { mockTime, unmockTime } from './helpers/time';
+
 beforeEach(() => {
   DateTime.setLocale('en-US');
   DateTime.setTimeZone('Asia/Tokyo');
@@ -12,7 +14,7 @@ describe('Interval', () => {
       it('should get the year calendar month', () => {
         const interval = Interval.getYear('2024-12-01');
         expect(interval.toISOString()).toBe(
-          '2023-12-31T15:00:00.000Z/2024-12-31T14:59:59.999Z'
+          '2023-12-31T15:00:00.000Z/2024-12-31T14:59:59.999Z',
         );
       });
     });
@@ -21,7 +23,7 @@ describe('Interval', () => {
       it('should get the correct calendar month', () => {
         const interval = Interval.getCalendarMonth('2024-12-01');
         expect(interval.toISOString()).toBe(
-          '2024-11-30T15:00:00.000Z/2025-01-04T14:59:59.999Z'
+          '2024-11-30T15:00:00.000Z/2025-01-04T14:59:59.999Z',
         );
       });
 
@@ -32,14 +34,14 @@ describe('Interval', () => {
           normalize: true,
         });
         expect(interval.toISOString()).toBe(
-          '2024-11-30T15:00:00.000Z/2025-01-11T14:59:59.999Z'
+          '2024-11-30T15:00:00.000Z/2025-01-11T14:59:59.999Z',
         );
 
         interval = Interval.getCalendarMonth('2026-02-01', {
           normalize: true,
         });
         expect(interval.toISOString()).toBe(
-          '2026-01-31T15:00:00.000Z/2026-03-14T14:59:59.999Z'
+          '2026-01-31T15:00:00.000Z/2026-03-14T14:59:59.999Z',
         );
       });
 
@@ -52,103 +54,148 @@ describe('Interval', () => {
   });
 
   describe('constructor', () => {
-    it('should be able to create from strings', () => {
-      const interval = new Interval(
-        '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
-
-    it('should be able to create from native dates', () => {
-      const interval = new Interval(
-        new Date('2025-01-01T00:00:00.000Z'),
-        new Date('2026-01-01T00:00:00.000Z')
-      );
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
-
-    it('should be able to create from DateTime', () => {
-      const interval = new Interval(
-        new DateTime('2025-01-01T00:00:00.000Z'),
-        new DateTime('2026-01-01T00:00:00.000Z')
-      );
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
-
-    it('should preserve DateTime options', () => {
-      const start = new DateTime('2025-01-01T00:00:00.000Z', {
-        timeZone: 'America/New_York',
-      });
-      const end = new DateTime('2026-01-01T00:00:00.000Z', {
-        timeZone: 'Asia/Tokyo',
-      });
-      const interval = new Interval(start, end);
-      expect(interval.start.getTimeZone()).toBe('America/New_York');
-      expect(interval.end.getTimeZone()).toBe('Asia/Tokyo');
-    });
-
-    it('should be able to create from timestamp', () => {
-      const interval = new Interval(
-        new Date('2025-01-01T00:00:00.000Z').getTime(),
-        new Date('2026-01-01T00:00:00.000Z').getTime()
-      );
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
-
-    it('should error when start is after end', () => {
-      expect(() => {
-        new Interval(
-          new Date('2026-01-01T00:00:00.000Z').getTime(),
-          new Date('2025-01-01T00:00:00.000Z').getTime()
+    describe('no arguments', () => {
+      it('should be the current instant if no arguments passed', () => {
+        mockTime('2025-01-01T00:00:00.000Z');
+        const interval = new Interval();
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2025-01-01T00:00:00.000Z',
         );
-      }).toThrow('Interval start cannot be after the end.');
+        expect(interval.duration()).toBe(0);
+        unmockTime();
+      });
     });
 
-    it('should error when date is invalid', () => {
-      expect(() => {
-        new Interval(new Date(NaN), new Date(NaN));
-      }).toThrow('Invalid dates for interval.');
-    });
+    describe('one argument', () => {
+      it('should be able to create from an ISO duration', () => {
+        const interval = new Interval(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
 
-    it('should be able to create from an ISO duration', () => {
-      const interval = new Interval(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
+      it('should be able to create from short ISO duration', () => {
+        const interval = new Interval('2025-01-01Z/2026-01-01Z');
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
 
-    it('should be able to create from short ISO duration', () => {
-      const interval = new Interval('2025-01-01Z/2026-01-01Z');
-      expect(interval.toISOString()).toBe(
-        '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z'
-      );
-      expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
-    });
+      it('should clone an interval when passed', () => {
+        const interval1 = new Interval(
+          '2025-01-01T00:00:00.000Z',
+          '2026-01-01T00:00:00.000Z',
+        );
+        const interval2 = new Interval(interval1);
+        expect(interval2).not.toBe(interval1);
+        expect(interval2).toEqual(interval1);
+      });
 
-    it('should clone an interval when passed', () => {
-      const interval1 = new Interval(
-        '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
-      );
-      const interval2 = new Interval(interval1);
-      expect(interval2).not.toBe(interval1);
-      expect(interval2).toEqual(interval1);
+      it('should assume ending now when a date-like is passed', () => {
+        mockTime('2026-01-01T00:00:00.000Z');
+
+        let interval;
+
+        interval = new Interval('2025-01-01T00:00:00.000Z');
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+
+        interval = new Interval(new Date('2025-01-01T00:00:00.000Z'));
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+
+        interval = new Interval(
+          new DateTime('2025-01-01T00:00:00.000Z').getTime(),
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+
+        interval = new Interval(new DateTime('2025-01-01T00:00:00.000Z'));
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+
+        unmockTime();
+      });
+    });
+    describe('two arguments', () => {
+      it('should be able to create from strings', () => {
+        const interval = new Interval(
+          '2025-01-01T00:00:00.000Z',
+          '2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
+
+      it('should be able to create from native dates', () => {
+        const interval = new Interval(
+          new Date('2025-01-01T00:00:00.000Z'),
+          new Date('2026-01-01T00:00:00.000Z'),
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
+
+      it('should be able to create from DateTime', () => {
+        const interval = new Interval(
+          new DateTime('2025-01-01T00:00:00.000Z'),
+          new DateTime('2026-01-01T00:00:00.000Z'),
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
+
+      it('should preserve DateTime options', () => {
+        const start = new DateTime('2025-01-01T00:00:00.000Z', {
+          timeZone: 'America/New_York',
+        });
+        const end = new DateTime('2026-01-01T00:00:00.000Z', {
+          timeZone: 'Asia/Tokyo',
+        });
+        const interval = new Interval(start, end);
+        expect(interval.start.getTimeZone()).toBe('America/New_York');
+        expect(interval.end.getTimeZone()).toBe('Asia/Tokyo');
+      });
+
+      it('should be able to create from timestamp', () => {
+        const interval = new Interval(
+          new Date('2025-01-01T00:00:00.000Z').getTime(),
+          new Date('2026-01-01T00:00:00.000Z').getTime(),
+        );
+        expect(interval.toISOString()).toBe(
+          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
+        );
+        expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
+      });
+
+      it('should error when start is after end', () => {
+        expect(() => {
+          new Interval(
+            new Date('2026-01-01T00:00:00.000Z').getTime(),
+            new Date('2025-01-01T00:00:00.000Z').getTime(),
+          );
+        }).toThrow('Interval start cannot be after the end.');
+      });
+
+      it('should error when date is invalid', () => {
+        expect(() => {
+          new Interval(new Date(NaN), new Date(NaN));
+        }).toThrow('Invalid dates for interval.');
+      });
     });
   });
 
@@ -156,7 +203,7 @@ describe('Interval', () => {
     it('should clone the interval', () => {
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
+        '2026-01-01T00:00:00.000Z',
       );
       const clone = interval.clone();
       expect(clone).not.toBe(interval);
@@ -180,7 +227,7 @@ describe('Interval', () => {
       const dt2 = new DateTime('2026-01-01T00:00:00.000Z');
       const interval = new Interval(dt1, dt2);
       expect(interval.toISOString()).toBe(
-        `${dt1.toISOString()}/${dt2.toISOString()}`
+        `${dt1.toISOString()}/${dt2.toISOString()}`,
       );
     });
   });
@@ -191,16 +238,16 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(
-        new Interval(year1, year3).overlaps(new Interval(year1, year2))
+        new Interval(year1, year3).overlaps(new Interval(year1, year2)),
       ).toBe(true);
       expect(
-        new Interval(year1, year2).overlaps(new Interval(year1, year3))
+        new Interval(year1, year2).overlaps(new Interval(year1, year3)),
       ).toBe(true);
       expect(
-        new Interval(year1, year2).overlaps(new Interval(year2, year3))
+        new Interval(year1, year2).overlaps(new Interval(year2, year3)),
       ).toBe(false);
       expect(
-        new Interval(year2, year3).overlaps(new Interval(year1, year2))
+        new Interval(year2, year3).overlaps(new Interval(year1, year2)),
       ).toBe(false);
     });
 
@@ -225,10 +272,10 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(new Interval(year1, year3).overlaps(new DateTime(year2))).toBe(
-        true
+        true,
       );
       expect(new Interval(year1, year2).overlaps(new DateTime(year3))).toBe(
-        false
+        false,
       );
     });
   });
@@ -239,13 +286,13 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(
-        new Interval(year1, year3).contains(new Interval(year1, year2))
+        new Interval(year1, year3).contains(new Interval(year1, year2)),
       ).toBe(true);
       expect(
-        new Interval(year1, year3).contains(new Interval(year2, year3))
+        new Interval(year1, year3).contains(new Interval(year2, year3)),
       ).toBe(true);
       expect(
-        new Interval(year1, year2).contains(new Interval(year1, year3))
+        new Interval(year1, year2).contains(new Interval(year1, year3)),
       ).toBe(false);
     });
 
@@ -272,13 +319,13 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(new Interval(year1, year3).contains(new DateTime(year2))).toBe(
-        true
+        true,
       );
       expect(new Interval(year1, year3).contains(new DateTime(year3))).toBe(
-        true
+        true,
       );
       expect(new Interval(year1, year2).contains(new DateTime(year3))).toBe(
-        false
+        false,
       );
     });
   });
@@ -289,13 +336,13 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(
-        new Interval(year1, year2).union(new Interval(year2, year3))
+        new Interval(year1, year2).union(new Interval(year2, year3)),
       ).toEqual(new Interval(year1, year3));
       expect(
-        new Interval(year2, year3).union(new Interval(year1, year2))
+        new Interval(year2, year3).union(new Interval(year1, year2)),
       ).toEqual(new Interval(year1, year3));
       expect(
-        new Interval(year1, year3).union(new Interval(year1, year2))
+        new Interval(year1, year3).union(new Interval(year1, year2)),
       ).toEqual(new Interval(year1, year3));
     });
   });
@@ -306,10 +353,10 @@ describe('Interval', () => {
       const year2 = '2026-01-01T00:00:00.000Z';
       const year3 = '2027-01-01T00:00:00.000Z';
       expect(
-        new Interval(year1, year3).intersection(new Interval(year2, year3))
+        new Interval(year1, year3).intersection(new Interval(year2, year3)),
       ).toEqual(new Interval(year2, year3));
       expect(
-        new Interval(year2, year3).intersection(new Interval(year1, year3))
+        new Interval(year2, year3).intersection(new Interval(year1, year3)),
       ).toEqual(new Interval(year2, year3));
     });
 
@@ -319,7 +366,7 @@ describe('Interval', () => {
       const year3 = '2027-01-01T00:00:00.000Z';
       const year4 = '2028-01-01T00:00:00.000Z';
       expect(
-        new Interval(year1, year2).intersection(new Interval(year3, year4))
+        new Interval(year1, year2).intersection(new Interval(year3, year4)),
       ).toBe(null);
     });
   });
@@ -328,7 +375,7 @@ describe('Interval', () => {
     it('should get the duration of the interval', () => {
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
+        '2026-01-01T00:00:00.000Z',
       );
       expect(interval.duration()).toBe(365 * 24 * 60 * 60 * 1000);
     });
@@ -337,7 +384,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in years', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('years')).toBe(1);
       });
@@ -345,7 +392,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in months', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('months')).toBe(12);
       });
@@ -353,7 +400,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in weeks', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('weeks')).toBe(365 / 7);
       });
@@ -361,7 +408,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in days', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('days')).toBe(365);
       });
@@ -369,7 +416,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in hours', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('hours')).toBe(365 * 24);
       });
@@ -377,7 +424,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in minutes', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('minutes')).toBe(365 * 24 * 60);
       });
@@ -385,7 +432,7 @@ describe('Interval', () => {
       it('should get the duration of the interval in seconds', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.duration('seconds')).toBe(365 * 24 * 60 * 60);
       });
@@ -395,7 +442,7 @@ describe('Interval', () => {
       it('should get days in a year on a leap year', () => {
         const interval = new Interval(
           '2020-01-01T00:00:00.000Z',
-          '2021-01-01T00:00:00.000Z'
+          '2021-01-01T00:00:00.000Z',
         );
         expect(interval.duration('days')).toBe(366);
       });
@@ -404,7 +451,7 @@ describe('Interval', () => {
         // Halfway through 2025 falls at noon on July 2nd.
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2025-07-02T12:00:00.000Z'
+          '2025-07-02T12:00:00.000Z',
         );
         expect(interval.duration('years')).toBe(0.5);
       });
@@ -413,7 +460,7 @@ describe('Interval', () => {
         // Halfway through January falls at noon on the 16th.
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2025-01-16T12:00:00.000Z'
+          '2025-01-16T12:00:00.000Z',
         );
         expect(interval.duration('months')).toBe(0.5);
       });
@@ -421,7 +468,7 @@ describe('Interval', () => {
       it('should get a short duration in minutes', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2025-01-01T00:30:00.000Z'
+          '2025-01-01T00:30:00.000Z',
         );
         expect(interval.duration('minutes')).toBe(30);
       });
@@ -454,7 +501,7 @@ describe('Interval', () => {
     it('should have basic shortcut methods for duration', () => {
       const interval = new Interval(
         '2025-01-01T00:00:00.000',
-        '2026-01-01T00:00:00.000'
+        '2026-01-01T00:00:00.000',
       );
       expect(interval.years()).toBe(1);
       expect(interval.months()).toBe(12);
@@ -471,7 +518,7 @@ describe('Interval', () => {
       it('should split the interval by a string', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.split('2025-07-01T00:00:00.000Z')).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-07-01T00:00:00.000Z'),
@@ -482,7 +529,7 @@ describe('Interval', () => {
       it('should split the interval by a number', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.split(Date.parse('2025-07-01T00:00:00.000Z'))).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-07-01T00:00:00.000Z'),
@@ -493,7 +540,7 @@ describe('Interval', () => {
       it('should split the interval by a native date', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.split(new Date('2025-07-01T00:00:00.000Z'))).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-07-01T00:00:00.000Z'),
@@ -504,10 +551,10 @@ describe('Interval', () => {
       it('should split the interval by a DateTime', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(
-          interval.split(new DateTime('2025-07-01T00:00:00.000Z'))
+          interval.split(new DateTime('2025-07-01T00:00:00.000Z')),
         ).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-07-01T00:00:00.000Z'),
           new Interval('2025-07-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'),
@@ -519,11 +566,11 @@ describe('Interval', () => {
       it('should split the interval by another interval', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         const middle = new Interval(
           '2025-06-01T00:00:00.000Z',
-          '2025-08-01T00:00:00.000Z'
+          '2025-08-01T00:00:00.000Z',
         );
         expect(interval.split(middle)).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-06-01T00:00:00.000Z'),
@@ -534,11 +581,11 @@ describe('Interval', () => {
       it('should split by an interval that overlaps the start', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         const middle = new Interval(
           '2024-07-01T00:00:00.000Z',
-          '2025-07-01T00:00:00.000Z'
+          '2025-07-01T00:00:00.000Z',
         );
         expect(interval.split(middle)).toEqual([
           new Interval('2025-07-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'),
@@ -548,11 +595,11 @@ describe('Interval', () => {
       it('should split by an interval that overlaps the end', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         const middle = new Interval(
           '2025-07-01T00:00:00.000Z',
-          '2026-07-01T00:00:00.000Z'
+          '2026-07-01T00:00:00.000Z',
         );
         expect(interval.split(middle)).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2025-07-01T00:00:00.000Z'),
@@ -564,7 +611,7 @@ describe('Interval', () => {
       it('should split when input before interval start', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.split('2024-01-01T00:00:00.000Z')).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'),
@@ -574,7 +621,7 @@ describe('Interval', () => {
       it('should split when input after interval end', () => {
         const interval = new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         );
         expect(interval.split('2027-01-01T00:00:00.000Z')).toEqual([
           new Interval('2025-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'),
@@ -587,7 +634,7 @@ describe('Interval', () => {
     it('should divide the interval into 2 equal parts', () => {
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-01-01T00:00:00.000Z'
+        '2026-01-01T00:00:00.000Z',
       );
       expect(interval.divide(2)).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-07-02T12:00:00.000Z'),
@@ -598,7 +645,7 @@ describe('Interval', () => {
     it('should divide the interval into 6 equal parts', () => {
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-02T00:00:00.000Z'
+        '2025-01-02T00:00:00.000Z',
       );
       expect(interval.divide(6)).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T04:00:00.000Z'),
@@ -616,10 +663,10 @@ describe('Interval', () => {
       expect(
         new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         ).isEqual(
-          new Interval('2025-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')
-        )
+          new Interval('2025-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'),
+        ),
       ).toBe(true);
     });
 
@@ -627,10 +674,10 @@ describe('Interval', () => {
       expect(
         new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
+          '2026-01-01T00:00:00.000Z',
         ).isEqual(
-          new Interval('2025-01-01T00:00:00.000Z', '2026-01-02T00:00:00.000Z')
-        )
+          new Interval('2025-01-01T00:00:00.000Z', '2026-01-02T00:00:00.000Z'),
+        ),
       ).toBe(false);
     });
 
@@ -638,8 +685,8 @@ describe('Interval', () => {
       expect(
         new Interval(
           '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z'
-        ).isEqual(null)
+          '2026-01-01T00:00:00.000Z',
+        ).isEqual(null),
       ).toBe(false);
     });
   });
@@ -649,7 +696,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-12-31T00:00:00.000Z'
+        '2026-12-31T00:00:00.000Z',
       );
       expect(interval.getYears()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-12-31T23:59:59.999Z'),
@@ -661,7 +708,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2024-11-01T00:00:00.000Z',
-        '2025-01-15T00:00:00.000Z'
+        '2025-01-15T00:00:00.000Z',
       );
       expect(interval.getYears()).toEqual([
         new Interval('2024-01-01T00:00:00.000Z', '2024-12-31T23:59:59.999Z'),
@@ -675,7 +722,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-12-31T00:00:00.000Z'
+        '2025-12-31T00:00:00.000Z',
       );
       expect(interval.getMonths()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-31T23:59:59.999Z'),
@@ -699,7 +746,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-02-01T00:00:00.000Z'
+        '2025-02-01T00:00:00.000Z',
       );
       expect(interval.getWeeks()).toEqual([
         new Interval('2024-12-29T00:00:00.000Z', '2025-01-04T23:59:59.999Z'),
@@ -716,7 +763,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-07T00:00:00.000Z'
+        '2025-01-07T00:00:00.000Z',
       );
       expect(interval.getDays()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T23:59:59.999Z'),
@@ -735,7 +782,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T05:00:00.000Z'
+        '2025-01-01T05:00:00.000Z',
       );
       expect(interval.getHours()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:59:59.999Z'),
@@ -753,7 +800,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T00:04:00.000Z'
+        '2025-01-01T00:04:00.000Z',
       );
       expect(interval.getMinutes()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:00:59.999Z'),
@@ -770,7 +817,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2025-01-01T00:00:04.000Z'
+        '2025-01-01T00:00:04.000Z',
       );
       expect(interval.getSeconds()).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-01-01T00:00:00.999Z'),
@@ -787,7 +834,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2026-12-01T00:00:00.000Z'
+        '2026-12-01T00:00:00.000Z',
       );
       expect(interval.getUnits('year')).toEqual([
         new Interval('2025-01-01T00:00:00.000Z', '2025-12-31T23:59:59.999Z'),
@@ -799,7 +846,7 @@ describe('Interval', () => {
       DateTime.setTimeZone('UTC');
       const interval = new Interval(
         '2025-01-01T00:00:00.000Z',
-        '2027-01-01T00:00:00.000Z'
+        '2027-01-01T00:00:00.000Z',
       );
       expect(() => {
         interval.getUnits('foo');

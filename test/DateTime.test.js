@@ -1,5 +1,7 @@
 import DateTime from '../src/DateTime';
 
+import { mockTime, unmockTime } from './helpers/time';
+
 beforeEach(() => {
   DateTime.setLocale('en-US');
   DateTime.setTimeZone('Asia/Tokyo');
@@ -532,19 +534,25 @@ describe('DateTime', () => {
   describe('constructor', () => {
     describe('no arguments', () => {
       it('should be the current time when no argument passed', () => {
-        expect(new DateTime().getTime()).toBeCloseTo(Date.now(), -1);
+        mockTime('2025-01-01T00:00:00.000Z');
+        expect(new DateTime().getTime()).toBe(Date.now());
+        unmockTime();
       });
 
       it('should be the current time when undefined passed', () => {
-        expect(new DateTime(undefined).getTime()).toBeCloseTo(Date.now(), -1);
+        mockTime('2025-01-01T00:00:00.000Z');
+        expect(new DateTime(undefined).getTime()).toBe(Date.now());
+        unmockTime();
       });
 
       it('should allow passing a single options object', () => {
+        mockTime('2025-01-01T00:00:00.000Z');
         const dt = new DateTime({
           timeZone: 'America/New_York',
         });
-        expect(dt.getTime()).toBeCloseTo(Date.now(), -2);
+        expect(dt.getTime()).toBe(Date.now());
         expect(dt.options.timeZone).toBe('America/New_York');
+        unmockTime();
       });
     });
 
