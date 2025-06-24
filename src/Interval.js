@@ -155,6 +155,18 @@ export default class Interval {
   }
 
   /**
+   * Returns an object that can be passed into a query.
+   * Most notably for use with range-based search in
+   * [@bedrockio/model](https://github.com/bedrockio/model/blob/master/README.md#range-based-search).
+   */
+  toQuery() {
+    return {
+      gte: this.start.toISOString(),
+      lte: this.end.toISOString(),
+    };
+  }
+
+  /**
    * Returns true if the interval overlaps the passed argument.
    *
    * @param {Interval|DateLike} arg

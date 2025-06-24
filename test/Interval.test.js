@@ -222,13 +222,24 @@ describe('Interval', () => {
   });
 
   describe('toISOString', () => {
-    it('should serialize ISO8601', () => {
+    it('should serialize ISO-8601', () => {
       const dt1 = new DateTime('2025-01-01T00:00:00.000Z');
       const dt2 = new DateTime('2026-01-01T00:00:00.000Z');
       const interval = new Interval(dt1, dt2);
       expect(interval.toISOString()).toBe(
         `${dt1.toISOString()}/${dt2.toISOString()}`,
       );
+    });
+  });
+
+  describe('toQuery', () => {
+    it('should export the object in a query readable format', () => {
+      DateTime.setTimeZone('America/New_York');
+      const interval = Interval.getDay('2025-01-01T12:00:00.000Z');
+      expect(interval.toQuery()).toEqual({
+        gte: '2025-01-01T05:00:00.000Z',
+        lte: '2025-01-02T04:59:59.999Z',
+      });
     });
   });
 

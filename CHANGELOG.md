@@ -1,6 +1,7 @@
-## Next
+## 0.6.0
 
 - Single date-like in Interval constructor assumes ending now.
+- Added `toQuery` method for use with `Model.search`.
 
 ## 0.5.0
 
