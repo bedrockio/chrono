@@ -47,7 +47,14 @@ describe('timezone', () => {
       // Standard ISO 8601 Date Formats (without time zone)
       assertAmbiguous('2024-11-07T14:53:00', true);
       assertAmbiguous('2024-11-07T14:53:00.123', true);
-      assertAmbiguous('2024-11-07', false);
+
+      // Note that for our purposes here the date-only ISO-8601 format
+      // is considered to be ambiguous. The Javascript Date constructor
+      // will always treat formats that do not have time components as
+      // being in UTC but we are trying to rectify this to achieve
+      // consistency.
+      // https://maggiepint.com/2017/04/11/fixing-javascript-date-web-compatibility-and-reality/
+      assertAmbiguous('2024-11-07', true);
 
       // Variations of Date Formats
       assertAmbiguous('2024/11/07 14:53:00', true);

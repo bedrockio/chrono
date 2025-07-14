@@ -264,12 +264,16 @@ export default class DateTime {
    * is set it will be parsed in that timezone. If no timezone can be derived the
    * system offset will be used instead.
    *
+   * Note also that ISO-8601 formats that do not include a time are also parsed in
+   * a manner that is consistent with the above, however **inconsistent** with the
+   * `Date` constructor which parses these as UTC for historical reasons.
+   *
    * @param {...DateLike|Object} args
    *
    * @example
    * new DateTime();
-   * new DateTime('2025-01-01');
    * new DateTime(1735689600000);
+   * new DateTime('2025-01-01'); // Parsed as local or system time.
    * new DateTime({
    *   locale: 'en-US',
    *   timeZone: 'America/New_York'

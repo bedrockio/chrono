@@ -23,9 +23,9 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.min(
-            new Date('2025-01-02'),
-            new Date('2025-01-03'),
-            new Date('2025-01-01'),
+            new Date('2025/01/02'),
+            new Date('2025/01/03'),
+            new Date('2025/01/01'),
           ),
         ).toEqual(new DateTime('2025-01-01'));
       });
@@ -49,11 +49,11 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.max(
-            new Date('2025-01-02'),
-            new Date('2025-01-03'),
-            new Date('2025-01-01'),
+            new Date('2025/01/02'),
+            new Date('2025/01/03'),
+            new Date('2025/01/01'),
           ),
-        ).toEqual(new DateTime('2025-01-03'));
+        ).toEqual(new DateTime('2025/01/03'));
       });
 
       it('should return null when no arguments', async () => {
@@ -75,11 +75,11 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.clamp(
-            new Date('2025-01-03'),
-            new Date('2025-01-01'),
-            new Date('2025-01-02'),
+            new Date('2025/01/03'),
+            new Date('2025/01/01'),
+            new Date('2025/01/02'),
           ),
-        ).toEqual(new DateTime('2025-01-02'));
+        ).toEqual(new DateTime('2025/01/02'));
       });
 
       it('should return null when no arguments', async () => {
@@ -646,6 +646,27 @@ describe('DateTime', () => {
         expect(dt.toISOString()).toBe(
           new Date('2020-01-01T00:00:00.000').toISOString(),
         );
+      });
+
+      it('should correctly parse YYYY-MM-DD', () => {
+        const dt = new DateTime('2020-01-01', {
+          timeZone: 'America/New_York',
+        });
+        expect(dt.toISOString()).toBe('2020-01-01T05:00:00.000Z');
+      });
+
+      it('should correctly parse YYYY-MM', () => {
+        const dt = new DateTime('2020-01', {
+          timeZone: 'America/New_York',
+        });
+        expect(dt.toISOString()).toBe('2020-01-01T05:00:00.000Z');
+      });
+
+      it('should correctly parse YYYY', () => {
+        const dt = new DateTime('2020-01', {
+          timeZone: 'America/New_York',
+        });
+        expect(dt.toISOString()).toBe('2020-01-01T05:00:00.000Z');
       });
     });
   });
@@ -1309,11 +1330,11 @@ describe('DateTime', () => {
       expect(
         new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
       ).toBe(true);
-      expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-01'))).toBe(
+      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/01'))).toBe(
         true,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime()),
+        new DateTime('2025/01/01').isEqual(new Date('2025/01/01').getTime()),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
     });
@@ -1322,11 +1343,11 @@ describe('DateTime', () => {
       expect(
         new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
       ).toBe(true);
-      expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-01'))).toBe(
+      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/01'))).toBe(
         true,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-01').getTime()),
+        new DateTime('2025/01/01').isEqual(new Date('2025/01/01').getTime()),
       ).toBe(true);
       expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
 
@@ -1334,11 +1355,11 @@ describe('DateTime', () => {
       expect(
         new DateTime('2025-01-01').isEqual(new DateTime('2025-01-02')),
       ).toBe(false);
-      expect(new DateTime('2025-01-01').isEqual(new Date('2025-01-02'))).toBe(
+      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/02'))).toBe(
         false,
       );
       expect(
-        new DateTime('2025-01-01').isEqual(new Date('2025-01-02').getTime()),
+        new DateTime('2025/01/01').isEqual(new Date('2025/01/02').getTime()),
       ).toBe(false);
       expect(new DateTime('2025-01-01').isEqual('2025-01-02')).toBe(false);
     });

@@ -1,3 +1,8 @@
+## 0.6.1
+
+- Parse ISO-8601 date only formats as either local or system time. This differs
+  from the Date constructor but provides consistency.
+
 ## 0.6.0
 
 - Single date-like in Interval constructor assumes ending now.
