@@ -1922,6 +1922,14 @@ describe('DateTime', () => {
 
         expect(dt.getMonthName()).toBe('January');
       });
+
+      it('should consider respect time zone ', () => {
+        const dt = new DateTime('2025-08-01T00:00:00.000Z', {
+          timeZone: 'America/New_York',
+        });
+
+        expect(dt.getMonthName()).toBe('July');
+      });
     });
 
     describe('weekdays', () => {
@@ -1971,6 +1979,14 @@ describe('DateTime', () => {
         });
 
         expect(dt.getWeekdayName()).toBe('Wednesday');
+      });
+
+      it('should consider respect time zone ', () => {
+        const dt = new DateTime('2025-08-12T18:00:00.000Z', {
+          timeZone: 'America/New_York',
+        });
+
+        expect(dt.getWeekdayName()).toBe('Tuesday');
       });
     });
   });

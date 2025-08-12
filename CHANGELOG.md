@@ -1,3 +1,7 @@
+## 0.6.2
+
+- Fix for time zones not taken account in `getWeekdayName`.
+
 ## 0.6.1
 
 - Parse ISO-8601 date only formats as either local or system time. This differs

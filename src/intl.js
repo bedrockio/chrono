@@ -1,18 +1,20 @@
 // Months
 
-export function getMonthName(date, style = 'long') {
-  return getPart(date, 'month', {
+export function getMonthName(dt, style = 'long') {
+  return getPart(dt, 'month', {
     style,
     month: style,
+    timeZone: dt.getTimeZone(),
   });
 }
 
 // Weekdays
 
-export function getWeekdayName(date, style = 'long') {
-  return getPart(date, 'weekday', {
+export function getWeekdayName(dt, style = 'long') {
+  return getPart(dt, 'weekday', {
     style,
     weekday: style,
+    timeZone: dt.getTimeZone(),
   });
 }
 
