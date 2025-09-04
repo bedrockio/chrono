@@ -48,6 +48,8 @@ const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
 
+const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
+
 /**
  * A timezone and locale aware DateTime.
  * This class assumes support for:
@@ -1064,6 +1066,16 @@ export default class DateTime {
     return getWeekdayName(this, style);
   }
 
+  // Private
+
+  // Allow instanceof check to work across imports.
+
+  [INSTANCE_KEY] = true;
+
+  static [Symbol.hasInstance](obj) {
+    return obj?.[INSTANCE_KEY];
+  }
+
   setUTCTime(time) {
     // Note the target time may have a different offset
     // so do an initial set before adding the offset.
@@ -1087,12 +1099,7 @@ function isEnumeratedArgs(args) {
 }
 
 function isDateLike(arg) {
-  return arg instanceof Date || isDateTime(arg);
-}
-
-// TODO: MAKE BETTER
-function isDateTime(arg) {
-  return arg instanceof DateTime;
+  return arg instanceof Date || arg instanceof DateTime;
 }
 
 function advanceDate(dt, dir, by, unit) {
