@@ -1,4 +1,4 @@
-import { isAmbiguousTimeZone, getTimezoneOffset } from './timezone';
+import { isAmbiguousTimeZone, setPseudoTimezone } from './timezone';
 
 // Allow any dates parseable by Javascript, however
 // exclude odd results that may be caused by partial
@@ -26,10 +26,7 @@ export function parseDate(str, options) {
     return date;
   }
 
-  const localOffset = getTimezoneOffset(date, options);
-  const systemOffset = date.getTimezoneOffset();
-
-  date.setMinutes(date.getMinutes() - systemOffset + localOffset);
+  setPseudoTimezone(date, options);
 
   return date;
 }

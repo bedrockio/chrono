@@ -33,6 +33,7 @@ describe('Interval', () => {
         interval = Interval.getCalendarMonth('2024-12-01', {
           normalize: true,
         });
+
         expect(interval.toISOString()).toBe(
           '2024-11-30T15:00:00.000Z/2025-01-11T14:59:59.999Z',
         );

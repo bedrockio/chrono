@@ -12,13 +12,16 @@ import {
   getMeridiem,
   getMonthName,
   getWeekdayName,
+  getSystemLocale,
   getSystemTimeZone,
 } from './intl';
+
+import { isInvalidDate, daysInMonth } from './utils';
 
 import { parseDate } from './parse';
 import { formatWithLocale } from './locale';
 import { formatWithTokens } from './tokens';
-import { getTimezoneOffset } from './timezone';
+import { getTimezoneOffset, setPseudoTimezone } from './timezone';
 import { normalizeUnit, getUnitIndex } from './units';
 
 import {
@@ -286,7 +289,6 @@ export default class DateTime {
   constructor(...args) {
     let options;
 
-    this.date = new Date();
     if (args.length === 0 || isOptionsObject(args[0])) {
       options = args[0];
       args = [];
@@ -303,8 +305,15 @@ export default class DateTime {
       ...options,
     };
 
+    options.locale ||= getSystemLocale();
+    options.timeZone ||= getSystemTimeZone();
+
     if (typeof args[0] === 'string') {
       this.date = parseDate(args[0], options);
+    } else if (isEnumeratedArgs(args)) {
+      // @ts-ignore
+      this.date = new Date(...args);
+      setPseudoTimezone(this.date, options);
     } else {
       // @ts-ignore
       this.date = new Date(...args);
@@ -682,7 +691,7 @@ export default class DateTime {
    * Returns true if the DateTime is invalid.
    */
   isInvalid() {
-    return isNaN(this.getTime());
+    return isInvalidDate(this);
   }
 
   /**
@@ -1007,7 +1016,7 @@ export default class DateTime {
    * @returns {string}
    */
   getTimeZone() {
-    return this.options.timeZone || getSystemTimeZone();
+    return this.options.timeZone;
   }
 
   /**
@@ -1078,7 +1087,12 @@ function isEnumeratedArgs(args) {
 }
 
 function isDateLike(arg) {
-  return arg instanceof Date || arg instanceof DateTime;
+  return arg instanceof Date || isDateTime(arg);
+}
+
+// TODO: MAKE BETTER
+function isDateTime(arg) {
+  return arg instanceof DateTime;
 }
 
 function advanceDate(dt, dir, by, unit) {
@@ -1323,8 +1337,4 @@ function endOf(dt, unit) {
   const seconds = index < 6 ? 59 : dt.getSeconds();
 
   return dt.setArgs(year, month, day, hours, minutes, seconds, 999);
-}
-
-function daysInMonth(dt) {
-  return 32 - new Date(dt.getFullYear(), dt.getMonth(), 32).getDate();
 }

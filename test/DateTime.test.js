@@ -23,9 +23,9 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.min(
-            new Date('2025/01/02'),
-            new Date('2025/01/03'),
-            new Date('2025/01/01'),
+            new Date('2025-01-01T15:00:00.000Z'),
+            new Date('2025-01-02T15:00:00.000Z'),
+            new Date('2024-12-31T15:00:00.000Z'),
           ),
         ).toEqual(new DateTime('2025-01-01'));
       });
@@ -49,9 +49,9 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.max(
-            new Date('2025/01/02'),
-            new Date('2025/01/03'),
-            new Date('2025/01/01'),
+            new Date('2025-01-01T15:00:00.000Z'),
+            new Date('2025-01-02T15:00:00.000Z'),
+            new Date('2024-12-31T15:00:00.000Z'),
           ),
         ).toEqual(new DateTime('2025/01/03'));
       });
@@ -75,9 +75,9 @@ describe('DateTime', () => {
       it('should coerce non DateTimes', async () => {
         expect(
           DateTime.clamp(
-            new Date('2025/01/03'),
-            new Date('2025/01/01'),
-            new Date('2025/01/02'),
+            new Date('2025-01-02T15:00:00.000Z'),
+            new Date('2024-12-31T15:00:00.000Z'),
+            new Date('2025-01-01T15:00:00.000Z'),
           ),
         ).toEqual(new DateTime('2025/01/02'));
       });
@@ -567,6 +567,37 @@ describe('DateTime', () => {
         const dt = new DateTime();
         expect(new DateTime('08')).toEqual(new DateTime(dt.getYear(), 7));
       });
+
+      it('should parse correctly for timezone around DST shifts', () => {
+        expect(
+          new DateTime('2020-11-01T02:00:00.000', {
+            timeZone: 'Asia/Tokyo',
+          }).toISOString(),
+        ).toEqual('2020-10-31T17:00:00.000Z');
+        expect(
+          new DateTime('2020-11-01', {
+            timeZone: 'America/New_York',
+          }).toISOString(),
+        ).toEqual('2020-11-01T04:00:00.000Z');
+        expect(
+          new DateTime('2020-11-01T01:00:00.00', {
+            timeZone: 'America/New_York',
+          }).toISOString(),
+        ).toEqual('2020-11-01T05:00:00.000Z');
+        expect(
+          new DateTime('2020-11-01T02:00:00.00', {
+            timeZone: 'America/New_York',
+          }).toISOString(),
+        ).toEqual('2020-11-01T05:00:00.000Z');
+      });
+
+      it('should parse half-hour timezones', async () => {
+        expect(
+          new DateTime('2020-11-01', {
+            timeZone: 'Asia/Kolkata',
+          }).toISOString(),
+        ).toEqual('2020-10-31T18:30:00.000Z');
+      });
     });
 
     describe('numeric argument', () => {
@@ -641,7 +672,7 @@ describe('DateTime', () => {
       });
 
       it('should respect the system time when no timezone is set', () => {
-        DateTime.setTimeZone();
+        DateTime.setTimeZone(null);
         const dt = new DateTime('2020-01-01T00:00:00.000');
         expect(dt.toISOString()).toBe(
           new Date('2020-01-01T00:00:00.000').toISOString(),
@@ -1327,41 +1358,25 @@ describe('DateTime', () => {
 
   describe('isEqual', () => {
     it('equal', () => {
-      expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
-      ).toBe(true);
-      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/01'))).toBe(
-        true,
-      );
-      expect(
-        new DateTime('2025/01/01').isEqual(new Date('2025/01/01').getTime()),
-      ).toBe(true);
-      expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
+      const dt = new DateTime('2025-01-01');
+      expect(dt.isEqual(new DateTime(dt))).toBe(true);
+      expect(dt.isEqual(dt.date)).toBe(true);
+      expect(dt.isEqual(dt.getTime())).toBe(true);
+      expect(dt.isEqual('2025-01-01')).toBe(true);
     });
 
     it('not equal', () => {
-      expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-01')),
-      ).toBe(true);
-      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/01'))).toBe(
-        true,
-      );
-      expect(
-        new DateTime('2025/01/01').isEqual(new Date('2025/01/01').getTime()),
-      ).toBe(true);
-      expect(new DateTime('2025-01-01').isEqual('2025-01-01')).toBe(true);
+      const dt = new DateTime('2025-01-01');
+
+      expect(dt.isEqual(new DateTime(dt))).toBe(true);
+      expect(dt.isEqual(dt.date)).toBe(true);
+      expect(dt.isEqual(dt.getTime())).toBe(true);
+      expect(dt.isEqual('2025-01-01')).toBe(true);
 
       // Not equal
-      expect(
-        new DateTime('2025-01-01').isEqual(new DateTime('2025-01-02')),
-      ).toBe(false);
-      expect(new DateTime('2025/01/01').isEqual(new Date('2025/01/02'))).toBe(
-        false,
-      );
-      expect(
-        new DateTime('2025/01/01').isEqual(new Date('2025/01/02').getTime()),
-      ).toBe(false);
-      expect(new DateTime('2025-01-01').isEqual('2025-01-02')).toBe(false);
+      expect(dt.isEqual(new DateTime('2025-01-02'))).toBe(false);
+      expect(dt.isEqual(new Date('2025-01-01T15:00:00.000Z'))).toBe(false);
+      expect(dt.isEqual('2025-01-02')).toBe(false);
     });
 
     it('other', () => {
@@ -1681,7 +1696,7 @@ describe('DateTime', () => {
     });
 
     it('should report the system offset when not timezone set', () => {
-      DateTime.setTimeZone();
+      DateTime.setTimeZone(null);
       expect(new DateTime().getTimezoneOffset()).toBe(
         new Date().getTimezoneOffset(),
       );
@@ -2051,6 +2066,11 @@ describe('DateTime', () => {
       expect(dt.set({ day: 10 }).toISOString()).toBe(
         '2025-03-10T04:00:00.000Z',
       );
+    });
+
+    it('should not be affected by system DST shifts', () => {
+      const dt = new DateTime('2026-03-01').setDate(15);
+      expect(dt.toISOString()).toBe('2026-03-14T15:00:00.000Z');
     });
   });
 
