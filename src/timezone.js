@@ -1,5 +1,5 @@
-import { isInvalidDate } from './utils';
 import { getPart } from './intl';
+import { isInvalidDate } from './utils';
 
 const TIMEZONE_REG = /Z|[A-Z]{3}|[+-]\d{2}:?\d{2}$/;
 const OFFSET_REG = /([+-])(\d)(?::(\d{2}))?/;

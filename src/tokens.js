@@ -1,6 +1,6 @@
 // https://moment.github.io/luxon/#/formatting?id=table-of-tokens
 
-import { getPart, getMeridiem } from './intl';
+import { getMeridiem, getPart } from './intl';
 
 const TOKENS = {
   // Year

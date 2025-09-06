@@ -8,39 +8,39 @@
  */
 
 import {
-  getWeekdays,
   getMeridiem,
   getMonthName,
-  getWeekdayName,
   getSystemLocale,
   getSystemTimeZone,
+  getWeekdayName,
+  getWeekdays,
 } from './intl';
 
-import { isInvalidDate, daysInMonth } from './utils';
-
-import { parseDate } from './parse';
 import { formatWithLocale } from './locale';
-import { formatWithTokens } from './tokens';
-import { getTimezoneOffset, setPseudoTimezone } from './timezone';
-import { normalizeUnit, getUnitIndex } from './units';
 
 import {
-  DATE_MED,
-  DATE_SHORT,
-  DATE_NARROW,
-  DATE_MED_WEEKDAY,
-  TIME_MED,
-  TIME_SHORT,
-  TIME_HOUR,
-  TIME_SHORT_HOUR,
-  TIME_WITH_ZONE,
   DATETIME_MED,
-  DATETIME_SHORT,
-  DATETIME_NARROW,
   DATETIME_MED_WEEKDAY,
+  DATETIME_NARROW,
+  DATETIME_SHORT,
+  DATE_MED,
+  DATE_MED_WEEKDAY,
+  DATE_NARROW,
+  DATE_SHORT,
   MONTH_YEAR,
   MONTH_YEAR_SHORT,
+  TIME_HOUR,
+  TIME_MED,
+  TIME_SHORT,
+  TIME_SHORT_HOUR,
+  TIME_WITH_ZONE,
 } from './locale';
+
+import { parseDate } from './parse';
+import { getTimezoneOffset, setPseudoTimezone } from './timezone';
+import { formatWithTokens } from './tokens';
+import { getUnitIndex, normalizeUnit } from './units';
+import { daysInMonth, isInvalidDate } from './utils';
 
 const ONE_SECOND = 1000;
 const ONE_MINUTE = 60 * ONE_SECOND;

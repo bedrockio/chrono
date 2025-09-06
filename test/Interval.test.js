@@ -1,6 +1,5 @@
 import DateTime from '../src/DateTime';
 import Interval from '../src/Interval';
-
 import { mockTime, unmockTime } from './helpers/time';
 
 beforeEach(() => {

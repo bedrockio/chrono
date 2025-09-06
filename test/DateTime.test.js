@@ -1,5 +1,4 @@
 import DateTime from '../src/DateTime';
-
 import { mockTime, unmockTime } from './helpers/time';
 
 beforeEach(() => {
