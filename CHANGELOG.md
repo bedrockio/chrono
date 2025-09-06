@@ -1,3 +1,8 @@
+## 0.6.3
+
+- Fixed DST shift issues.
+- Fixed relative time truncate instead of round.
+
 ## 0.6.2
 
 - Fix for time zones not taken account in `getWeekdayName`.

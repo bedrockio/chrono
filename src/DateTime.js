@@ -1213,13 +1213,13 @@ function formatRelative(date, options = {}) {
   // with more or less than 24 hours due to DST shifts
   // as this is acceptable for this case.
   if (msAbs < ONE_MINUTE) {
-    return formatter.format(Math.trunc(ms / ONE_SECOND), 'seconds');
+    return formatter.format(Math.round(ms / ONE_SECOND), 'seconds');
   } else if (msAbs < ONE_HOUR) {
-    return formatter.format(Math.trunc(ms / ONE_MINUTE), 'minutes');
+    return formatter.format(Math.round(ms / ONE_MINUTE), 'minutes');
   } else if (msAbs < ONE_DAY) {
-    return formatter.format(Math.trunc(ms / ONE_HOUR), 'hours');
+    return formatter.format(Math.round(ms / ONE_HOUR), 'hours');
   } else if (msAbs < ONE_WEEK) {
-    return formatter.format(Math.trunc(ms / ONE_DAY), 'days');
+    return formatter.format(Math.round(ms / ONE_DAY), 'days');
   }
 
   // Months are trickier as they do not have an exact
@@ -1253,12 +1253,12 @@ function formatRelative(date, options = {}) {
   }
 
   if (format === 'weeks') {
-    const weekOffset = Math.trunc(ms / ONE_WEEK);
+    const weekOffset = Math.round(ms / ONE_WEEK);
     return formatter.format(weekOffset, 'weeks');
   } else if (format === 'months') {
     return formatter.format(months, 'months');
   } else if (format === 'years') {
-    const yearOffset = Math.trunc(months / 12);
+    const yearOffset = Math.round(months / 12);
     return formatter.format(yearOffset, 'years');
   }
 }

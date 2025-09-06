@@ -1545,13 +1545,15 @@ describe('DateTime', () => {
       });
 
       it('now', () => {
+        mockTime('2025-01-01T00:00:00.000Z');
         expect(new DateTime().rewind(500, 'milliseconds').relative()).toBe(
           'now',
         );
+        unmockTime();
       });
     });
 
-    describe('advancing', () => {
+    describe('future', () => {
       it('next year', () => {
         expect(new DateTime().advance(13, 'months').relative()).toBe(
           'next year',
@@ -1560,6 +1562,79 @@ describe('DateTime', () => {
 
       it('tomorrow', () => {
         expect(new DateTime().advance(25, 'hours').relative()).toBe('tomorrow');
+      });
+    });
+
+    describe('rounding', () => {
+      it('should round up when a second off', () => {
+        mockTime('2025-03-04T00:00:01.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 2 hours',
+        );
+        unmockTime();
+      });
+
+      it('should round up when a minute off', () => {
+        mockTime('2025-03-04T00:01:00.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 2 hours',
+        );
+        unmockTime();
+      });
+
+      it('should round up when 30 minutes off', () => {
+        mockTime('2025-03-04T00:30:00.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 2 hours',
+        );
+        unmockTime();
+      });
+
+      it('should round down when 31 minutes off', () => {
+        mockTime('2025-03-04T00:31:00.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 1 hour',
+        );
+        unmockTime();
+      });
+
+      it('should use hours when exactly 60 minutes', () => {
+        mockTime('2025-03-04T01:00:00.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 1 hour',
+        );
+        unmockTime();
+      });
+
+      it('should use minutes when 59 minutes', () => {
+        mockTime('2025-03-04T01:01:00.000Z');
+        expect(new DateTime('2025-03-04T02:00:00.000Z').relative()).toBe(
+          'in 59 minutes',
+        );
+        unmockTime();
+      });
+
+      it('should round correctly for years', () => {
+        mockTime('2025-01-01T00:00:00.000Z');
+        expect(new DateTime('2026-01-01T00:00:00.000Z').relative()).toBe(
+          'next year',
+        );
+        expect(new DateTime('2026-06-01T00:00:00.000Z').relative()).toBe(
+          'next year',
+        );
+        expect(new DateTime('2026-07-01T00:00:00.000Z').relative()).toBe(
+          'in 2 years',
+        );
+        expect(new DateTime('2026-12-31T00:00:00.000Z').relative()).toBe(
+          'in 2 years',
+        );
+        expect(new DateTime('2027-01-01T00:00:00.000Z').relative()).toBe(
+          'in 2 years',
+        );
+        expect(new DateTime('2027-07-01T00:00:00.000Z').relative()).toBe(
+          'in 3 years',
+        );
+        unmockTime();
       });
     });
 
