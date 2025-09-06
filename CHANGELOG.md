@@ -1,7 +1,12 @@
+## 0.6.4
+
+- Fixed CJS target issues in compiling.
+
 ## 0.6.3
 
 - Fixed DST shift issues.
 - Fixed relative time truncate instead of round.
+- Allow better instance of tests across frames.
 
 ## 0.6.2
 
