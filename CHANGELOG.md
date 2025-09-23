@@ -1,3 +1,7 @@
+## 0.6.5
+
+- Fixed ESM target issues in compiling.
+
 ## 0.6.4
 
 - Fixed CJS target issues in compiling.
