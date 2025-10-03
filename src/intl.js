@@ -66,7 +66,7 @@ function normalizeCompact(locale, style) {
 function getFirstDayOfWeek(locale) {
   try {
     // @ts-ignore
-    return new Intl.Locale(locale).weekInfo.firstDay;
+    return new Intl.Locale(locale).getWeekInfo().firstDay;
   } catch {
     return 0;
   }
