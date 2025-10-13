@@ -1,3 +1,7 @@
+## Next
+
+- Moved from Jest to Vitest.
+
 ## 0.6.5
 
 - Fixed ESM target issues in compiling.
