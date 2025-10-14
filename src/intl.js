@@ -21,7 +21,7 @@ export function getWeekdayName(dt, style = 'long') {
 export function getWeekdays(options) {
   let { start, locale, style = 'long' } = options;
 
-  start ||= getFirstDayOfWeek(locale);
+  start ||= getFirstDayOfWeek(options);
   locale ||= getSystemLocale();
 
   return Array.from(new Array(7), (_, i) => {
@@ -63,13 +63,23 @@ function normalizeCompact(locale, style) {
   }
 }
 
-function getFirstDayOfWeek(locale) {
-  try {
-    // @ts-ignore
-    return new Intl.Locale(locale).weekInfo.firstDay;
-  } catch {
-    return 0;
+// Week Info
+
+export function getFirstDayOfWeek(options) {
+  let { firstDayOfWeek, locale } = options;
+
+  if (firstDayOfWeek == null) {
+    firstDayOfWeek = getWeekInfo(locale)?.firstDay ?? 0;
   }
+
+  // Normalize to index 0 for Sunday.
+  return firstDayOfWeek % 7;
+}
+
+function getWeekInfo(code) {
+  const locale = new Intl.Locale(code);
+  // @ts-ignore
+  return locale.getWeekInfo?.() || locale.weekInfo;
 }
 
 // Meridiem

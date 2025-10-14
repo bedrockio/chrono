@@ -27,13 +27,16 @@ export default class Interval {
    * @param {DateLike} date
    * @param {Object} options
    * @param {string} [options.normalize] - Normalizes output to always have 6 weeks.
+   * @param {string} [options.locale] - Locale to derive the start of the week.
+   * @param {string} [options.timeZone] - IANA timezone to pass to the DateTime.
+   * @param {number} [options.firstDayOfWeek] - Hard coded first day of the week.
    */
   static getCalendarMonth(date, options = {}) {
-    const { normalize } = options;
+    const { normalize, ...dateOptions } = options;
 
     let interval = new Interval(
-      new DateTime(date).startOfCalendarMonth(),
-      new DateTime(date).endOfCalendarMonth(),
+      new DateTime(date, dateOptions).startOfCalendarMonth(),
+      new DateTime(date, dateOptions).endOfCalendarMonth(),
     );
 
     if (normalize) {

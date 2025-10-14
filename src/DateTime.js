@@ -8,6 +8,7 @@
  */
 
 import {
+  getFirstDayOfWeek,
   getMeridiem,
   getMonthName,
   getSystemLocale,
@@ -1310,7 +1311,9 @@ function startOf(dt, unit) {
 
   let day;
   if (unit === 'week') {
-    day = dt.getDate() - dt.getDay();
+    const firstDay = getFirstDayOfWeek(dt.options);
+    const startOffset = (dt.getDay() - firstDay + 7) % 7;
+    day = dt.getDate() - startOffset;
   } else if (index < 3) {
     day = 1;
   } else {
@@ -1332,7 +1335,9 @@ function endOf(dt, unit) {
 
   let day;
   if (unit === 'week') {
-    day = dt.getDate() + (6 - dt.getDay());
+    const firstDay = getFirstDayOfWeek(dt.options);
+    const endOffset = (firstDay + 6 - dt.getDay() + 7) % 7;
+    day = dt.getDate() + endOffset;
   } else if (index < 3) {
     day = daysInMonth(dt.setMonth(month));
   } else {

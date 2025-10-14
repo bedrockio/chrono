@@ -2150,6 +2150,128 @@ describe('DateTime', () => {
     });
   });
 
+  describe('calendar weeks', () => {
+    describe('startOfWeek', () => {
+      it('should move to Monday in the UK', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-UK',
+          timeZone: 'Europe/London',
+        });
+        expect(dt.startOfWeek().toISOString()).toBe('2020-03-16T00:00:00.000Z');
+      });
+
+      it('should move to Saturday in Algeria', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'ar-DZ',
+          timeZone: 'Africa/Algiers',
+        });
+        expect(dt.startOfWeek().toISOString()).toBe('2020-03-13T23:00:00.000Z');
+      });
+    });
+
+    describe('endOfWeek', () => {
+      it('should move to Sunday in the UK', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-UK',
+          timeZone: 'Europe/London',
+        });
+        expect(dt.endOfWeek().toISOString()).toBe('2020-03-22T23:59:59.999Z');
+      });
+
+      it('should move to Friday in Algeria', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'ar-DZ',
+          timeZone: 'Africa/Algiers',
+        });
+        expect(dt.endOfWeek().toISOString()).toBe('2020-03-20T22:59:59.999Z');
+      });
+    });
+
+    describe('startOfCalendarMonth', () => {
+      it('should be Monday in the UK', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-UK',
+          timeZone: 'Europe/London',
+        });
+        expect(dt.startOfCalendarMonth().toISOString()).toBe(
+          '2020-02-24T00:00:00.000Z',
+        );
+      });
+
+      it('should be Saturday in Algeria', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'ar-DZ',
+          timeZone: 'Africa/Algiers',
+        });
+        expect(dt.startOfCalendarMonth().toISOString()).toBe(
+          '2020-02-28T23:00:00.000Z',
+        );
+      });
+
+      it('should respect Unicode extension', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-u-fw-sat',
+          timeZone: 'UTC',
+        });
+        expect(dt.startOfCalendarMonth().toISOString()).toBe(
+          '2020-02-29T00:00:00.000Z',
+        );
+      });
+
+      it('should respect hard coded value', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          firstDayOfWeek: 6,
+          timeZone: 'UTC',
+        });
+        expect(dt.startOfCalendarMonth().toISOString()).toBe(
+          '2020-02-29T00:00:00.000Z',
+        );
+      });
+    });
+
+    describe('endOfCalendarMonth', () => {
+      it('should be Monday in the UK', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-UK',
+          timeZone: 'Europe/London',
+        });
+        expect(dt.endOfCalendarMonth().toISOString()).toBe(
+          '2020-04-05T22:59:59.999Z',
+        );
+      });
+
+      it('should be Saturday in Algeria', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'ar-DZ',
+          timeZone: 'Africa/Algiers',
+        });
+        expect(dt.endOfCalendarMonth().toISOString()).toBe(
+          '2020-04-03T22:59:59.999Z',
+        );
+      });
+
+      it('should respect Unicode extension', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          locale: 'en-u-fw-sat',
+          timeZone: 'UTC',
+        });
+        expect(dt.endOfCalendarMonth().toISOString()).toBe(
+          '2020-04-03T23:59:59.999Z',
+        );
+      });
+
+      it('should respect hard coded value', () => {
+        const dt = new DateTime('2020-03-18T05:06:07.000Z', {
+          firstDayOfWeek: 6,
+          timeZone: 'UTC',
+        });
+        expect(dt.endOfCalendarMonth().toISOString()).toBe(
+          '2020-04-03T23:59:59.999Z',
+        );
+      });
+    });
+  });
+
   describe('compatibility', () => {
     it('toISOString', () => {
       const str = '2020-01-01T00:00:00.000Z';

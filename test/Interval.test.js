@@ -866,4 +866,46 @@ describe('Interval', () => {
       }).toThrow('Unknown unit "foo"');
     });
   });
+
+  describe('calendar weeks', () => {
+    it('should get the correct calendar month in the UK', () => {
+      const interval = Interval.getCalendarMonth('2024-12-01', {
+        locale: 'en-UK',
+        timeZone: 'Europe/London',
+      });
+      expect(interval.toISOString()).toBe(
+        '2024-11-25T00:00:00.000Z/2025-01-05T23:59:59.999Z',
+      );
+    });
+
+    it('should get the correct calendar month in Algeria', () => {
+      const interval = Interval.getCalendarMonth('2024-12-01', {
+        locale: 'ar-DZ',
+        timeZone: 'Africa/Algiers',
+      });
+      expect(interval.toISOString()).toBe(
+        '2024-11-29T23:00:00.000Z/2025-01-03T22:59:59.999Z',
+      );
+    });
+
+    it('should get the correct calendar for Unicode locale extension', () => {
+      const interval = Interval.getCalendarMonth('2024-12-01', {
+        locale: 'en-u-fw-sat',
+        timeZone: 'UTC',
+      });
+      expect(interval.toISOString()).toBe(
+        '2024-11-30T00:00:00.000Z/2025-01-03T23:59:59.999Z',
+      );
+    });
+
+    it('should get the correct calendar for hard coded first day', () => {
+      const interval = Interval.getCalendarMonth('2024-12-01', {
+        firstDayOfWeek: 6,
+        timeZone: 'UTC',
+      });
+      expect(interval.toISOString()).toBe(
+        '2024-11-30T00:00:00.000Z/2025-01-03T23:59:59.999Z',
+      );
+    });
+  });
 });

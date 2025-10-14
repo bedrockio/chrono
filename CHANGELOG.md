@@ -1,5 +1,6 @@
-## Next
+## 0.7.0
 
+- Allow locales to specify first day of week.
 - Moved from Jest to Vitest.
 
 ## 0.6.5
