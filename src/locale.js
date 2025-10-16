@@ -1,13 +1,26 @@
 /**
- * A medium date format.
+ * A long date format.
  *
  * @constant
  * @example
  * January 1, 2020
  */
-export const DATE_MED = {
+export const DATE_LONG = {
   year: 'numeric',
   month: 'long',
+  day: 'numeric',
+};
+
+/**
+ * A medium date format.
+ *
+ * @constant
+ * @example
+ * Jan 1, 2020
+ */
+export const DATE_MEDIUM = {
+  year: 'numeric',
+  month: 'short',
   day: 'numeric',
 };
 
@@ -16,39 +29,25 @@ export const DATE_MED = {
  *
  * @constant
  * @example
- * Jan 1, 2020
- */
-export const DATE_SHORT = {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-};
-
-/**
- * A narrow date format.
- *
- * @constant
- * @example
  * 1/1/2020
  */
-export const DATE_NARROW = {
+export const DATE_SHORT = {
   year: 'numeric',
   month: 'numeric',
   day: 'numeric',
 };
 
 /**
- * A medium date format that includes the weekday.
+ * A long time format.
  *
  * @constant
  * @example
- * Wednesday, January 1, 2020
+ * 9:00:00am
  */
-export const DATE_MED_WEEKDAY = {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  weekday: 'long',
+export const TIME_LONG = {
+  hour: 'numeric',
+  minute: '2-digit',
+  second: 'numeric',
 };
 
 /**
@@ -58,7 +57,7 @@ export const DATE_MED_WEEKDAY = {
  * @example
  * 9:00am
  */
-export const TIME_MED = {
+export const TIME_MEDIUM = {
   hour: 'numeric',
   minute: '2-digit',
 };
@@ -68,48 +67,22 @@ export const TIME_MED = {
  *
  * @constant
  * @example
- * 9:00a
+ * 9am
  */
 export const TIME_SHORT = {
   hour: 'numeric',
-  minute: '2-digit',
-  shortDayPeriod: true,
 };
 
 /**
- * A medium hour format.
+ * A long datetime format.
  *
  * @constant
  * @example
- * 9pm
+ * January 1, 2020 at 9:00am
  */
-export const TIME_HOUR = {
-  hour: 'numeric',
-};
-
-/**
- * A short hour format.
- *
- * @constant
- * @example
- * 9p
- */
-export const TIME_SHORT_HOUR = {
-  hour: 'numeric',
-  shortDayPeriod: true,
-};
-
-/**
- * A time format that includes the timezone.
- *
- * @constant
- * @example
- * 9:00am Japan Standard Time
- */
-export const TIME_WITH_ZONE = {
-  hour: 'numeric',
-  minute: '2-digit',
-  timeZoneName: 'long',
+export const DATETIME_LONG = {
+  ...DATE_LONG,
+  ...TIME_MEDIUM,
 };
 
 /**
@@ -117,11 +90,11 @@ export const TIME_WITH_ZONE = {
  *
  * @constant
  * @example
- * January 1, 2020 9:00pm
+ * Jan 1, 2020, 9:00am
  */
-export const DATETIME_MED = {
-  ...DATE_MED,
-  ...TIME_MED,
+export const DATETIME_MEDIUM = {
+  ...DATE_MEDIUM,
+  ...TIME_MEDIUM,
 };
 
 /**
@@ -129,35 +102,11 @@ export const DATETIME_MED = {
  *
  * @constant
  * @example
- * Jan 1, 2020 9:00pm
+ * 1/1/2020, 9:00am
  */
 export const DATETIME_SHORT = {
   ...DATE_SHORT,
-  ...TIME_MED,
-};
-
-/**
- * A narrow datetime format.
- *
- * @constant
- * @example
- * 1/1/2020 9:00pm
- */
-export const DATETIME_NARROW = {
-  ...DATE_NARROW,
-  ...TIME_MED,
-};
-
-/**
- * A medium datetime format that includes the weekday.
- *
- * @constant
- * @example
- * Wednesday, January 1, 2020 9:00pm
- */
-export const DATETIME_MED_WEEKDAY = {
-  ...DATE_MED_WEEKDAY,
-  ...TIME_MED,
+  ...TIME_MEDIUM,
 };
 
 /**
@@ -172,21 +121,9 @@ export const MONTH_YEAR = {
   month: 'long',
 };
 
-/**
- * A short month and year format.
- *
- * @constant
- * @example
- * Jan 2020
- */
-export const MONTH_YEAR_SHORT = {
-  year: 'numeric',
-  month: 'short',
-};
-
 export function formatWithLocale(dt, options = {}) {
   const { date } = dt;
-  const { locale, shortDayPeriod, ...rest } = options;
+  const { locale, meridiem, ...rest } = options;
 
   // Note that Intl.DateTimeFormat which Date uses can be
   // passed unknown options without complaining.
@@ -197,11 +134,19 @@ export function formatWithLocale(dt, options = {}) {
   // U+202F NARROW NO BREAK SPACE
   // https://unicode-explorer.com/c/202F
   str = str.replace(/\s(AM|PM)/, (match, ampm) => {
-    return ampm.toLowerCase();
+    if (meridiem === 'space') {
+      ampm = ' ' + ampm;
+    }
+    if (meridiem !== 'caps') {
+      ampm = ampm.toLowerCase();
+    }
+    return ampm;
   });
 
-  if (shortDayPeriod) {
+  if (meridiem === 'short') {
     str = str.replace(/(a|p)m/, '$1');
+  } else if (meridiem === 'period') {
+    str = str.replace(/(a|p)m/, ' $1.m.');
   }
 
   return str;

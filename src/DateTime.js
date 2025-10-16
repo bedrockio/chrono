@@ -7,6 +7,19 @@
  * @typedef {DateTime|Date|number|string} DateLike
  */
 
+/**
+ * @typedef {'long' | 'short' | 'narrow' | 'numeric' | '2-digit'} FormatLength
+ */
+
+/**
+ * @typedef {Object} MeridiemOptions
+ * @property {'short' | 'period' | 'caps' | 'space'} [meridiem] - Format style for AM/PM display
+ */
+
+/**
+ * @typedef {Intl.DateTimeFormatOptions & MeridiemOptions} FormatOptions
+ */
+
 import {
   getFirstDayOfWeek,
   getMeridiem,
@@ -20,21 +33,16 @@ import {
 import { formatWithLocale } from './locale';
 
 import {
-  DATETIME_MED,
-  DATETIME_MED_WEEKDAY,
-  DATETIME_NARROW,
+  DATETIME_LONG,
+  DATETIME_MEDIUM,
   DATETIME_SHORT,
-  DATE_MED,
-  DATE_MED_WEEKDAY,
-  DATE_NARROW,
+  DATE_LONG,
+  DATE_MEDIUM,
   DATE_SHORT,
   MONTH_YEAR,
-  MONTH_YEAR_SHORT,
-  TIME_HOUR,
-  TIME_MED,
+  TIME_LONG,
+  TIME_MEDIUM,
   TIME_SHORT,
-  TIME_SHORT_HOUR,
-  TIME_WITH_ZONE,
 } from './locale';
 
 import { parseDate } from './parse';
@@ -61,22 +69,6 @@ const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
  *  @class
  */
 export default class DateTime {
-  static DATE_MED = DATE_MED;
-  static DATE_SHORT = DATE_SHORT;
-  static DATE_NARROW = DATE_NARROW;
-  static DATE_MED_WEEKDAY = DATE_MED_WEEKDAY;
-  static TIME_MED = TIME_MED;
-  static TIME_SHORT = TIME_SHORT;
-  static TIME_HOUR = TIME_HOUR;
-  static TIME_SHORT_HOUR = TIME_SHORT_HOUR;
-  static TIME_WITH_ZONE = TIME_WITH_ZONE;
-  static DATETIME_MED = DATETIME_MED;
-  static DATETIME_SHORT = DATETIME_SHORT;
-  static DATETIME_NARROW = DATETIME_NARROW;
-  static DATETIME_MED_WEEKDAY = DATETIME_MED_WEEKDAY;
-  static MONTH_YEAR = MONTH_YEAR;
-  static MONTH_YEAR_SHORT = MONTH_YEAR_SHORT;
-
   static options = {};
 
   /**
@@ -330,11 +322,26 @@ export default class DateTime {
   // Compatibility
 
   /**
-   * Returns the numeric value of the DateTime instance.
-   * @returns {number}
+   * Returns the unix timestamp of the DateTime.
    */
-  valueOf() {
-    return this.getTime();
+  getTime() {
+    return this.date.getTime();
+  }
+
+  /**
+   * Sets the unix timestamp of the DateTime.
+   * @param {number} time
+   */
+  setTime(time) {
+    return new DateTime(time, this.options);
+  }
+
+  /**
+   * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
+   * representation of the DateTime.
+   */
+  toISOString() {
+    return this.date.toISOString();
   }
 
   /**
@@ -345,12 +352,21 @@ export default class DateTime {
   }
 
   /**
-   * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
-   * representation of the DateTime.
+   * Equivalent to `toISOString`.
    */
-  toISOString() {
+  toJSON() {
     return this.date.toISOString();
   }
+
+  /**
+   * Returns the numeric value of the DateTime instance.
+   * @returns {number}
+   */
+  valueOf() {
+    return this.getTime();
+  }
+
+  // Formatting
 
   /**
    * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -377,11 +393,11 @@ export default class DateTime {
   }
 
   /**
-   * Returns the date component of the DateTime. The result will
-   * be in the specified timezone, either that passed or set globally.
+   * Formats the date component in ISO style but in the local or global timezone.
    *
    * @example
    * 2025-01-01
+   *
    */
   toDate() {
     const str = toUTC(this).toISOString();
@@ -389,8 +405,55 @@ export default class DateTime {
   }
 
   /**
-   * Returns the time component of the DateTime. The result will
-   * be in the specified timezone, either that passed or set globally.
+   * Formats the date component in long style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * January 1, 2020
+   * dateTime.toDateLong();
+   */
+  toDateLong(extra) {
+    return this.format({
+      ...DATE_LONG,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the date component in medium style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * Jan 1, 2020
+   * dateTime.toDateMedium();
+   */
+  toDateMedium(extra) {
+    return this.format({
+      ...DATE_MEDIUM,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the date component in short style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * 1/1/2020
+   * dateTime.toDateShort();
+   */
+  toDateShort(extra) {
+    return this.format({
+      ...DATE_SHORT,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the time component in ISO style but in the local or global timezone.
    *
    * @example
    * 12:30:00.000
@@ -401,39 +464,197 @@ export default class DateTime {
   }
 
   /**
-   * Returns the unix timestamp of the DateTime.
+   * Formats the time component in long style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * 9:00:00am
+   * dateTime.toTimeLong();
    */
-  getTime() {
-    return this.date.getTime();
-  }
-
-  /**
-   * Sets the unix timestamp of the DateTime.
-   * @param {number} time
-   */
-  setTime(time) {
-    return new DateTime(time, this.options);
-  }
-
-  /**
-   * Sets the internal timezone of the DateTime.
-   * @param {string} timeZone
-   */
-  setZone(timeZone) {
-    return new DateTime(this.date, {
-      ...this.options,
-      timeZone,
+  toTimeLong(extra) {
+    return this.format({
+      ...TIME_LONG,
+      ...extra,
     });
   }
 
   /**
-   * Equivalent to `toISOString`.
+   * Formats the time component in medium style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * 9:00am
+   * dateTime.toTimeLong();
    */
-  toJSON() {
-    return this.date.toISOString();
+  toTimeMedium(extra) {
+    return this.format({
+      ...TIME_MEDIUM,
+      ...extra,
+    });
   }
 
-  // Formatting
+  /**
+   * Formats the time component in short style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * 9am
+   * dateTime.toTimeShort();
+   */
+  toTimeShort(extra) {
+    return this.format({
+      ...TIME_SHORT,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the time component with the time zone.
+   '
+   * @param {FormatLength | FormatOptions} [arg='short'] - Either a string
+   * representing the `timeZoneName` component, or an options object conforming to
+   * Intl.DateTimeFormatOptions.
+   *
+   * @example
+   * 9:00am EST
+   * dateTime.toTimeWithZone();
+   *
+   * @example
+   * 9:00am Eastern Standard Time
+   * dateTime.toTimeWithZone('long');
+   *
+   * @example
+   * 9:00am ET
+   * dateTime.toTimeWithZone('shortGeneric');
+   *
+   * @example
+   * 9:00am Eastern Time
+   * dateTime.toTimeWithZone('longGeneric');
+   *
+   * @example
+   * 09:00am EST
+   * dateTime.toTimeWithZone({ hour: '2-digit' });
+   */
+  toTimeWithZone(arg) {
+    const extra = resolveTimeZoneParams(arg);
+    return this.format({
+      ...TIME_MEDIUM,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the month and year components of the DateTime by locales.
+   *
+   * @param {FormatLength | FormatOptions} [arg='long'] - Either a string
+   * representing the month component, or an options object conforming to
+   * Intl.DateTimeFormatOptions.
+   *
+   * @example
+   * January 2025
+   * dateTime.toMonthYear();
+   *
+   * @example
+   * Jan 2025
+   * dateTime.toMonthYear('short');
+   *
+   * @example
+   * Jan 25
+   * dateTime.toMonthYear({ month: 'short', year: '2-digit' });
+   */
+  toMonthYear(arg) {
+    const extra = resolveMonthParams(arg);
+    return this.format({
+      ...MONTH_YEAR,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the DateTime in long style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * January 1, 2020 at 9:00am
+   * dateTime.formatLong();
+   */
+  formatLong(extra) {
+    return this.format({
+      ...DATETIME_LONG,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the DateTime in medium style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * Jan 1, 2020, 9:00am
+   * dateTime.formatMedium();
+   */
+  formatMedium(extra) {
+    return this.format({
+      ...DATETIME_MEDIUM,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the DateTime in short style.
+   *
+   * @param {FormatOptions} [extra] - Extra params.
+   *
+   * @example
+   * 1/1/2020, 9:00am
+   * dateTime.formatShort();
+   */
+  formatShort(extra) {
+    return this.format({
+      ...DATETIME_SHORT,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the DateTime with the time zone.
+   '
+   * @param {FormatLength | FormatOptions} [arg='short'] - Either a string
+   * representing the `timeZoneName` component, or an options object conforming to
+   * Intl.DateTimeFormatOptions.
+   *
+   * @example
+   * January 1, 2020 at 9:00am EST
+   * dateTime.formatWithZone();
+   *
+   * @example
+   * January 1, 2020 at 9:00am Eastern Standard Time
+   * dateTime.formatWithZone('long');
+   *
+   * @example
+   * January 1, 2020 at 9:00am ET
+   * dateTime.formatWithZone('shortGeneric');
+   *
+   * @example
+   * January 1, 2020 at 9:00am Eastern Time
+   * dateTime.formatWithZone('longGeneric');
+   *
+   * @example
+   * Jan 1, 2020 at 9:00am Eastern Time
+   * dateTime.formatTimeWithZone({ month: 'short' });
+   */
+  formatWithZone(arg) {
+    const extra = resolveTimeZoneParams(arg);
+    return this.format({
+      ...DATETIME_LONG,
+      ...extra,
+    });
+  }
 
   /**
    * Formats the DateTime using various formats accessible as static
@@ -442,8 +663,8 @@ export default class DateTime {
    * @param {Object} format
    * @param {Object} options
    */
-  format(format = DateTime.DATETIME_MED, options) {
-    // Merge everything with defaults.
+  format(format = DATETIME_LONG, options) {
+    // Merge default options.
     options = {
       ...this.options,
       ...options,
@@ -453,68 +674,10 @@ export default class DateTime {
       return formatWithTokens(this, format, options);
     } else {
       return formatWithLocale(this, {
-        ...options,
         ...format,
+        ...options,
       });
     }
-  }
-
-  /**
-   * Formats the date component of the DateTime using a standard
-   * representation. The local or global locale will be used when
-   * specified.
-   *
-   * @example
-   * January 1, 2025
-   */
-  formatDate() {
-    return this.format(DateTime.DATE_MED);
-  }
-
-  /**
-   * Formats the time component of the DateTime using a standard
-   * representation. The local or global locale will be used when
-   * specified.
-   *
-   * @example
-   * 9:00am
-   */
-  formatTime() {
-    return this.format(DateTime.TIME_MED);
-  }
-
-  /**
-   * Formats the hours component of the DateTime. The local or
-   * global locale will be used when specified.
-   *
-   * @example
-   * 9am
-   */
-  formatHours() {
-    return this.format(DateTime.TIME_HOUR);
-  }
-
-  /**
-   * Formats the month and year components of the DateTime. The
-   * local or global locale will be used when specified.
-   *
-   * @example
-   * January 2025
-   */
-  formatMonthYear() {
-    return this.format(DateTime.MONTH_YEAR);
-  }
-
-  /**
-   * Formats the month and year components of the DateTime in a
-   * shortened format. The local or global locale will be used
-   * when specified.
-   *
-   * @example
-   * Jan 2025
-   */
-  formatMonthYearShort() {
-    return this.format(DateTime.MONTH_YEAR_SHORT);
   }
 
   // Relative Formatting
@@ -730,7 +893,7 @@ export default class DateTime {
   }
 
   /**
-   * Alias for `getFullYear`.
+   * @alias {@link getFullYear}
    */
   getYear() {
     return this.getFullYear();
@@ -851,7 +1014,7 @@ export default class DateTime {
   }
 
   /**
-   * Alias for `setFullYear`.
+   * @alias {@link setFullYear}
    */
   setYear(year) {
     return this.setFullYear(year);
@@ -1023,7 +1186,7 @@ export default class DateTime {
   }
 
   /**
-   * Alias for {@link getTimeZone}.
+   * @alias {@link getTimeZone}
    */
   getTimezone() {
     return this.getTimeZone();
@@ -1041,10 +1204,21 @@ export default class DateTime {
   }
 
   /**
-   * Alias for {@link getTimeZoneOffset}.
+   * @alias {@link getTimeZoneOffset}.
    */
   getTimezoneOffset() {
     return this.offset;
+  }
+
+  /**
+   * Sets the internal timezone of the DateTime.
+   * @param {string} timeZone
+   */
+  setZone(timeZone) {
+    return new DateTime(this.date, {
+      ...this.options,
+      timeZone,
+    });
   }
 
   /**
@@ -1349,4 +1523,27 @@ function endOf(dt, unit) {
   const seconds = index < 6 ? 59 : dt.getSeconds();
 
   return dt.setArgs(year, month, day, hours, minutes, seconds, 999);
+}
+
+// Formatting Utils
+
+function resolveTimeZoneParams(arg) {
+  return resolveFormatParams(arg, 'timeZoneName', 'short');
+}
+
+function resolveMonthParams(arg) {
+  return resolveFormatParams(arg, 'month', 'long');
+}
+
+function resolveFormatParams(arg, name, preset) {
+  if (typeof arg === 'string') {
+    return {
+      [name]: arg,
+    };
+  } else {
+    return {
+      [name]: preset,
+      ...arg,
+    };
+  }
 }

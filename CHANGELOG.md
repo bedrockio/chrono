@@ -1,3 +1,11 @@
+## 0.8.0
+
+- Aligned date formatting styles better.
+- `formatDate` -> `toDateMedium`.
+- `formatTime` -> `toTimeMedium`.
+- `formatHours` -> `toTimeShort`.
+- Removed all static `presets` and instead allow params to all methods.
+
 ## 0.7.0
 
 - Allow locales to specify first day of week.

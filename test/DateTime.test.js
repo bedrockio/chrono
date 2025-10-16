@@ -716,113 +716,14 @@ describe('DateTime', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
         expect(dt.format()).toBe('January 1, 2020 at 9:00am');
       });
-    });
 
-    describe('presets', () => {
-      it('datetime with weekday', () => {
+      it('should not merge options into default format', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATETIME_MED_WEEKDAY)).toBe(
-          'Wednesday, January 1, 2020 at 9:00am',
-        );
-      });
-
-      it('medium datetime', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATETIME_MED)).toBe(
-          'January 1, 2020 at 9:00am',
-        );
-      });
-
-      it('short datetime', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATETIME_SHORT)).toBe('Jan 1, 2020, 9:00am');
-      });
-
-      it('narrow datetime', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATETIME_NARROW)).toBe('1/1/2020, 9:00am');
-      });
-
-      it('date with weekday', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATE_MED_WEEKDAY)).toBe(
-          'Wednesday, January 1, 2020',
-        );
-      });
-
-      it('medium date', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATE_MED)).toBe('January 1, 2020');
-      });
-
-      it('short date', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATE_SHORT)).toBe('Jan 1, 2020');
-      });
-
-      it('narrow date', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.DATE_NARROW)).toBe('1/1/2020');
-      });
-
-      it('time with timezone', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_WITH_ZONE)).toBe(
-          '9:00am Japan Standard Time',
-        );
-      });
-
-      it('medium time', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_MED)).toBe('9:00am');
-      });
-
-      it('short time', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_SHORT)).toBe('9:00a');
-      });
-
-      it('hour time', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_HOUR)).toBe('9am');
-      });
-
-      it('short hour time', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.TIME_SHORT_HOUR)).toBe('9a');
-      });
-    });
-
-    describe('formatDate', () => {
-      it('short format the date only', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.formatDate()).toBe('January 1, 2020');
-      });
-    });
-
-    describe('formatTime', () => {
-      it('short format the time only', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.formatTime()).toBe('9:00am');
-      });
-    });
-
-    describe('formatHours', () => {
-      it('short format the hour only', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.formatHours()).toBe('9am');
-      });
-    });
-
-    describe('formatMonthYear', () => {
-      it('short format the month and year', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.formatMonthYear()).toBe('January 2020');
-      });
-
-      it('short expose a way to format the short form', () => {
-        const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.format(DateTime.MONTH_YEAR_SHORT)).toBe('Jan 2020');
+        expect(
+          dt.format({
+            month: 'short',
+          }),
+        ).toBe('Jan');
       });
     });
   });
@@ -897,31 +798,20 @@ describe('DateTime', () => {
       expect(dt.toString()).toBe('December 31, 2019 at 7:00pm');
     });
 
-    it('should allow passing timezone in datetime format', () => {
+    it('should allow passing timezone in options', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
-        dt.format(DateTime.DATETIME_MED, {
-          timeZone: 'America/New_York',
-        }),
-      ).toBe('December 31, 2019 at 7:00pm');
-    });
-
-    it('should allow passing timezone in date format', () => {
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(
-        dt.format(DateTime.DATE_MED, {
-          timeZone: 'America/New_York',
-        }),
+        dt.format(
+          {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          },
+          {
+            timeZone: 'America/New_York',
+          },
+        ),
       ).toBe('December 31, 2019');
-    });
-
-    it('should allow passing timezone in time format', () => {
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(
-        dt.format(DateTime.TIME_MED, {
-          timeZone: 'America/New_York',
-        }),
-      ).toBe('7:00pm');
     });
 
     it('use system time when not set', () => {
@@ -960,31 +850,20 @@ describe('DateTime', () => {
       expect(dt.toString()).toBe('2020年1月1日 9:00');
     });
 
-    it('should allow passing locale in datetime format', () => {
+    it('should allow passing locale in options', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(
-        dt.format(DateTime.DATETIME_MED, {
-          locale: 'ja-JP',
-        }),
-      ).toBe('2020年1月1日 9:00');
-    });
-
-    it('should allow passing locale in date format', () => {
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(
-        dt.format(DateTime.DATE_MED, {
-          locale: 'ja-JP',
-        }),
+        dt.format(
+          {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          },
+          {
+            locale: 'ja-JP',
+          },
+        ),
       ).toBe('2020年1月1日');
-    });
-
-    it('should allow passing locale in time format', () => {
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(
-        dt.format(DateTime.TIME_MED, {
-          locale: 'ja-JP',
-        }),
-      ).toBe('9:00');
     });
 
     it('use system locale when not set', () => {
@@ -1395,29 +1274,279 @@ describe('DateTime', () => {
     });
   });
 
-  describe('toDate', () => {
-    it('should get the date', () => {
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(dt.toDate()).toBe('2020-01-01');
+  describe('date formatting', () => {
+    describe('toDate', () => {
+      it('should get the date', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDate()).toBe('2020-01-01');
+      });
+
+      it('should account for timezone', () => {
+        DateTime.setTimeZone('America/New_York');
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDate()).toBe('2019-12-31');
+      });
     });
 
-    it('should account for timezone', () => {
-      DateTime.setTimeZone('America/New_York');
-      const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(dt.toDate()).toBe('2019-12-31');
+    describe('toDateLong', () => {
+      it('should return long format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDateLong()).toBe('January 1, 2020');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toDateLong({
+            hour: 'numeric',
+          }),
+        ).toBe('January 1, 2020 at 9am');
+      });
+    });
+
+    describe('toDateMedium', () => {
+      it('should return medium format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDateMedium()).toBe('Jan 1, 2020');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toDateMedium({
+            hour: 'numeric',
+          }),
+        ).toBe('Jan 1, 2020, 9am');
+      });
+    });
+
+    describe('toDateShort', () => {
+      it('should return short format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDateShort()).toBe('1/1/2020');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toDateShort({
+            hour: 'numeric',
+          }),
+        ).toBe('1/1/2020, 9am');
+      });
     });
   });
 
-  describe('toTime', () => {
-    it('should get the time', () => {
-      const dt = new DateTime('2020-01-01T00:10:20.300Z');
-      expect(dt.toTime()).toBe('09:10:20.300');
+  describe('time formatting', () => {
+    describe('toTime', () => {
+      it('should get the time', () => {
+        const dt = new DateTime('2020-01-01T00:10:20.300Z');
+        expect(dt.toTime()).toBe('09:10:20.300');
+      });
+
+      it('should account for timezone', () => {
+        DateTime.setTimeZone('America/New_York');
+        const dt = new DateTime('2020-01-01T00:10:20.300Z');
+        expect(dt.toTime()).toBe('19:10:20.300');
+      });
     });
 
-    it('should account for timezone', () => {
-      DateTime.setTimeZone('America/New_York');
-      const dt = new DateTime('2020-01-01T00:10:20.300Z');
-      expect(dt.toTime()).toBe('19:10:20.300');
+    describe('toTimeWithZone', () => {
+      it('should use short zone by default', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeWithZone()).toBe('9:00am GMT+9');
+      });
+
+      it('should format with long zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeWithZone('long')).toBe('9:00am Japan Standard Time');
+      });
+
+      it('should format with short generic zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeWithZone('shortGeneric')).toBe('9:00am Japan Time');
+      });
+
+      it('should format with long generic zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeWithZone('longGeneric')).toBe(
+          '9:00am Japan Standard Time',
+        );
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeWithZone({
+            hour: '2-digit',
+          }),
+        ).toBe('09:00am GMT+9');
+      });
+    });
+
+    describe('toTimeLong', () => {
+      it('should return long format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeLong()).toBe('9:00:00am');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeLong({
+            hour: '2-digit',
+          }),
+        ).toBe('09:00:00am');
+      });
+    });
+
+    describe('toTimeMedium', () => {
+      it('should return medium format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeMedium()).toBe('9:00am');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeMedium({
+            hour: '2-digit',
+          }),
+        ).toBe('09:00am');
+      });
+    });
+
+    describe('toTimeShort', () => {
+      it('should return short format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toTimeShort()).toBe('9am');
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeShort({
+            hour: '2-digit',
+          }),
+        ).toBe('09am');
+      });
+
+      it('should be able to format short meridiem', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeShort({
+            meridiem: 'short',
+          }),
+        ).toBe('9a');
+      });
+
+      it('should be able to format caps meridiem', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeShort({
+            meridiem: 'caps',
+          }),
+        ).toBe('9AM');
+      });
+
+      it('should be able to format space meridiem', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeShort({
+            meridiem: 'space',
+          }),
+        ).toBe('9 am');
+      });
+
+      it('should be able to format period meridiem', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toTimeShort({
+            meridiem: 'period',
+          }),
+        ).toBe('9 a.m.');
+      });
+    });
+  });
+
+  describe('datetime formatting', () => {
+    describe('formatWithZone', () => {
+      it('should format with short zone by default', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatWithZone()).toBe('January 1, 2020 at 9:00am GMT+9');
+      });
+
+      it('should format with long zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatWithZone('long')).toBe(
+          'January 1, 2020 at 9:00am Japan Standard Time',
+        );
+      });
+
+      it('should format with short generic zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatWithZone('shortGeneric')).toBe(
+          'January 1, 2020 at 9:00am Japan Time',
+        );
+      });
+
+      it('should format with long generic zone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatWithZone('longGeneric')).toBe(
+          'January 1, 2020 at 9:00am Japan Standard Time',
+        );
+      });
+
+      it('should be able to pass extra params', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.formatWithZone({
+            hour: '2-digit',
+          }),
+        ).toBe('January 1, 2020 at 09:00am GMT+9');
+      });
+    });
+
+    describe('formatLong', () => {
+      it('should return long format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatLong()).toBe('January 1, 2020 at 9:00am');
+      });
+    });
+
+    describe('formatMedium', () => {
+      it('should return medium format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatMedium()).toBe('Jan 1, 2020, 9:00am');
+      });
+    });
+
+    describe('formatShort', () => {
+      it('should return short format', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.formatShort()).toBe('1/1/2020, 9:00am');
+      });
+    });
+  });
+
+  describe('month-year formatting', () => {
+    it('should format month-year', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toMonthYear()).toBe('January 2020');
+    });
+
+    it('should use short month', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toMonthYear('short')).toBe('Jan 2020');
+    });
+
+    it('should be able to pass extra params', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(
+        dt.toMonthYear({
+          hour: '2-digit',
+        }),
+      ).toBe('January 2020 at 09am');
     });
   });
 
