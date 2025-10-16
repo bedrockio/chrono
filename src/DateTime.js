@@ -1214,11 +1214,18 @@ export default class DateTime {
    * Sets the internal timezone of the DateTime.
    * @param {string} timeZone
    */
-  setZone(timeZone) {
+  setTimeZone(timeZone) {
     return new DateTime(this.date, {
       ...this.options,
       timeZone,
     });
+  }
+
+  /**
+   * @alias {@link setTimeZone}
+   */
+  setZone(timeZone) {
+    return this.setTimeZone(timeZone);
   }
 
   /**

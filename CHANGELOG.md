@@ -5,6 +5,7 @@
 - `formatTime` -> `toTimeMedium`.
 - `formatHours` -> `toTimeShort`.
 - Removed all static `presets` and instead allow params to all methods.
+- `setZone` -> `setTimeZone` with alias.
 
 ## 0.7.0
 

@@ -1207,8 +1207,17 @@ describe('DateTime', () => {
     });
   });
 
-  describe('setZone', () => {
+  describe('setTimeZone', () => {
     it('should set the internal timezone', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.setTimeZone('UTC').endOf('month').toISOString()).toBe(
+        '2020-01-31T23:59:59.999Z',
+      );
+    });
+  });
+
+  describe('setZone', () => {
+    it('should be an alias for setTimeZone', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
       expect(dt.setZone('UTC').endOf('month').toISOString()).toBe(
         '2020-01-31T23:59:59.999Z',
