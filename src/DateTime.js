@@ -39,6 +39,7 @@ import {
   DATE_LONG,
   DATE_MEDIUM,
   DATE_SHORT,
+  MONTH_DAY,
   MONTH_YEAR,
   TIME_LONG,
   TIME_MEDIUM,
@@ -322,14 +323,14 @@ export default class DateTime {
   // Compatibility
 
   /**
-   * Returns the unix timestamp of the DateTime.
+   * Returns a number representing the timestamp of the DateTime in milliseconds.
    */
   getTime() {
     return this.date.getTime();
   }
 
   /**
-   * Sets the unix timestamp of the DateTime.
+   * Sets the timestamp of the DateTime as a number in milliseconds.
    * @param {number} time
    */
   setTime(time) {
@@ -569,6 +570,33 @@ export default class DateTime {
     const extra = resolveMonthParams(arg);
     return this.format({
       ...MONTH_YEAR,
+      ...extra,
+    });
+  }
+
+  /**
+   * Formats the month and day components of the DateTime by locales.
+   *
+   * @param {FormatLength | FormatOptions} [arg='long'] - Either a string
+   * representing the month component, or an options object conforming to
+   * Intl.DateTimeFormatOptions.
+   *
+   * @example
+   * January 15
+   * dateTime.toMonthDay();
+   *
+   * @example
+   * Jan 15
+   * dateTime.toMonthDay('short');
+   *
+   * @example
+   * January 15 at 9am
+   * dateTime.toMonthDay({ hour: 'numeric' });
+   */
+  toMonthDay(arg) {
+    const extra = resolveMonthParams(arg);
+    return this.format({
+      ...MONTH_DAY,
       ...extra,
     });
   }
@@ -1367,25 +1395,47 @@ function setComponents(dt, components) {
   return dt;
 }
 
-function formatRelative(date, options = {}) {
-  const { min, max, locale, numeric = 'auto', now = new DateTime() } = options;
-  const ms = date - now;
+function formatRelative(dt, options = {}) {
+  const { min, max, locale, numeric = 'auto' } = options;
+  const now = new DateTime(options.now);
 
-  // Return nothing up front if the offset is outside
-  // defined bounds. This allows a fallback to an absolute
-  // date. For example:
+  // @ts-ignore
+  const ms = dt - now;
+  const msAbs = Math.abs(ms);
+
+  // Fall back to non-relative formats if outside defined
+  // bounds. If we are within a day show a time format,
+  // otherwise show a date fromat. For example:
   //
   // dt.relative({
-  //  min: new DateTime().rewind(6, 'months')
-  // }) || dt.format();
+  //  min: new DateTime().rewind(6, 'hours')
+  // })
   //
-  // This will render a relative format no earlier than
-  // 6 months and fall back to an absolute format otherwise.
-  if (date < min || date > max) {
-    return;
+  // Will progressively render:
+
+  // - 1 minute ago
+  // - 5 hours ago
+  // - 11:00pm
+  // - March 15
+  // - June 15 2018
+  if (dt < min) {
+    if (dt > now.startOfDay()) {
+      return dt.toTimeMedium();
+    } else if (dt > now.startOfYear()) {
+      return dt.toMonthDay();
+    } else {
+      return dt.toDateLong();
+    }
+  } else if (dt > max) {
+    if (dt < now.endOfDay()) {
+      return dt.toTimeMedium();
+    } else if (dt < now.endOfYear()) {
+      return dt.toMonthDay();
+    } else {
+      return dt.toDateLong();
+    }
   }
 
-  const msAbs = Math.abs(ms);
   const formatter = new Intl.RelativeTimeFormat(locale, {
     numeric,
   });
@@ -1409,7 +1459,7 @@ function formatRelative(date, options = {}) {
   // the month offset with years (for example 24 for 2
   // years) as a pivot point to determine which unit
   // to render.
-  const months = getMonthOffset(date, now);
+  const months = getMonthOffset(dt, now);
   const monthsAbs = Math.abs(months);
 
   let format;
@@ -1421,7 +1471,7 @@ function formatRelative(date, options = {}) {
     // example if the current date is 8/15 then only
     // format as months if the input date is 7/15 or
     // before, otherwise format as weeks.
-    const day1 = date.getDate();
+    const day1 = dt.getDate();
     const day2 = now.getDate();
     if (months === 1) {
       format = day1 >= day2 ? 'months' : 'weeks';

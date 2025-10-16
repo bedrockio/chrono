@@ -121,6 +121,18 @@ export const MONTH_YEAR = {
   month: 'long',
 };
 
+/**
+ * A medium month and day format.
+ *
+ * @constant
+ * @example
+ * January 2020
+ */
+export const MONTH_DAY = {
+  month: 'long',
+  day: 'numeric',
+};
+
 export function formatWithLocale(dt, options = {}) {
   const { date } = dt;
   const { locale, meridiem, ...rest } = options;

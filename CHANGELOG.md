@@ -6,6 +6,9 @@
 - `formatHours` -> `toTimeShort`.
 - Removed all static `presets` and instead allow params to all methods.
 - `setZone` -> `setTimeZone` with alias.
+- `relative` now has intelligent fallback past bounds.
+- Added `toMonthYear`.
+- Added `toMonthDay`.
 
 ## 0.7.0
 

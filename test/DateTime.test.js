@@ -1559,6 +1559,27 @@ describe('DateTime', () => {
     });
   });
 
+  describe('month-day formatting', () => {
+    it('should format month-day', () => {
+      const dt = new DateTime('2020-11-14T00:00:00.000Z');
+      expect(dt.toMonthDay()).toBe('November 14');
+    });
+
+    it('should use short month', () => {
+      const dt = new DateTime('2020-11-14T00:00:00.000Z');
+      expect(dt.toMonthDay('short')).toBe('Nov 14');
+    });
+
+    it('should be able to pass extra params', () => {
+      const dt = new DateTime('2020-11-14T00:00:00.000Z');
+      expect(
+        dt.toMonthDay({
+          hour: 'numeric',
+        }),
+      ).toBe('November 14 at 9am');
+    });
+  });
+
   describe('toISODate', () => {
     it('should get the date', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
@@ -1827,12 +1848,14 @@ describe('DateTime', () => {
       });
 
       describe('min', () => {
-        it('should not format if past cutoff', () => {
+        it('should format as date past cutoff', () => {
+          mockTime('2025-01-01T00:00:00.000Z');
+
           expect(
             new DateTime().rewind(1, 'year').relative({
               min: new DateTime().rewind(6, 'months'),
             }),
-          ).toBeUndefined();
+          ).toBe('January 1, 2024');
 
           const now = new DateTime();
           const next = now.rewind(6, 'months');
@@ -1849,16 +1872,50 @@ describe('DateTime', () => {
               min: new DateTime().rewind(6, 'months'),
             }),
           ).toBe('2 days ago');
+
+          unmockTime();
+        });
+
+        it('should return a time if still same day', () => {
+          mockTime('2025-01-01T09:00:00.000Z');
+
+          expect(
+            new DateTime().rewind(1, 'hour').relative({
+              min: new DateTime().rewind(3, 'hours'),
+            }),
+          ).toBe('1 hour ago');
+
+          expect(
+            new DateTime().rewind(6, 'hours').relative({
+              min: new DateTime().rewind(3, 'hours'),
+            }),
+          ).toBe('12:00pm');
+
+          unmockTime();
+        });
+
+        it('should return a day and month if same year', () => {
+          mockTime('2025-06-15T09:00:00.000Z');
+
+          expect(
+            new DateTime().rewind(19, 'hours').relative({
+              min: new DateTime().rewind(6, 'hours'),
+            }),
+          ).toBe('June 14');
+
+          unmockTime();
         });
       });
 
       describe('max', () => {
-        it('should not format if past cutoff', () => {
+        it('should format as date past cutoff', () => {
+          mockTime('2025-01-01T00:00:00.000Z');
+
           expect(
             new DateTime().advance(1, 'year').relative({
               max: new DateTime().advance(6, 'months'),
             }),
-          ).toBeUndefined();
+          ).toBe('January 1, 2026');
 
           const now = new DateTime();
           const next = now.advance(6, 'months');
@@ -1880,6 +1937,8 @@ describe('DateTime', () => {
                 max: new DateTime().advance(6, 'months'),
               }),
           ).toBe('in 2 days');
+
+          unmockTime();
         });
       });
 
