@@ -14,6 +14,10 @@ export function getUnitIndex(unit) {
   return UNITS.indexOf(unit);
 }
 
+export function getUnitForIndex(index) {
+  return UNITS[index];
+}
+
 export function normalizeUnit(unit) {
   unit = unit.replace(/s$/, '');
   if (!UNITS.includes(unit)) {

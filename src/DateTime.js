@@ -46,7 +46,7 @@ import {
   TIME_SHORT,
 } from './locale';
 
-import { parseDate } from './parse';
+import { parseDate, parseTime } from './parse';
 import { getTimezoneOffset, setPseudoTimezone } from './timezone';
 import { formatWithTokens } from './tokens';
 import { getUnitIndex, normalizeUnit } from './units';
@@ -334,7 +334,12 @@ export default class DateTime {
    * @param {number} time
    */
   setTime(time) {
-    return new DateTime(time, this.options);
+    if (typeof time === 'string') {
+      const { params, utc } = parseTime(time);
+      return setComponents(this, params, utc);
+    } else {
+      return new DateTime(time, this.options);
+    }
   }
 
   /**
@@ -1355,7 +1360,7 @@ function advanceDate(dt, dir, by, unit) {
   return dt;
 }
 
-function setComponents(dt, components) {
+function setComponents(dt, components, utc) {
   const names = Object.keys(components);
 
   names.sort((a, b) => {
@@ -1367,32 +1372,52 @@ function setComponents(dt, components) {
 
     name = normalizeUnit(name);
 
-    switch (name) {
-      case 'year':
-        dt = dt.setFullYear(value);
-        break;
-      case 'month':
-        dt = dt.setMonth(value - 1);
-        break;
-      case 'day':
-        dt = dt.setDate(value);
-        break;
-      case 'hour':
-        dt = dt.setHours(value);
-        break;
-      case 'minute':
-        dt = dt.setMinutes(value);
-        break;
-      case 'second':
-        dt = dt.setSeconds(value);
-        break;
-      case 'millisecond':
-        dt = dt.setMilliseconds(value);
-        break;
+    if (utc) {
+      dt = setUTCComponent(dt, name, value);
+    } else {
+      dt = setComponent(dt, name, value);
     }
   }
 
   return dt;
+}
+
+function setComponent(dt, name, value) {
+  switch (name) {
+    case 'year':
+      return dt.setFullYear(value);
+    case 'month':
+      return dt.setMonth(value - 1);
+    case 'day':
+      return dt.setDate(value);
+    case 'hour':
+      return dt.setHours(value);
+    case 'minute':
+      return dt.setMinutes(value);
+    case 'second':
+      return dt.setSeconds(value);
+    case 'millisecond':
+      return dt.setMilliseconds(value);
+  }
+}
+
+function setUTCComponent(dt, name, value) {
+  switch (name) {
+    case 'year':
+      return dt.setUTCFullYear(value);
+    case 'month':
+      return dt.setUTCMonth(value - 1);
+    case 'day':
+      return dt.setUTCDate(value);
+    case 'hour':
+      return dt.setUTCHours(value);
+    case 'minute':
+      return dt.setUTCMinutes(value);
+    case 'second':
+      return dt.setUTCSeconds(value);
+    case 'millisecond':
+      return dt.setUTCMilliseconds(value);
+  }
 }
 
 function formatRelative(dt, options = {}) {

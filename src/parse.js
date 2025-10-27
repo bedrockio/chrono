@@ -1,4 +1,5 @@
 import { isAmbiguousTimeZone, setPseudoTimezone } from './timezone';
+import { getUnitForIndex } from './units';
 
 // Allow any dates parseable by Javascript, however
 // exclude odd results that may be caused by partial
@@ -67,4 +68,35 @@ function expandShortISOFormats(str) {
   }
 
   return str;
+}
+
+// Time string parsing
+
+const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?$/;
+
+export function parseTime(str) {
+  const match = str.match(TIME_REG);
+
+  if (!match) {
+    throw new Error('Invalid time value');
+  }
+
+  const utc = !!match[5];
+  const arr = match?.slice(1, 5);
+
+  const params = {};
+
+  for (let i = 0; i < arr.length; i++) {
+    const value = match?.[i + 1];
+
+    if (value) {
+      const unit = getUnitForIndex(i + 4);
+      params[unit] = Number(value);
+    }
+  }
+
+  return {
+    utc,
+    params,
+  };
 }

@@ -1,3 +1,7 @@
+## 0.9.0
+
+- Added `setTime` extension than can parse a time string.
+
 ## 0.8.0
 
 - Aligned date formatting styles better.

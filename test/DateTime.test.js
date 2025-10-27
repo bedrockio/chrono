@@ -2538,4 +2538,78 @@ describe('DateTime', () => {
       });
     });
   });
+
+  describe('extensions', () => {
+    describe('setTime', () => {
+      it('should set parsed time components by a string', async () => {
+        mockTime('2025-01-01T12:00:00.000Z');
+
+        const dt = new DateTime();
+
+        expect(dt.setTime('11').toISOString()).toBe('2025-01-01T02:00:00.000Z');
+
+        expect(dt.setTime('11:00').toISOString()).toBe(
+          '2025-01-01T02:00:00.000Z',
+        );
+
+        expect(dt.setTime('11:45').toISOString()).toBe(
+          '2025-01-01T02:45:00.000Z',
+        );
+
+        expect(dt.setTime('11:45:15').toISOString()).toBe(
+          '2025-01-01T02:45:15.000Z',
+        );
+
+        expect(dt.setTime('11:45:15.200').toISOString()).toBe(
+          '2025-01-01T02:45:15.200Z',
+        );
+
+        unmockTime();
+      });
+
+      it('should set UTC time components by a string', async () => {
+        mockTime('2025-01-01T12:00:00.000Z');
+
+        const dt = new DateTime();
+
+        expect(dt.setTime('11Z').toISOString()).toBe(
+          '2025-01-01T11:00:00.000Z',
+        );
+
+        expect(dt.setTime('11:00Z').toISOString()).toBe(
+          '2025-01-01T11:00:00.000Z',
+        );
+
+        expect(dt.setTime('11:45Z').toISOString()).toBe(
+          '2025-01-01T11:45:00.000Z',
+        );
+
+        expect(dt.setTime('11:45:15Z').toISOString()).toBe(
+          '2025-01-01T11:45:15.000Z',
+        );
+
+        expect(dt.setTime('11:45:15.200Z').toISOString()).toBe(
+          '2025-01-01T11:45:15.200Z',
+        );
+
+        unmockTime();
+      });
+
+      it('should handle standard errors', async () => {
+        mockTime('2025-01-01T12:00:00.000Z');
+
+        const dt = new DateTime();
+
+        expect(() => {
+          dt.setTime('bad').toISOString();
+        }).toThrow('Invalid time value');
+
+        expect(() => {
+          dt.setTime('11.25').toISOString();
+        }).toThrow('Invalid time value');
+
+        unmockTime();
+      });
+    });
+  });
 });
