@@ -1,6 +1,7 @@
 ## 0.9.1
 
 - Allow unsetting time by empty string.
+- Allow fractional seconds in `set`.
 
 ## 0.9.0
 

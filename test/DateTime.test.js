@@ -939,6 +939,17 @@ describe('DateTime', () => {
           .toISOString(),
       ).toBe('2020-03-30T00:00:00.000Z');
     });
+
+    it('should set fractional seconds', () => {
+      const dt = new DateTime('2020-02-15T00:00:00.000Z');
+      expect(
+        dt
+          .set({
+            seconds: 30.572,
+          })
+          .toISOString(),
+      ).toBe('2020-02-15T00:00:30.572Z');
+    });
   });
 
   describe('advance', () => {

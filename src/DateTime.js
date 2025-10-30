@@ -1361,6 +1361,8 @@ function advanceDate(dt, dir, by, unit) {
 }
 
 function setComponents(dt, components, utc) {
+  components = normalizeComponents(components);
+
   const names = Object.keys(components);
 
   names.sort((a, b) => {
@@ -1380,6 +1382,22 @@ function setComponents(dt, components, utc) {
   }
 
   return dt;
+}
+
+function normalizeComponents(components) {
+  const seconds = components.seconds || components.second;
+
+  if (seconds) {
+    const fraction = seconds % 1;
+    if (fraction !== 0) {
+      components = {
+        ...components,
+        milliseconds: Math.round(fraction * 1000),
+      };
+    }
+  }
+
+  return components;
 }
 
 function setComponent(dt, name, value) {

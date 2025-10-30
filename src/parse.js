@@ -72,7 +72,7 @@ function expandShortISOFormats(str) {
 
 // Time string parsing
 
-const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?$/;
+const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}(?:\.\d{3})?))?(Z)?$/;
 
 export function parseTime(str) {
   if (!str) {
@@ -81,7 +81,6 @@ export function parseTime(str) {
         hour: 0,
         minute: 0,
         seconds: 0,
-        milliseconds: 0,
       },
       utc: false,
     };
@@ -93,8 +92,8 @@ export function parseTime(str) {
     throw new Error('Invalid time value');
   }
 
-  const utc = !!match[5];
-  const arr = match?.slice(1, 5);
+  const utc = !!match[4];
+  const arr = match?.slice(1, 4);
 
   const params = {};
 
