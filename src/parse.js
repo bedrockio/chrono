@@ -75,6 +75,18 @@ function expandShortISOFormats(str) {
 const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?$/;
 
 export function parseTime(str) {
+  if (!str) {
+    return {
+      params: {
+        hour: 0,
+        minute: 0,
+        seconds: 0,
+        milliseconds: 0,
+      },
+      utc: false,
+    };
+  }
+
   const match = str.match(TIME_REG);
 
   if (!match) {

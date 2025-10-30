@@ -2595,6 +2595,16 @@ describe('DateTime', () => {
         unmockTime();
       });
 
+      it('should unset time by empty string', async () => {
+        mockTime('2025-01-01T12:00:00.000Z');
+
+        expect(new DateTime().setTime('').toISOString()).toBe(
+          '2024-12-31T15:00:00.000Z',
+        );
+
+        unmockTime();
+      });
+
       it('should handle standard errors', async () => {
         mockTime('2025-01-01T12:00:00.000Z');
 

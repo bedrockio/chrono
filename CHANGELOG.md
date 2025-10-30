@@ -1,3 +1,7 @@
+## 0.9.1
+
+- Allow unsetting time by empty string.
+
 ## 0.9.0
 
 - Added `setTime` extension than can parse a time string.
