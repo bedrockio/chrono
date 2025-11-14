@@ -1,3 +1,7 @@
+## Next
+
+- Throw on bad locale or timezone.
+
 ## 0.9.1
 
 - Allow unsetting time by empty string.

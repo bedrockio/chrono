@@ -24,10 +24,9 @@ import {
   getFirstDayOfWeek,
   getMeridiem,
   getMonthName,
-  getSystemLocale,
-  getSystemTimeZone,
   getWeekdayName,
   getWeekdays,
+  resolveIntlOptions,
 } from './intl';
 
 import { formatWithLocale } from './locale';
@@ -301,8 +300,7 @@ export default class DateTime {
       ...options,
     };
 
-    options.locale ||= getSystemLocale();
-    options.timeZone ||= getSystemTimeZone();
+    resolveIntlOptions(options);
 
     if (typeof args[0] === 'string') {
       this.date = parseDate(args[0], options);

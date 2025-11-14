@@ -701,6 +701,24 @@ describe('DateTime', () => {
         expect(dt.toISOString()).toBe('2020-01-01T05:00:00.000Z');
       });
     });
+
+    describe('options', () => {
+      it('should error on invalid timezone', () => {
+        expect(() => {
+          new DateTime({
+            timeZone: 'bad timezone',
+          });
+        }).toThrow('Invalid time zone specified: bad');
+      });
+
+      it('should error on invalid locale', () => {
+        expect(() => {
+          new DateTime({
+            locale: 'bad locale',
+          });
+        }).toThrow('Incorrect locale information provided');
+      });
+    });
   });
 
   describe('toString', () => {

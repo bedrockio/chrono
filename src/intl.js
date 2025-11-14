@@ -19,10 +19,11 @@ export function getWeekdayName(dt, style = 'long') {
 }
 
 export function getWeekdays(options) {
+  resolveIntlOptions(options);
+
   let { start, locale, style = 'long' } = options;
 
   start ||= getFirstDayOfWeek(options);
-  locale ||= getSystemLocale();
 
   return Array.from(new Array(7), (_, i) => {
     const day = (1 + i + start) % 7;
@@ -133,10 +134,13 @@ function normalizeIntlOptions(locale, options) {
 
 // Utils
 
-export function getSystemLocale() {
-  return new Intl.DateTimeFormat().resolvedOptions().locale;
-}
+export function resolveIntlOptions(options) {
+  const { locale, timeZone } = options;
 
-export function getSystemTimeZone() {
-  return new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const resolved = new Intl.DateTimeFormat(locale, {
+    timeZone,
+  }).resolvedOptions();
+
+  options.locale ||= resolved.locale;
+  options.timeZone ||= resolved.timeZone;
 }
