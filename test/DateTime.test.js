@@ -599,6 +599,10 @@ describe('DateTime', () => {
           }).toISOString(),
         ).toEqual('2020-10-31T18:30:00.000Z');
       });
+
+      it('should be invalid on bad input', async () => {
+        expect(new DateTime('bad').isInvalid()).toBe(true);
+      });
     });
 
     describe('numeric argument', () => {

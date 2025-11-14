@@ -13,7 +13,7 @@ export function parseDate(str, options) {
 
   const date = new Date(str);
 
-  if (date.getFullYear() === 2001 && !str.includes(2001)) {
+  if (date.getFullYear() === 2001 && !str.includes('2001')) {
     date.setFullYear(new Date().getFullYear());
   }
 
