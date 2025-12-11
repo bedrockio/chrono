@@ -1,6 +1,9 @@
-## Next
+## 0.10.0
 
 - Throw on bad locale or timezone.
+- Added `toLocalString`.
+- `toDate` -> `toLocalDate` with alias.
+- `toTime` -> `toLocalTime` with alias.
 
 ## 0.9.1
 

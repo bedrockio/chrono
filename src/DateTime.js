@@ -342,7 +342,7 @@ export default class DateTime {
 
   /**
    * Returns the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)
-   * representation of the DateTime.
+   * representation of the DateTime in UTC.
    */
   toISOString() {
     return this.date.toISOString();
@@ -397,15 +397,53 @@ export default class DateTime {
   }
 
   /**
-   * Formats the date component in ISO style but in the local or global timezone.
+   * Formats the DateTime in [ISO format](https://en.wikipedia.org/wiki/ISO_8601)
+   * and the local timezone.
+   *
+   * @param {"minute" | "second" | "millisecond"} [precision] - The time precision to format to.
+   *   Default is "milliseconds".
+   *
+   * @example
+   * 2026-01-01T09:00:00.000
+   *
+   * @example
+   * 2026-01-01T09:00:00
+   *
+   * @example
+   * 2026-01-01T09:00
+   */
+  toLocalString(precision) {
+    const local = toUTC(this).toISOString().slice(0, -1);
+    return toPrecision(local, precision);
+  }
+
+  /**
+   * Formats the date component in ISO format but in local timezone.
    *
    * @example
    * 2025-01-01
    *
    */
+  toLocalDate() {
+    return toUTC(this).toISOString().split('T')[0];
+  }
+
+  /**
+   * Formats the time component in ISO format but in local timezone.
+   *
+   * @example
+   * 12:30:00.000
+   */
+  toLocalTime(precision) {
+    const local = this.toLocalString().split('T')[1];
+    return toPrecision(local, precision);
+  }
+
+  /**
+   * @alias {@link toLocalDate}
+   */
   toDate() {
-    const str = toUTC(this).toISOString();
-    return str.split('T')[0];
+    return this.toLocalDate();
   }
 
   /**
@@ -457,14 +495,10 @@ export default class DateTime {
   }
 
   /**
-   * Formats the time component in ISO style but in the local or global timezone.
-   *
-   * @example
-   * 12:30:00.000
+   * @alias {@link toLocalTime}
    */
   toTime() {
-    const str = toUTC(this).toISOString();
-    return str.split('T')[1].slice(0, -1);
+    return this.toLocalTime();
   }
 
   /**
@@ -1644,4 +1678,22 @@ function resolveFormatParams(arg, name, preset) {
       ...arg,
     };
   }
+}
+
+function toPrecision(str, precision = 'millisecond') {
+  let offset;
+
+  precision = precision.replace(/s$/, '');
+
+  if (precision === 'millisecond') {
+    return str;
+  } else if (precision === 'second') {
+    offset = -1;
+  } else if (precision === 'minute') {
+    offset = -2;
+  } else {
+    throw new Error(`Unknown precision "${precision}".`);
+  }
+
+  return str.split(/[:.]/).slice(-4, offset).join(':');
 }

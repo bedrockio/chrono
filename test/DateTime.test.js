@@ -1317,16 +1317,23 @@ describe('DateTime', () => {
   });
 
   describe('date formatting', () => {
-    describe('toDate', () => {
+    describe('toLocalDate', () => {
       it('should get the date', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.toDate()).toBe('2020-01-01');
+        expect(dt.toLocalDate()).toBe('2020-01-01');
       });
 
       it('should account for timezone', () => {
         DateTime.setTimeZone('America/New_York');
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
-        expect(dt.toDate()).toBe('2019-12-31');
+        expect(dt.toLocalDate()).toBe('2019-12-31');
+      });
+    });
+
+    describe('toDate', () => {
+      it('should be an alias for toLocalDate', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toDate()).toBe('2020-01-01');
       });
     });
 
@@ -1380,16 +1387,35 @@ describe('DateTime', () => {
   });
 
   describe('time formatting', () => {
-    describe('toTime', () => {
+    describe('toLocalTime', () => {
       it('should get the time', () => {
         const dt = new DateTime('2020-01-01T00:10:20.300Z');
-        expect(dt.toTime()).toBe('09:10:20.300');
+        expect(dt.toLocalTime()).toBe('09:10:20.300');
       });
 
       it('should account for timezone', () => {
         DateTime.setTimeZone('America/New_York');
         const dt = new DateTime('2020-01-01T00:10:20.300Z');
-        expect(dt.toTime()).toBe('19:10:20.300');
+        expect(dt.toLocalTime()).toBe('19:10:20.300');
+      });
+
+      it('should format to seconds precision', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z');
+        expect(dt.toLocalTime('second')).toBe('09:00:00');
+        expect(dt.toLocalTime('seconds')).toBe('09:00:00');
+      });
+
+      it('should format to minutes precision', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z');
+        expect(dt.toLocalTime('minute')).toBe('09:00');
+        expect(dt.toLocalTime('minutes')).toBe('09:00');
+      });
+    });
+
+    describe('toTime', () => {
+      it('should be an alias for toLocalTime', () => {
+        const dt = new DateTime('2020-01-01T00:10:20.300Z');
+        expect(dt.toTime()).toBe('09:10:20.300');
       });
     });
 
@@ -1512,6 +1538,32 @@ describe('DateTime', () => {
   });
 
   describe('datetime formatting', () => {
+    describe('toLocalString', () => {
+      it('should use the global timezone', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z');
+        expect(dt.toLocalString()).toBe('2026-01-01T09:00:00.000');
+      });
+
+      it('should use the local timezone', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z', {
+          timeZone: 'America/New_York',
+        });
+        expect(dt.toLocalString()).toBe('2025-12-31T19:00:00.000');
+      });
+
+      it('should format to seconds precision', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z');
+        expect(dt.toLocalString('second')).toBe('2026-01-01T09:00:00');
+        expect(dt.toLocalString('seconds')).toBe('2026-01-01T09:00:00');
+      });
+
+      it('should format to minutes precision', () => {
+        const dt = new DateTime('2026-01-01T00:00:00.000Z');
+        expect(dt.toLocalString('minute')).toBe('2026-01-01T09:00');
+        expect(dt.toLocalString('minutes')).toBe('2026-01-01T09:00');
+      });
+    });
+
     describe('formatWithZone', () => {
       it('should format with short zone by default', () => {
         const dt = new DateTime('2020-01-01T00:00:00.000Z');
