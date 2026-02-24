@@ -363,6 +363,14 @@ export default class DateTime {
   }
 
   /**
+   * Returns a native Date for BSON serialization.
+   * @see https://github.com/mongodb/js-bson
+   */
+  toBSON() {
+    return this.date;
+  }
+
+  /**
    * Returns the numeric value of the DateTime instance.
    * @returns {number}
    */

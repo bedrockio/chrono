@@ -2565,6 +2565,11 @@ describe('DateTime', () => {
       expect(new DateTime(str).toJSON()).toBe(new Date(str).toJSON());
     });
 
+    it('toBSON', () => {
+      const date = new Date('2020-01-01T00:00:00.000Z');
+      expect(new DateTime(date).toBSON()).toEqual(date);
+    });
+
     it('getTime', () => {
       const str = '2020-01-01T00:00:00.000Z';
       expect(new DateTime(str).getTime()).toBe(new Date(str).getTime());

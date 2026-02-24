@@ -1,3 +1,7 @@
+## 0.11.0
+
+- Added `toBSON`.
+
 ## 0.10.0
 
 - Throw on bad locale or timezone.
