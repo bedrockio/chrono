@@ -1,3 +1,7 @@
+## 0.11.1
+
+- Added `types` to `exports`.
+
 ## 0.11.0
 
 - Added `toBSON`.
