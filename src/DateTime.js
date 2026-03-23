@@ -219,7 +219,7 @@ export default class DateTime {
    * @param {Object} options
    * @param {string} [options.locale]
    * @param {number} [options.start]
-   * @param {"long"|"short"|"narrow"} [options.style]
+   * @param {"long"|"short"|"compact"|"narrow"} [options.style]
    */
   static getWeekdays(options = {}) {
     return getWeekdays({
@@ -734,7 +734,7 @@ export default class DateTime {
    * members of the DateTime class.
    *
    * @param {Object} format
-   * @param {Object} options
+   * @param {Object} [options]
    */
   format(format = DATETIME_LONG, options) {
     // Merge default options.

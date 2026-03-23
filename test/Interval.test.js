@@ -291,6 +291,10 @@ describe('Interval', () => {
         false,
       );
     });
+
+    it('should return false for falsy value', () => {
+      expect(Interval.getDay().overlaps()).toBe(false);
+    });
   });
 
   describe('contains', () => {
@@ -340,6 +344,10 @@ describe('Interval', () => {
       expect(new Interval(year1, year2).contains(new DateTime(year3))).toBe(
         false,
       );
+    });
+
+    it('should return false for falsy value', () => {
+      expect(Interval.getDay().contains()).toBe(false);
     });
   });
 

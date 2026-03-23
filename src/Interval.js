@@ -10,7 +10,7 @@ export default class Interval {
    * Gets an interval representing the year of the
    * input.
    *
-   * @param {DateLike} date
+   * @param {DateLike} [date]
    */
   static getYear(date) {
     return new Interval(
@@ -24,12 +24,12 @@ export default class Interval {
    * month from the first day of the week at the start
    * to the last day of the week at the end.
    *
-   * @param {DateLike} date
-   * @param {Object} options
-   * @param {string} [options.normalize] - Normalizes output to always have 6 weeks.
+   * @param {DateLike} [date]
+   * @param {Object} [options]
    * @param {string} [options.locale] - Locale to derive the start of the week.
    * @param {string} [options.timeZone] - IANA timezone to pass to the DateTime.
    * @param {number} [options.firstDayOfWeek] - Hard coded first day of the week.
+   * @param {boolean} [options.normalize] - Normalizes output to always have 6 weeks.
    */
   static getCalendarMonth(date, options = {}) {
     const { normalize, ...dateOptions } = options;
@@ -57,7 +57,7 @@ export default class Interval {
    * Gets an interval representing the month of the
    * input.
    *
-   * @param {DateLike} date
+   * @param {DateLike} [date]
    */
   static getMonth(date) {
     return new Interval(
@@ -70,7 +70,7 @@ export default class Interval {
    * Gets an interval representing the week of the
    * input.
    *
-   * @param {DateLike} date
+   * @param {DateLike} [date]
    */
   static getWeek(date) {
     return new Interval(
@@ -83,7 +83,7 @@ export default class Interval {
    * Gets an interval representing the full day of
    * the input.
    *
-   * @param {DateLike} date
+   * @param {DateLike} [date]
    */
   static getDay(date) {
     return new Interval(
@@ -172,28 +172,32 @@ export default class Interval {
   /**
    * Returns true if the interval overlaps the passed argument.
    *
-   * @param {Interval|DateLike} arg
+   * @param {Interval|DateLike} [arg]
    */
   overlaps(arg) {
     if (arg instanceof Interval) {
       return arg.end > this.start && arg.start < this.end;
-    } else {
+    } else if (arg) {
       const date = new DateTime(arg);
       return date > this.start && date < this.end;
+    } else {
+      return false;
     }
   }
 
   /**
    * Returns true if the argument passed is contained by the interval.
    *
-   * @param {Interval|DateLike} arg
+   * @param {Interval|DateLike} [arg]
    */
   contains(arg) {
     if (arg instanceof Interval) {
       return arg.start >= this.start && arg.end <= this.end;
-    } else {
+    } else if (arg) {
       const date = new DateTime(arg);
       return date >= this.start && date <= this.end;
+    } else {
+      return false;
     }
   }
 
