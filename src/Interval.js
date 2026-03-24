@@ -5,12 +5,16 @@ import { normalizeUnit } from './units';
  * @typedef {DateTime|Date|number|string} DateLike
  */
 
+/**
+ * @typedef {DateLike|null} OptionalDateLike
+ */
+
 export default class Interval {
   /**
    * Gets an interval representing the year of the
    * input.
    *
-   * @param {DateLike} [date]
+   * @param {OptionalDateLike} [date]
    */
   static getYear(date) {
     return new Interval(
@@ -24,7 +28,7 @@ export default class Interval {
    * month from the first day of the week at the start
    * to the last day of the week at the end.
    *
-   * @param {DateLike} [date]
+   * @param {OptionalDateLike} [date]
    * @param {Object} [options]
    * @param {string} [options.locale] - Locale to derive the start of the week.
    * @param {string} [options.timeZone] - IANA timezone to pass to the DateTime.
@@ -57,7 +61,7 @@ export default class Interval {
    * Gets an interval representing the month of the
    * input.
    *
-   * @param {DateLike} [date]
+   * @param {OptionalDateLike} [date]
    */
   static getMonth(date) {
     return new Interval(
@@ -70,7 +74,7 @@ export default class Interval {
    * Gets an interval representing the week of the
    * input.
    *
-   * @param {DateLike} [date]
+   * @param {OptionalDateLike} [date]
    */
   static getWeek(date) {
     return new Interval(
@@ -83,7 +87,7 @@ export default class Interval {
    * Gets an interval representing the full day of
    * the input.
    *
-   * @param {DateLike} [date]
+   * @param {OptionalDateLike} [date]
    */
   static getDay(date) {
     return new Interval(
@@ -172,7 +176,7 @@ export default class Interval {
   /**
    * Returns true if the interval overlaps the passed argument.
    *
-   * @param {Interval|DateLike} [arg]
+   * @param {Interval|OptionalDateLike} [arg]
    */
   overlaps(arg) {
     if (arg instanceof Interval) {
@@ -188,7 +192,7 @@ export default class Interval {
   /**
    * Returns true if the argument passed is contained by the interval.
    *
-   * @param {Interval|DateLike} [arg]
+   * @param {Interval|OptionalDateLike} [arg]
    */
   contains(arg) {
     if (arg instanceof Interval) {
