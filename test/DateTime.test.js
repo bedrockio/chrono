@@ -566,7 +566,8 @@ describe('DateTime', () => {
 
       it('should not parse incomplete dates as 2001', () => {
         const dt = new DateTime();
-        expect(new DateTime('08')).toEqual(new DateTime(dt.getYear(), 7));
+        expect(new DateTime('1/1')).toEqual(new DateTime(dt.getYear(), 0, 1));
+        expect(new DateTime('9-11')).toEqual(new DateTime(dt.getYear(), 8, 11));
       });
 
       it('should parse correctly for timezone around DST shifts', () => {
@@ -602,6 +603,12 @@ describe('DateTime', () => {
 
       it('should be invalid on bad input', async () => {
         expect(new DateTime('bad').isInvalid()).toBe(true);
+      });
+
+      it('should not parse ambiguous digits less than 4 chars', () => {
+        expect(new DateTime('5').isInvalid()).toBe(true);
+        expect(new DateTime('05').isInvalid()).toBe(true);
+        expect(new DateTime('705').isInvalid()).toBe(true);
       });
     });
 

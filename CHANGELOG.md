@@ -1,3 +1,7 @@
+## 0.11.3
+
+- Ensure ambiguous digits of 3 or less are not parsed incorrectly.
+
 ## 0.11.2
 
 - Ensure overlaps/contains doesn't fail on falsy value.

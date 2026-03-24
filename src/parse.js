@@ -10,6 +10,7 @@ export function parseDate(str, options) {
   const { timeZone } = options;
 
   str = expandShortISOFormats(str);
+  str = stripIncompleteInput(str);
 
   const date = new Date(str);
 
@@ -44,7 +45,7 @@ const ISO_DATE_REG = /^[+-]?\d{4,5}-\d{2}-\d{2}$/;
 // ISO-8601 but could not be changed due to web compatibility".
 //
 // This leads to the following inconsistency in parsing:
-
+//
 // - "June 27, 2025" - System time - 2025-06-27T00:04:00.000Z
 // - "6/27/2025"     - System time - 2025-06-27T00:04:00.000Z
 // - "2025-06-27"    - UTC         - 2025-06-27T00:00:00.000Z
@@ -68,6 +69,22 @@ function expandShortISOFormats(str) {
   }
 
   return str;
+}
+
+// Javascript will happily parse ambiguous digits that
+// are almost never intentional with odd defaults that
+// exist for historical reasons. For example:
+//
+// - new Date('8')   -> Aug 1, 2001
+// - new Date('08')  -> Aug 1, 2001
+// - new Date('18')  -> Invalid Date
+// - new Date('58')  -> Jan 1, 1958
+// - new Date('508') -> Jan 1, 508
+//
+// For this reason strip all digit-only input less than
+// four characters as it cannot be disambiguated.
+function stripIncompleteInput(str) {
+  return str.replace(/^\d{1,3}$/, '');
 }
 
 // Time string parsing
