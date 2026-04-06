@@ -7,11 +7,11 @@
     "node_modules",
   ],
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
+    "strict": true,
     "rootDir": "src",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "target": "es2024",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
   }
 }

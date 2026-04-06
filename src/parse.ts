@@ -1,4 +1,5 @@
 import { isAmbiguousTimeZone, setPseudoTimezone } from './timezone';
+import { DateFields, DateTimeOptions, Unit } from './types';
 import { getUnitForIndex } from './units';
 
 // Allow any dates parseable by Javascript, however
@@ -6,7 +7,7 @@ import { getUnitForIndex } from './units';
 // input. For example "08" defaults to August 2001,
 // which is unexpected. Additionally do simple year
 // checks to prevent unexpected input.
-export function parseDate(str, options) {
+export function parseDate(str: string, options: DateTimeOptions) {
   const { timeZone } = options;
 
   str = expandShortISOFormats(str);
@@ -59,7 +60,7 @@ const ISO_DATE_REG = /^[+-]?\d{4,5}-\d{2}-\d{2}$/;
 //
 // Normalizing these short formats here to be full ISO-8601 ensures
 // that they will be consistently parsed in the system time zone.
-function expandShortISOFormats(str) {
+function expandShortISOFormats(str: string) {
   if (ISO_YEAR_REG.test(str)) {
     str += '-01-01T00:00:00.000';
   } else if (ISO_MONTH_REG.test(str)) {
@@ -83,21 +84,27 @@ function expandShortISOFormats(str) {
 //
 // For this reason strip all digit-only input less than
 // four characters as it cannot be disambiguated.
-function stripIncompleteInput(str) {
+function stripIncompleteInput(str: string) {
   return str.replace(/^\d{1,3}$/, '');
 }
 
 // Time string parsing
 
-const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}(?:\.\d{3})?))?(Z)?$/;
+const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?$/;
 
-export function parseTime(str) {
+interface ParsedTime {
+  utc?: boolean;
+  params: DateFields;
+}
+
+export function parseTime(str: string): ParsedTime {
   if (!str) {
     return {
       params: {
         hour: 0,
         minute: 0,
-        seconds: 0,
+        second: 0,
+        millisecond: 0,
       },
       utc: false,
     };
@@ -109,17 +116,17 @@ export function parseTime(str) {
     throw new Error('Invalid time value');
   }
 
-  const utc = !!match[4];
-  const arr = match?.slice(1, 4);
+  const utc = !!match[5];
+  const arr = match?.slice(1, 5);
 
-  const params = {};
+  const params: DateFields = {};
 
   for (let i = 0; i < arr.length; i++) {
     const value = match?.[i + 1];
 
     if (value) {
-      const unit = getUnitForIndex(i + 4);
-      params[unit] = Number(value);
+      const unit = getUnitForIndex(i + 4) as Unit;
+      params[unit] = parseInt(value);
     }
   }
 

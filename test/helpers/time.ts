@@ -1,21 +1,21 @@
-const { createClock, timers } = require('@sinonjs/fake-timers');
+import { type Clock, createClock, timers } from '@sinonjs/fake-timers';
 
-let clock;
+let clock: Clock;
 
-export function mockTime(time) {
+export function mockTime(time: string) {
   if (!time) {
     throw new Error('Time mocks require a starting date.');
   }
   clock = createClock();
-  global.Date = clock.Date;
+  globalThis.Date = clock.Date as DateConstructor;
   setTime(time);
 }
 
 export function unmockTime() {
-  global.Date = timers.Date;
+  globalThis.Date = timers.Date as unknown as DateConstructor;
 }
 
-export function setTime(time) {
+export function setTime(time: string | number | Date) {
   if (typeof time === 'string') {
     time = new Date(time);
   }
@@ -25,6 +25,6 @@ export function setTime(time) {
   clock.setSystemTime(time);
 }
 
-export function advanceTime(ms) {
+export function advanceTime(ms: number) {
   clock.setSystemTime(Date.now() + ms);
 }

@@ -1,10 +1,11 @@
 import { getPart } from './intl';
+import { DateTimeOptions } from './types';
 import { isInvalidDate } from './utils';
 
 const TIMEZONE_REG = /Z|[A-Z]{3}|[+-]\d{2}:?\d{2}$/;
 const OFFSET_REG = /([+-])(\d)(?::(\d{2}))?/;
 
-export function isAmbiguousTimeZone(str) {
+export function isAmbiguousTimeZone(str: string) {
   return !TIMEZONE_REG.test(str);
 }
 
@@ -12,7 +13,11 @@ export function isAmbiguousTimeZone(str) {
 // its moment is in the target timezone. Note that the
 // act of advancing or rewinding can have unintended
 // effects around DST shifts so compensate for those here.
-export function setPseudoTimezone(date, options) {
+export function setPseudoTimezone(date: Date, options: DateTimeOptions) {
+  if (isInvalidDate(date)) {
+    return;
+  }
+
   // First "remove" the system offset to put the date
   // in pseudo ISO time.
   const systemOffset = date.getTimezoneOffset();
@@ -44,17 +49,17 @@ export function setPseudoTimezone(date, options) {
   }
 }
 
-export function getTimezoneOffset(date, options) {
+export function getTimezoneOffset(date: Date, options: DateTimeOptions) {
   if (!options.timeZone) {
     throw new Error('No timezone passed.');
   } else if (isInvalidDate(date)) {
-    return null;
+    return NaN;
   }
 
   return getTimezoneOffsetByName(date, options);
 }
 
-function getTimezoneOffsetByName(date, options) {
+function getTimezoneOffsetByName(date: Date, options: DateTimeOptions) {
   const { timeZone } = options;
 
   const zoneName = getPart(date, 'timeZoneName', {
@@ -65,7 +70,7 @@ function getTimezoneOffsetByName(date, options) {
   return parseOffset(zoneName);
 }
 
-function parseOffset(str) {
+function parseOffset(str: string) {
   if (str === 'GMT') {
     return 0;
   }
@@ -73,7 +78,7 @@ function parseOffset(str) {
   const match = str.match(OFFSET_REG);
 
   if (!match) {
-    return;
+    return 0;
   }
 
   const [, s, h, m] = match;

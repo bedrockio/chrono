@@ -1,56 +1,59 @@
 // https://moment.github.io/luxon/#/formatting?id=table-of-tokens
 
 import { getMeridiem, getPart } from './intl';
+import { DateTime, IntlOptions } from './types';
 
-const TOKENS = {
+type Tokenizer = (dt: DateTime, options: IntlOptions) => string;
+
+const TOKENS: Record<string, Tokenizer> = {
   // Year
-  yy(dt, options) {
+  yy(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'year', {
       ...options,
       year: '2-digit',
     });
   },
-  yyyy(dt, options) {
+  yyyy(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'year', {
       ...options,
       year: 'numeric',
     });
   },
   // Month
-  M(dt, options) {
+  M(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'month', {
       ...options,
       month: 'numeric',
     });
   },
-  MM(dt, options) {
+  MM(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'month', {
       ...options,
       month: '2-digit',
     });
   },
   // Day
-  d(dt, options) {
+  d(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'day', {
       ...options,
       day: 'numeric',
     });
   },
-  dd(dt, options) {
+  dd(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'day', {
       ...options,
       day: '2-digit',
     });
   },
   // Hour 12
-  h(dt, options) {
+  h(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'hour', {
       ...options,
       hour: 'numeric',
       hour12: true,
     });
   },
-  hh(dt, options) {
+  hh(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'hour', {
       ...options,
       hour: '2-digit',
@@ -58,7 +61,7 @@ const TOKENS = {
     });
   },
   // Hour 24
-  H(dt, options) {
+  H(dt: DateTime, options: IntlOptions) {
     let str = getPart(dt, 'hour', {
       ...options,
       hour: 'numeric',
@@ -67,7 +70,7 @@ const TOKENS = {
     str = str.replace(/^0/, '');
     return str;
   },
-  HH(dt, options) {
+  HH(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'hour', {
       ...options,
       hour: '2-digit',
@@ -75,14 +78,14 @@ const TOKENS = {
     });
   },
   // Minute
-  m(dt, options) {
+  m(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'minute', {
       ...options,
       hour: 'numeric',
       minute: 'numeric',
     });
   },
-  mm(dt, options) {
+  mm(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'minute', {
       ...options,
       hour: 'numeric',
@@ -90,13 +93,13 @@ const TOKENS = {
     });
   },
   // Second
-  s(dt, options) {
+  s(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'second', {
       ...options,
       second: 'numeric',
     });
   },
-  ss(dt, options) {
+  ss(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'second', {
       ...options,
       minute: '2-digit',
@@ -104,17 +107,17 @@ const TOKENS = {
     });
   },
   // Meridiem
-  a(dt, options) {
+  a(dt: DateTime, options: IntlOptions) {
     return getMeridiem(dt, {
       ...options,
       lower: true,
     });
   },
-  A(dt, options) {
+  A(dt: DateTime, options: IntlOptions) {
     return getMeridiem(dt, options);
   },
   // Timezone
-  Z(dt, options) {
+  Z(dt: DateTime, options: IntlOptions) {
     let str = getPart(dt, 'timeZoneName', {
       ...options,
       timeZoneName: 'shortOffset',
@@ -122,7 +125,7 @@ const TOKENS = {
     str = str.replace(/^[a-z]+/i, '');
     return str || '+0';
   },
-  ZZ(dt, options) {
+  ZZ(dt: DateTime, options: IntlOptions) {
     let str = getPart(dt, 'timeZoneName', {
       ...options,
       timeZoneName: 'longOffset',
@@ -131,7 +134,7 @@ const TOKENS = {
     str = str.replace(/:/, '');
     return str || '+0000';
   },
-  ZZZ(dt, options) {
+  ZZZ(dt: DateTime, options: IntlOptions) {
     let str = getPart(dt, 'timeZoneName', {
       ...options,
       timeZoneName: 'longOffset',
@@ -139,13 +142,13 @@ const TOKENS = {
     str = str.replace(/^[a-z]+/i, '');
     return str || '+00:00';
   },
-  ZZZZ(dt, options) {
+  ZZZZ(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'timeZoneName', {
       ...options,
       timeZoneName: 'short',
     });
   },
-  ZZZZZ(dt, options) {
+  ZZZZZ(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'timeZoneName', {
       ...options,
       timeZoneName: 'long',
@@ -153,7 +156,11 @@ const TOKENS = {
   },
 };
 
-export function formatWithTokens(dt, format, options) {
+export function formatWithTokens(
+  dt: DateTime,
+  format: string,
+  options: IntlOptions,
+) {
   let buffer = '';
   let result = '';
   let isLiteral = false;

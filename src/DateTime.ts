@@ -1,25 +1,3 @@
-/**
- * @typedef {"year"|"years"|"month"|"months"|"week"|"weeks"|"day"|"days"|
- *           "hour"|"hours"|"minute"|"minutes"|"second"|"seconds"} TimeUnit
- */
-
-/**
- * @typedef {DateTime|Date|number|string} DateLike
- */
-
-/**
- * @typedef {'long' | 'short' | 'narrow' | 'numeric' | '2-digit'} FormatLength
- */
-
-/**
- * @typedef {Object} MeridiemOptions
- * @property {'short' | 'period' | 'caps' | 'space'} [meridiem] - Format style for AM/PM display
- */
-
-/**
- * @typedef {Intl.DateTimeFormatOptions & MeridiemOptions} FormatOptions
- */
-
 import {
   getFirstDayOfWeek,
   getMeridiem,
@@ -28,8 +6,6 @@ import {
   getWeekdays,
   resolveIntlOptions,
 } from './intl';
-
-import { formatWithLocale } from './locale';
 
 import {
   DATETIME_LONG,
@@ -43,11 +19,32 @@ import {
   TIME_LONG,
   TIME_MEDIUM,
   TIME_SHORT,
+  formatWithLocale,
 } from './locale';
 
 import { parseDate, parseTime } from './parse';
 import { getTimezoneOffset, setPseudoTimezone } from './timezone';
 import { formatWithTokens } from './tokens';
+
+import {
+  AdvanceBy,
+  DateFields,
+  DateResolvable,
+  DateTimeOptions,
+  FormatOptions,
+  GlobalDateTimeOptions,
+  MeridiemOptions,
+  MonthName,
+  MonthOptions,
+  RelativeOptions,
+  SingularUnit,
+  TimePrecision,
+  TimeZoneName,
+  Unit,
+  WeekdayName,
+  WeekdayOptions,
+} from './types';
+
 import { getUnitIndex, normalizeUnit } from './units';
 import { daysInMonth, isInvalidDate } from './utils';
 
@@ -69,7 +66,7 @@ const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
  *  @class
  */
 export default class DateTime {
-  static options = {};
+  static options: DateTimeOptions = {};
 
   /**
    * Gets the global timezone.
@@ -80,10 +77,8 @@ export default class DateTime {
 
   /**
    * Sets the global timezone.
-   *
-   * @param {string} timeZone
    */
-  static setTimeZone(timeZone) {
+  static setTimeZone(timeZone: string | null) {
     this.setOptions({
       timeZone,
     });
@@ -98,10 +93,8 @@ export default class DateTime {
 
   /**
    * Sets the global locale.
-   *
-   * @param {string} locale
    */
-  static setLocale(locale) {
+  static setLocale(locale: string | null) {
     this.setOptions({
       locale,
     });
@@ -116,11 +109,10 @@ export default class DateTime {
 
   /**
    * Sets global options.
-   *
-   * @param {Object} options
    */
-  static setOptions(options) {
-    for (let [key, value] of Object.entries(options)) {
+  static setOptions(options: GlobalDateTimeOptions) {
+    for (let [k, value] of Object.entries(options)) {
+      const key = k as keyof DateTimeOptions;
       if (value === null) {
         delete this.options[key];
       } else if (value) {
@@ -131,11 +123,8 @@ export default class DateTime {
 
   /**
    * Returns the minimum value passed in as a DateTime.
-   *
-   * @param {...DateLike} args
-   * @returns DateTime
    */
-  static min(...args) {
+  static min(...args: DateResolvable[]) {
     if (!args.length) {
       return null;
     }
@@ -150,11 +139,8 @@ export default class DateTime {
 
   /**
    * Returns the maximum value passed in as a DateTime.
-   *
-   * @param {...DateLike} args
-   * @returns DateTime
    */
-  static max(...args) {
+  static max(...args: DateResolvable[]) {
     if (!args.length) {
       return null;
     }
@@ -169,31 +155,19 @@ export default class DateTime {
 
   /**
    * Clamps the value passed to the minimum and maximum.
-   *
-   * @param {DateLike} arg
-   * @param {DateLike} min
-   * @param {DateLike} max
-   * @returns DateTime
    */
-  static clamp(arg, min, max) {
+  static clamp(
+    arg?: DateResolvable,
+    min?: DateResolvable,
+    max?: DateResolvable,
+  ) {
     if (!arg) {
       return null;
     }
-    return this.min(this.max(arg, min), max);
+    return this.min(this.max(arg, min) as DateResolvable, max);
   }
 
-  /**
-   * Gets the months of the year for a given locale. Options are:
-   *
-   * - `locale` - If not passed will use the global locale or fall
-   *              back to the system locale.
-   * - `style` -  Will be passed as `month` to Intl.DateTimeFormat. Default `long`.
-   *
-   * @param {Object} options
-   * @param {string} [options.locale]
-   * @param {"long"|"short"|"narrow"} [options.style]
-   */
-  static getMonths(options = {}) {
+  static getMonths(options: MonthOptions = {}) {
     let { locale, style = 'long' } = options;
 
     locale ||= DateTime.options.locale;
@@ -207,41 +181,14 @@ export default class DateTime {
     });
   }
 
-  /**
-   * Gets the weekday names for a given locale. Options are:
-   *
-   * - `locale` - If not passed will use the global locale or fall
-   *              back to the system locale.
-   * - `start` -  An explicit start day of the week, 0 for sunday, 6 for Saturday.
-   *              Will fall back to the locale defined first day.
-   * - `style` -  Will be passed as `weekday` to Intl.DateTimeFormat. Default `long`.
-   *
-   * @param {Object} options
-   * @param {string} [options.locale]
-   * @param {number} [options.start]
-   * @param {"long"|"short"|"compact"|"narrow"} [options.style]
-   */
-  static getWeekdays(options = {}) {
+  static getWeekdays(options: WeekdayOptions = {}) {
     return getWeekdays({
       ...this.options,
       ...options,
     });
   }
 
-  /**
-   * Gets the meridiem tokens (am/pm) a given locale. Options are:
-   *
-   * - `locale` - If not passed will use the global locale or fall
-   *              back to the system locale.
-   * - `lower` -  Return the tokens in lower case.
-   * - `style` -  When "short" will return a/p for am/pm tokens only.
-   *
-   * @param {Object} options
-   * @param {string} [options.locale]
-   * @param {number} [options.lower]
-   * @param {"long"|"short"} [options.style]
-   */
-  static getMeridiem(options = {}) {
+  static getMeridiem(options: MeridiemOptions = {}) {
     return Array.from(new Array(2), (_, i) => {
       const date = new Date(Date.UTC(2020, 0, 1, i * 12));
       return getMeridiem(date, {
@@ -252,70 +199,135 @@ export default class DateTime {
     });
   }
 
+  utc: Date | null;
+  date: Date;
+  offset: number;
+  options: DateTimeOptions;
+
   /**
-   * Creates a DateTime from various input. A single argument may be date input
-   * or an options object. Two arguments represents input and an options object.
-   * If no arguments are passed the DateTime will be the current date.
+   * Creates a DateTime from:
+   *
+   * - A parseable `string`.
+   * - A timestamp as a `number`.
+   * - A `Date` object.
+   * - A `DateTime` object.
+   * - Enumerated arguments.
    *
    * If the input is a string that specifies a timezone or offset it will be used
    * as is. Otherwise if the `timeZone` option is specified or a global timezone
    * is set it will be parsed in that timezone. If no timezone can be derived the
-   * system offset will be used instead.
+   * system offset will be used as a final fallback.
    *
    * Note also that ISO-8601 formats that do not include a time are also parsed in
    * a manner that is consistent with the above, however **inconsistent** with the
    * `Date` constructor which parses these as UTC for historical reasons.
    *
-   * @param {...DateLike|Object} args
+   * @example
+   *
+   * new DateTime(); // Current datetime
+   * new DateTime('January 1, 2025');
+   * new DateTime(1735657200000);
+   * new DateTime(2025, 0, 1);
+   *
+   */
+  constructor();
+
+  /**
+   * Creates a DateTime with local options.
    *
    * @example
-   * new DateTime();
-   * new DateTime(1735689600000);
-   * new DateTime('2025-01-01'); // Parsed as local or system time.
+   *
    * new DateTime({
    *   locale: 'en-US',
    *   timeZone: 'America/New_York'
    * });
+   */
+  constructor(options: DateTimeOptions);
+
+  /**
+   * Creates a DateTime from input which may be:
+   *
+   * - A parseable string.
+   * - A timestamp as a number.
+   * - A Date object.
+   * - Another DateTime object.
+   *
+   * @example
+   *
+   * new DateTime(1735689600000);
+   * new DateTime('2025-01-01');
+   *
+   */
+  constructor(input: DateResolvable);
+
+  /**
+   * Creates a DateTime from input with local options.
+   *
+   * @example
+   *
    * new DateTime('Jan 1 2025', {
    *   locale: 'en-US',
    *   timeZone: 'America/New_York'
    * });
    */
-  constructor(...args) {
+  constructor(input: DateResolvable, options: DateTimeOptions);
+
+  /**
+   * Creates a DateTime from enumerated arguments. Note that
+   * as with the native date constructor months are 0 indexed.
+   *
+   * @example
+   *
+   * new DateTime(2026, 1, 1, 12, 30);
+   */
+  constructor(
+    fullYear: number,
+    month: number,
+    day?: number,
+    hours?: number,
+    minutes?: number,
+    seconds?: number,
+    milliseconds?: number,
+  );
+
+  constructor(...args: any) {
+    let date;
+    let input;
     let options;
 
-    if (args.length === 0 || isOptionsObject(args[0])) {
+    if (isEnumeratedArgs(args)) {
+      input = args;
+    } else if (args.length === 1 && isOptionsObject(args[0])) {
       options = args[0];
-      args = [];
-    } else if (!isEnumeratedArgs(args)) {
-      options = {
-        ...args[0]?.options,
-        ...args[1],
-      };
-      args = [args[0] ?? Date.now()];
+    } else if (args.length === 1 && args[0] instanceof DateTime) {
+      input = args[0];
+      options = args[0].options;
+    } else if (args.length > 0) {
+      input = args[0];
+      options = args[1];
     }
 
-    options = {
+    options = resolveIntlOptions({
       ...DateTime.options,
       ...options,
-    };
+    });
 
-    resolveIntlOptions(options);
-
-    if (typeof args[0] === 'string') {
-      this.date = parseDate(args[0], options);
-    } else if (isEnumeratedArgs(args)) {
-      // @ts-ignore
-      this.date = new Date(...args);
-      setPseudoTimezone(this.date, options);
+    if (isEnumeratedArgs(input)) {
+      const enumerated = input as unknown as [number];
+      date = new Date(...enumerated);
+      setPseudoTimezone(date, options);
+    } else if (typeof input === 'string') {
+      date = parseDate(input, options);
+    } else if (input !== undefined) {
+      date = new Date(input);
     } else {
-      // @ts-ignore
-      this.date = new Date(...args);
+      date = new Date();
     }
 
     this.utc = null;
+    this.date = date;
     this.options = options;
-    this.offset = getTimezoneOffset(this.date, options);
+    this.offset = getTimezoneOffset(date, options);
   }
 
   // Compatibility
@@ -329,9 +341,8 @@ export default class DateTime {
 
   /**
    * Sets the timestamp of the DateTime as a number in milliseconds.
-   * @param {number} time
    */
-  setTime(time) {
+  setTime(time: string | number) {
     if (typeof time === 'string') {
       const { params, utc } = parseTime(time);
       return setComponents(this, params, utc);
@@ -355,6 +366,27 @@ export default class DateTime {
     return this.format();
   }
 
+  // TODO: ensure these fit into the system
+  toDateString() {
+    return this.toDateMedium();
+  }
+
+  toTimeString() {
+    return this.toTimeMedium();
+  }
+
+  toLocaleDateString() {
+    return this.date.toLocaleDateString();
+  }
+
+  toLocaleTimeString() {
+    return this.date.toLocaleTimeString();
+  }
+
+  toUTCString() {
+    return this.date.toUTCString();
+  }
+
   /**
    * Equivalent to `toISOString`.
    */
@@ -372,7 +404,6 @@ export default class DateTime {
 
   /**
    * Returns the numeric value of the DateTime instance.
-   * @returns {number}
    */
   valueOf() {
     return this.getTime();
@@ -408,9 +439,6 @@ export default class DateTime {
    * Formats the DateTime in [ISO format](https://en.wikipedia.org/wiki/ISO_8601)
    * and the local timezone.
    *
-   * @param {"minute" | "second" | "millisecond"} [precision] - The time precision to format to.
-   *   Default is "milliseconds".
-   *
    * @example
    * 2026-01-01T09:00:00.000
    *
@@ -420,7 +448,7 @@ export default class DateTime {
    * @example
    * 2026-01-01T09:00
    */
-  toLocalString(precision) {
+  toLocalString(precision?: TimePrecision) {
     const local = toUTC(this).toISOString().slice(0, -1);
     return toPrecision(local, precision);
   }
@@ -442,7 +470,7 @@ export default class DateTime {
    * @example
    * 12:30:00.000
    */
-  toLocalTime(precision) {
+  toLocalTime(precision?: TimePrecision) {
     const local = this.toLocalString().split('T')[1];
     return toPrecision(local, precision);
   }
@@ -457,13 +485,11 @@ export default class DateTime {
   /**
    * Formats the date component in long style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * January 1, 2020
    * dateTime.toDateLong();
    */
-  toDateLong(extra) {
+  toDateLong(extra?: FormatOptions) {
     return this.format({
       ...DATE_LONG,
       ...extra,
@@ -473,13 +499,11 @@ export default class DateTime {
   /**
    * Formats the date component in medium style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * Jan 1, 2020
    * dateTime.toDateMedium();
    */
-  toDateMedium(extra) {
+  toDateMedium(extra?: FormatOptions) {
     return this.format({
       ...DATE_MEDIUM,
       ...extra,
@@ -489,13 +513,11 @@ export default class DateTime {
   /**
    * Formats the date component in short style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * 1/1/2020
    * dateTime.toDateShort();
    */
-  toDateShort(extra) {
+  toDateShort(extra?: FormatOptions) {
     return this.format({
       ...DATE_SHORT,
       ...extra,
@@ -512,13 +534,11 @@ export default class DateTime {
   /**
    * Formats the time component in long style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * 9:00:00am
    * dateTime.toTimeLong();
    */
-  toTimeLong(extra) {
+  toTimeLong(extra?: FormatOptions) {
     return this.format({
       ...TIME_LONG,
       ...extra,
@@ -528,13 +548,11 @@ export default class DateTime {
   /**
    * Formats the time component in medium style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * 9:00am
    * dateTime.toTimeLong();
    */
-  toTimeMedium(extra) {
+  toTimeMedium(extra?: FormatOptions) {
     return this.format({
       ...TIME_MEDIUM,
       ...extra,
@@ -544,13 +562,11 @@ export default class DateTime {
   /**
    * Formats the time component in short style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
    * 9am
    * dateTime.toTimeShort();
    */
-  toTimeShort(extra) {
+  toTimeShort(extra?: FormatOptions) {
     return this.format({
       ...TIME_SHORT,
       ...extra,
@@ -560,10 +576,6 @@ export default class DateTime {
   /**
    * Formats the time component with the time zone.
    '
-   * @param {FormatLength | FormatOptions} [arg='short'] - Either a string
-   * representing the `timeZoneName` component, or an options object conforming to
-   * Intl.DateTimeFormatOptions.
-   *
    * @example
    * 9:00am EST
    * dateTime.toTimeWithZone();
@@ -584,7 +596,7 @@ export default class DateTime {
    * 09:00am EST
    * dateTime.toTimeWithZone({ hour: '2-digit' });
    */
-  toTimeWithZone(arg) {
+  toTimeWithZone(arg?: TimeZoneName | FormatOptions) {
     const extra = resolveTimeZoneParams(arg);
     return this.format({
       ...TIME_MEDIUM,
@@ -594,10 +606,6 @@ export default class DateTime {
 
   /**
    * Formats the month and year components of the DateTime by locales.
-   *
-   * @param {FormatLength | FormatOptions} [arg='long'] - Either a string
-   * representing the month component, or an options object conforming to
-   * Intl.DateTimeFormatOptions.
    *
    * @example
    * January 2025
@@ -611,7 +619,7 @@ export default class DateTime {
    * Jan 25
    * dateTime.toMonthYear({ month: 'short', year: '2-digit' });
    */
-  toMonthYear(arg) {
+  toMonthYear(arg?: MonthName | FormatOptions) {
     const extra = resolveMonthParams(arg);
     return this.format({
       ...MONTH_YEAR,
@@ -621,10 +629,6 @@ export default class DateTime {
 
   /**
    * Formats the month and day components of the DateTime by locales.
-   *
-   * @param {FormatLength | FormatOptions} [arg='long'] - Either a string
-   * representing the month component, or an options object conforming to
-   * Intl.DateTimeFormatOptions.
    *
    * @example
    * January 15
@@ -638,7 +642,7 @@ export default class DateTime {
    * January 15 at 9am
    * dateTime.toMonthDay({ hour: 'numeric' });
    */
-  toMonthDay(arg) {
+  toMonthDay(arg?: MonthName | FormatOptions) {
     const extra = resolveMonthParams(arg);
     return this.format({
       ...MONTH_DAY,
@@ -649,13 +653,12 @@ export default class DateTime {
   /**
    * Formats the DateTime in long style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
-   * January 1, 2020 at 9:00am
+   *
    * dateTime.formatLong();
+   * January 1, 2020 at 9:00am
    */
-  formatLong(extra) {
+  formatLong(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_LONG,
       ...extra,
@@ -665,13 +668,12 @@ export default class DateTime {
   /**
    * Formats the DateTime in medium style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
-   * Jan 1, 2020, 9:00am
+   *
    * dateTime.formatMedium();
+   * Jan 1, 2020, 9:00am
    */
-  formatMedium(extra) {
+  formatMedium(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_MEDIUM,
       ...extra,
@@ -681,13 +683,12 @@ export default class DateTime {
   /**
    * Formats the DateTime in short style.
    *
-   * @param {FormatOptions} [extra] - Extra params.
-   *
    * @example
-   * 1/1/2020, 9:00am
+   *
    * dateTime.formatShort();
+   * 1/1/2020, 9:00am
    */
-  formatShort(extra) {
+  formatShort(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_SHORT,
       ...extra,
@@ -697,31 +698,27 @@ export default class DateTime {
   /**
    * Formats the DateTime with the time zone.
    '
-   * @param {FormatLength | FormatOptions} [arg='short'] - Either a string
-   * representing the `timeZoneName` component, or an options object conforming to
-   * Intl.DateTimeFormatOptions.
-   *
    * @example
-   * January 1, 2020 at 9:00am EST
    * dateTime.formatWithZone();
+   * January 1, 2020 at 9:00am EST
    *
    * @example
-   * January 1, 2020 at 9:00am Eastern Standard Time
    * dateTime.formatWithZone('long');
+   * January 1, 2020 at 9:00am Eastern Standard Time
    *
    * @example
-   * January 1, 2020 at 9:00am ET
    * dateTime.formatWithZone('shortGeneric');
+   * January 1, 2020 at 9:00am ET
    *
    * @example
-   * January 1, 2020 at 9:00am Eastern Time
    * dateTime.formatWithZone('longGeneric');
+   * January 1, 2020 at 9:00am Eastern Time
    *
    * @example
-   * Jan 1, 2020 at 9:00am Eastern Time
    * dateTime.formatTimeWithZone({ month: 'short' });
+   * Jan 1, 2020 at 9:00am Eastern Time
    */
-  formatWithZone(arg) {
+  formatWithZone(arg?: TimeZoneName | FormatOptions) {
     const extra = resolveTimeZoneParams(arg);
     return this.format({
       ...DATETIME_LONG,
@@ -730,13 +727,34 @@ export default class DateTime {
   }
 
   /**
-   * Formats the DateTime using various formats accessible as static
-   * members of the DateTime class.
-   *
-   * @param {Object} format
-   * @param {Object} [options]
+   * Formats the DateTime to standard locale-based format.
    */
-  format(format = DATETIME_LONG, options) {
+  format(): string;
+
+  /**
+   * Format the DateTime by locale options similar to
+   * [DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#options).
+   *
+   * @example
+   *
+   *  dt.format({
+   *    year: 'numeric',
+   *    month: '2-digit',
+   *  });
+   */
+  format(format: FormatOptions, options?: DateTimeOptions): string;
+
+  /**
+   * Format the DateTime with a token based format.
+   *
+   * @example
+   *
+   *  dt.format('M/d/yyyy');
+   *  dt.format('hh:mm');
+   */
+  format(format: string): string;
+
+  format(format?: string | FormatOptions, options?: DateTimeOptions): string {
     // Merge default options.
     options = {
       ...this.options,
@@ -746,6 +764,7 @@ export default class DateTime {
     if (typeof format === 'string') {
       return formatWithTokens(this, format, options);
     } else {
+      format ||= DATETIME_LONG as FormatOptions;
       return formatWithLocale(this, {
         ...format,
         ...options,
@@ -757,21 +776,8 @@ export default class DateTime {
 
   /**
    * Formats the DateTime in a relative format. Allowed options are:
-   *
-   * - `now`     - Offset to format relative to. Defaults to the current time.
-   * - `min`     - When set will return undefined if the DateTime is before this date.
-   * - `max`     - When set will return undefined if the DateTime is after this date.
-   * - `numeric` - Passed to Intl.RelativeTimeFormat. Defaults to `auto` but may
-   *               also be `always`.
-   *
-   * @param {Object} [options]
-   * @param {DateLike} [options.now]
-   * @param {DateLike} [options.min]
-   * @param {DateLike} [options.max]
-   * @param {string} [options.numeric]
-   *
    */
-  relative(options) {
+  relative(options?: RelativeOptions) {
     return formatRelative(this, {
       ...this.options,
       ...options,
@@ -785,9 +791,6 @@ export default class DateTime {
    * be followed by a unit advancing by that many units. If the first
    * argument is an object it will advance the date by multiple units.
    *
-   * @param {number|Object.<string, number>} by
-   * @param {TimeUnit} [unit]
-   *
    * @example
    * new DateTime().advance(6, 'months')
    * new DateTime().advance({
@@ -795,7 +798,7 @@ export default class DateTime {
    *   days: 15
    * })
    */
-  advance(by, unit) {
+  advance(by: AdvanceBy, unit?: Unit) {
     return advanceDate(this, 1, by, unit);
   }
 
@@ -804,9 +807,6 @@ export default class DateTime {
    * be followed by a unit rewinding by that many units. If the first
    * argument is an object it will rewind the date by multiple units.
    *
-   * @param {number|Object.<string, number>} by
-   * @param {TimeUnit} [unit]
-   *
    * @example
    * new DateTime().rewind(6, 'months')
    * new DateTime().rewind({
@@ -814,7 +814,7 @@ export default class DateTime {
    *   days: 15
    * })
    */
-  rewind(by, unit) {
+  rewind(by: AdvanceBy, unit?: Unit) {
     return advanceDate(this, -1, by, unit);
   }
 
@@ -822,17 +822,15 @@ export default class DateTime {
 
   /**
    * Rewinds the DateTime to the start of the specified unit.
-   * @param {("year"|"month"|"week"|"day"|"hour"|"minute"|"second")} unit
    */
-  startOf(unit) {
+  startOf(unit: Unit) {
     return startOf(this, unit);
   }
 
   /**
    * Advances the DateTime to the end of the specified unit.
-   * @param {("year"|"month"|"week"|"day"|"hour"|"minute"|"second")} unit
    */
-  endOf(unit) {
+  endOf(unit: Unit) {
     return endOf(this, unit);
   }
 
@@ -942,10 +940,8 @@ export default class DateTime {
 
   /**
    * Returns true if the DateTime is equivalent to the passed value..
-   *
-   * @param {DateLike} arg
    */
-  isEqual(arg) {
+  isEqual(arg: DateResolvable) {
     return this.getTime() === new DateTime(arg).getTime();
   }
 
@@ -1081,7 +1077,7 @@ export default class DateTime {
   /**
    * Sets the year of the DateTime.
    */
-  setFullYear(year) {
+  setFullYear(year: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCFullYear(year));
   }
@@ -1089,7 +1085,7 @@ export default class DateTime {
   /**
    * @alias {@link setFullYear}
    */
-  setYear(year) {
+  setYear(year: number) {
     return this.setFullYear(year);
   }
 
@@ -1097,7 +1093,7 @@ export default class DateTime {
    * Sets the month of the DateTime. Note that months are zero based so
    * January is 0.
    */
-  setMonth(month) {
+  setMonth(month: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMonth(month));
   }
@@ -1105,7 +1101,7 @@ export default class DateTime {
   /**
    * Sets the date of the DateTime.
    */
-  setDate(date) {
+  setDate(date: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCDate(date));
   }
@@ -1113,7 +1109,7 @@ export default class DateTime {
   /**
    * Sets the hours of the DateTime.
    */
-  setHours(hours) {
+  setHours(hours: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCHours(hours));
   }
@@ -1121,7 +1117,7 @@ export default class DateTime {
   /**
    * Sets the minutes of the DateTime.
    */
-  setMinutes(minutes) {
+  setMinutes(minutes: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMinutes(minutes));
   }
@@ -1129,7 +1125,7 @@ export default class DateTime {
   /**
    * Sets the seconds of the DateTime.
    */
-  setSeconds(seconds) {
+  setSeconds(seconds: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCSeconds(seconds));
   }
@@ -1137,7 +1133,7 @@ export default class DateTime {
   /**
    * Sets the milliseconds of the DateTime.
    */
-  setMilliseconds(milliseconds) {
+  setMilliseconds(milliseconds: number) {
     const utc = toUTC(this);
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
@@ -1147,7 +1143,7 @@ export default class DateTime {
   /**
    * Sets full year of the DateTime in UTC.
    */
-  setUTCFullYear(year) {
+  setUTCFullYear(year: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCFullYear(year));
   }
@@ -1155,7 +1151,7 @@ export default class DateTime {
   /**
    * Sets month of the DateTime in UTC.
    */
-  setUTCMonth(month) {
+  setUTCMonth(month: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCMonth(month));
   }
@@ -1163,7 +1159,7 @@ export default class DateTime {
   /**
    * Sets date of the DateTime in UTC.
    */
-  setUTCDate(utcDate) {
+  setUTCDate(utcDate: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCDate(utcDate));
   }
@@ -1171,7 +1167,7 @@ export default class DateTime {
   /**
    * Sets hours of the DateTime in UTC.
    */
-  setUTCHours(hours) {
+  setUTCHours(hours: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCHours(hours));
   }
@@ -1179,7 +1175,7 @@ export default class DateTime {
   /**
    * Sets minutes of the DateTime in UTC.
    */
-  setUTCMinutes(minutes) {
+  setUTCMinutes(minutes: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCMinutes(minutes));
   }
@@ -1187,7 +1183,7 @@ export default class DateTime {
   /**
    * Sets seconds of the DateTime in UTC.
    */
-  setUTCSeconds(seconds) {
+  setUTCSeconds(seconds: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCSeconds(seconds));
   }
@@ -1195,64 +1191,46 @@ export default class DateTime {
   /**
    * Sets milliseconds of the DateTime in UTC.
    */
-  setUTCMilliseconds(milliseconds) {
+  setUTCMilliseconds(milliseconds: number) {
     const date = new Date(this.date);
     return this.setTime(date.setUTCMilliseconds(milliseconds));
   }
 
   /**
    * Sets components of the DateTime by name.
-   *
-   * @param {Object} components
-   * @param {number} [components.year] - The year to set.
-   * @param {number} [components.month] - The month to set.
-   * @param {number} [components.day] - The day of the month to set.
-   * @param {number} [components.hour] - The hours to set.
-   * @param {number} [components.hours] - The hours to set.
-   * @param {number} [components.minute] - The minutes to set.
-   * @param {number} [components.minutes] - The minutes to set.
-   * @param {number} [components.second] - The seconds to set.
-   * @param {number} [components.seconds] - The seconds to set.
-   * @param {number} [components.millisecond] - The milliseconds to set.
-   * @param {number} [components.milliseconds] - The milliseconds to set.
    */
-  set(components) {
+  set(components: DateFields) {
     return setComponents(this, components);
   }
 
-  // Create a new date from arguments. This is identical
-  // to using the overloaded constructor, however where
-  // numeric values there are relative to the system time,
-  // the result here will be relative to the derived timezone.
-  //
-  // For example:
-  //
-  // - System time is GMT-5
-  // - DateTime.setTimeZone('Asia/Tokyo') (GMT+9)
-  //
-  // new Date(2020, 0, 1)     -> "2019-12-31T19:00:00Z"
-  // this.setArgs(2020, 0, 1) -> "2020-01-01T09:00:00Z"
-  //
-  // This effectively allows creating a DateTime by numeric
-  // values while ignoring the system time (and preserving
-  // the timezone and locale). The strategy here is to first
-  // set the values in UTC, then subtract the offset, which
-  // is derived from either the DateTime's internal timezone
-  // or the global timezone.
-
   /**
-   * Sets the arguments for the UTC time.
+   * Create a new date from arguments. This is identical
+   * to using the overloaded constructor, however where
+   * numeric values there are relative to the system time,
+   * the result here will be relative to the derived timezone.
    *
-   * @param {...number} args - A list of arguments representing the date components.
+   * For example:
+   *
+   * - System time is GMT-5
+   * - DateTime.setTimeZone('Asia/Tokyo') (GMT+9)
+   *
+   * new Date(2020, 0, 1)     -> "2019-12-31T19:00:00Z"
+   * this.setArgs(2020, 0, 1) -> "2020-01-01T09:00:00Z"
+   *
+   * This effectively allows creating a DateTime by numeric
+   * values while ignoring the system time (and preserving
+   * the timezone and locale). The strategy here is to first
+   * set the values in UTC, then subtract the offset, which
+   * is derived from either the DateTime's internal timezone
+   * or the global timezone.
    */
-  setArgs(...args) {
-    // @ts-ignore
-    return this.setUTCTime(Date.UTC(...args));
+  setArgs(...args: number[]) {
+    const enumerated = args as [number, ...number[]];
+    return this.setUTCTime(Date.UTC(...enumerated));
   }
 
   /**
    * Returns the IANA timezone.
-   * @returns {string}
    */
   getTimeZone() {
     return this.options.timeZone;
@@ -1269,8 +1247,6 @@ export default class DateTime {
    * Gets the timezone offset of the DateTime in minutes. This may
    * be the offset of the local or global timezone if one is set,
    * otherwise will be the system offset.
-   *
-   * @returns {number}
    */
   getTimeZoneOffset() {
     return this.offset;
@@ -1285,9 +1261,8 @@ export default class DateTime {
 
   /**
    * Sets the internal timezone of the DateTime.
-   * @param {string} timeZone
    */
-  setTimeZone(timeZone) {
+  setTimeZone(timeZone: string) {
     return new DateTime(this.date, {
       ...this.options,
       timeZone,
@@ -1297,27 +1272,23 @@ export default class DateTime {
   /**
    * @alias {@link setTimeZone}
    */
-  setZone(timeZone) {
+  setZone(timeZone: string) {
     return this.setTimeZone(timeZone);
   }
 
   /**
    * Returns the English name of the month. `style` follows Intl format
    * with `compact` as a special 2 character form. Default is `long`.
-   *
-   * @param {'long'|'short'|'compact'|'narrow'} [style]
    */
-  getMonthName(style = 'long') {
+  getMonthName(style?: MonthName) {
     return getMonthName(this, style);
   }
 
   /**
    * Returns the English name of the weekday. `style` follows Intl format
    * with `compact` as a special 2 character form. Default is `long`.
-   *
-   * @param {'long'|'short'|'compact'|'narrow'} [style]
    */
-  getWeekdayName(style = 'long') {
+  getWeekdayName(style?: WeekdayName) {
     return getWeekdayName(this, style);
   }
 
@@ -1327,25 +1298,37 @@ export default class DateTime {
 
   [INSTANCE_KEY] = true;
 
-  static [Symbol.hasInstance](obj) {
+  static [Symbol.hasInstance](obj: any) {
     return obj?.[INSTANCE_KEY];
   }
 
-  setUTCTime(time) {
+  setUTCTime(time: number) {
     // Note the target time may have a different offset
     // so do an initial set before adding the offset.
     const dt = this.setTime(time);
     const offset = dt.getTimezoneOffset();
     return dt.setTime(time + offset * ONE_MINUTE);
   }
+
+  // TODO: document and organize compat here
+
+  getVarDate(): VarDate {
+    throw new Error('getVarDate is not supported');
+  }
+
+  [Symbol.toPrimitive](hint: 'number'): number;
+  [Symbol.toPrimitive](hint: 'string' | 'default'): string;
+  [Symbol.toPrimitive](hint: string): number | string {
+    return hint === 'number' ? this.getTime() : this.toISOString();
+  }
 }
 
-function isOptionsObject(arg) {
+function isOptionsObject(arg: any) {
   return arg && typeof arg === 'object' && !isDateLike(arg);
 }
 
-function isEnumeratedArgs(args) {
-  if (args.length < 2) {
+function isEnumeratedArgs(args: any) {
+  if (!Array.isArray(args) || args.length < 2) {
     return false;
   }
   return args.every((arg) => {
@@ -1353,18 +1336,20 @@ function isEnumeratedArgs(args) {
   });
 }
 
-function isDateLike(arg) {
+function isDateLike(arg: any) {
   return arg instanceof Date || arg instanceof DateTime;
 }
 
-function advanceDate(dt, dir, by, unit) {
+function advanceDate(dt: DateTime, dir: number, by: AdvanceBy, unit?: Unit) {
   if (typeof by === 'number' && typeof unit === 'string') {
     return advanceDate(dt, dir, {
       [unit]: by,
-    });
+    } as AdvanceBy);
   }
 
-  for (let [name, value] of Object.entries(by)) {
+  const entries = Object.entries(by) as [Unit, number][];
+
+  for (let [name, value] of entries) {
     value *= dir;
 
     name = normalizeUnit(name);
@@ -1400,31 +1385,31 @@ function advanceDate(dt, dir, by, unit) {
   return dt;
 }
 
-function setComponents(dt, components, utc) {
+function setComponents(dt: DateTime, components: DateFields, utc?: boolean) {
   components = normalizeComponents(components);
 
-  const names = Object.keys(components);
+  const names = Object.keys(components) as Unit[];
 
   names.sort((a, b) => {
     return getUnitIndex(a) - getUnitIndex(b);
   });
 
   for (let name of names) {
-    const value = components[name];
+    const value = components[name] as number;
 
     name = normalizeUnit(name);
 
     if (utc) {
-      dt = setUTCComponent(dt, name, value);
+      dt = setUTCComponent(dt, name, value) as DateTime;
     } else {
-      dt = setComponent(dt, name, value);
+      dt = setComponent(dt, name, value) as DateTime;
     }
   }
 
   return dt;
 }
 
-function normalizeComponents(components) {
+function normalizeComponents(components: DateFields) {
   const seconds = components.seconds || components.second;
 
   if (seconds) {
@@ -1440,7 +1425,7 @@ function normalizeComponents(components) {
   return components;
 }
 
-function setComponent(dt, name, value) {
+function setComponent(dt: DateTime, name: SingularUnit, value: number) {
   switch (name) {
     case 'year':
       return dt.setFullYear(value);
@@ -1459,7 +1444,7 @@ function setComponent(dt, name, value) {
   }
 }
 
-function setUTCComponent(dt, name, value) {
+function setUTCComponent(dt: DateTime, name: SingularUnit, value: number) {
   switch (name) {
     case 'year':
       return dt.setUTCFullYear(value);
@@ -1478,12 +1463,11 @@ function setUTCComponent(dt, name, value) {
   }
 }
 
-function formatRelative(dt, options = {}) {
+function formatRelative(dt: DateTime, options: RelativeOptions = {}) {
   const { min, max, locale, numeric = 'auto' } = options;
   const now = new DateTime(options.now);
 
-  // @ts-ignore
-  const ms = dt - now;
+  const ms = dt.getTime() - now.getTime();
   const msAbs = Math.abs(ms);
 
   // Fall back to non-relative formats if outside defined
@@ -1501,7 +1485,7 @@ function formatRelative(dt, options = {}) {
   // - 11:00pm
   // - March 15
   // - June 15 2018
-  if (dt < min) {
+  if (dt < min!) {
     if (dt > now.startOfDay()) {
       return dt.toTimeMedium();
     } else if (dt > now.startOfYear()) {
@@ -1509,7 +1493,7 @@ function formatRelative(dt, options = {}) {
     } else {
       return dt.toDateLong();
     }
-  } else if (dt > max) {
+  } else if (dt > max!) {
     if (dt < now.endOfDay()) {
       return dt.toTimeMedium();
     } else if (dt < now.endOfYear()) {
@@ -1578,13 +1562,13 @@ function formatRelative(dt, options = {}) {
   }
 }
 
-function getMonthOffset(d1, d2) {
+function getMonthOffset(d1: DateTime, d2: DateTime) {
   const yearOffset = d1.getFullYear() - d2.getFullYear();
   const monthOffset = d1.getMonth() - d2.getMonth();
   return yearOffset * 12 + monthOffset;
 }
 
-function toUTC(dt) {
+function toUTC(dt: DateTime) {
   const offset = dt.getTimezoneOffset();
   return new Date(dt.getTime() - offset * ONE_MINUTE);
 }
@@ -1593,7 +1577,7 @@ function toUTC(dt) {
 // we "fall back" instead of falling forward. For
 // example when rewinding one month from 12-31 we
 // should land on 11-30, not 12-01.
-function advanceMonthSafe(dt, by) {
+function advanceMonthSafe(dt: DateTime, by: number) {
   const isRewind = by < 0;
   const targetDate = dt.getDate();
 
@@ -1617,7 +1601,7 @@ function advanceMonthSafe(dt, by) {
   return dt;
 }
 
-function startOf(dt, unit) {
+function startOf(dt: DateTime, unit: Unit) {
   const index = getUnitIndex(unit);
 
   const year = dt.getFullYear();
@@ -1641,7 +1625,7 @@ function startOf(dt, unit) {
   return dt.setArgs(year, month, day, hours, minutes, seconds);
 }
 
-function endOf(dt, unit) {
+function endOf(dt: DateTime, unit: Unit) {
   const index = getUnitIndex(unit);
 
   const year = dt.getFullYear();
@@ -1667,15 +1651,19 @@ function endOf(dt, unit) {
 
 // Formatting Utils
 
-function resolveTimeZoneParams(arg) {
+function resolveTimeZoneParams(arg?: TimeZoneName | FormatOptions) {
   return resolveFormatParams(arg, 'timeZoneName', 'short');
 }
 
-function resolveMonthParams(arg) {
+function resolveMonthParams(arg?: MonthName | FormatOptions) {
   return resolveFormatParams(arg, 'month', 'long');
 }
 
-function resolveFormatParams(arg, name, preset) {
+function resolveFormatParams(
+  arg: string | FormatOptions | undefined,
+  name: string,
+  preset: string,
+) {
   if (typeof arg === 'string') {
     return {
       [name]: arg,
@@ -1688,10 +1676,10 @@ function resolveFormatParams(arg, name, preset) {
   }
 }
 
-function toPrecision(str, precision = 'millisecond') {
+function toPrecision(str: string, precision: TimePrecision = 'millisecond') {
   let offset;
 
-  precision = precision.replace(/s$/, '');
+  precision = precision.replace(/s$/, '') as TimePrecision;
 
   if (precision === 'millisecond') {
     return str;

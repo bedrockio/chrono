@@ -1,3 +1,7 @@
+## 0.12.0
+
+- Typescript rewrite
+
 ## 0.11.4
 
 - OptionalDateLike with null types.

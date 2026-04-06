@@ -1,2 +1,2 @@
-import { nodeImports, recommended } from '@bedrockio/eslint-plugin';
-export default [recommended, nodeImports];
+import { imports, recommended, typescript } from '@bedrockio/eslint-plugin';
+export default [recommended, imports, typescript];

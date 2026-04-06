@@ -1,6 +1,17 @@
 // Months
 
-export function getMonthName(dt, style = 'long') {
+import {
+  DateLike,
+  DateTime,
+  DateTimeOptions,
+  IntlOptions,
+  MeridiemOptions,
+  MonthName,
+  WeekdayName,
+  WeekdayOptions,
+} from './types';
+
+export function getMonthName(dt: DateTime, style: MonthName = 'long') {
   return getPart(dt, 'month', {
     style,
     month: style,
@@ -10,7 +21,7 @@ export function getMonthName(dt, style = 'long') {
 
 // Weekdays
 
-export function getWeekdayName(dt, style = 'long') {
+export function getWeekdayName(dt: DateTime, style: WeekdayName = 'long') {
   return getPart(dt, 'weekday', {
     style,
     weekday: style,
@@ -18,7 +29,7 @@ export function getWeekdayName(dt, style = 'long') {
   });
 }
 
-export function getWeekdays(options) {
+export function getWeekdays(options: WeekdayOptions) {
   resolveIntlOptions(options);
 
   let { start, locale, style = 'long' } = options;
@@ -55,7 +66,7 @@ const HAS_COMPACT = [
   'sk',
 ];
 
-function normalizeCompact(locale, style) {
+function normalizeCompact(locale: string, style?: string) {
   if (style === 'compact') {
     const lang = locale.slice(0, 2);
     return HAS_COMPACT.includes(lang) ? 'short' : 'narrow';
@@ -66,26 +77,29 @@ function normalizeCompact(locale, style) {
 
 // Week Info
 
-export function getFirstDayOfWeek(options) {
+export function getFirstDayOfWeek(options: DateTimeOptions) {
   let { firstDayOfWeek, locale } = options;
 
+  if (firstDayOfWeek == null && locale) {
+    firstDayOfWeek = getWeekInfo(locale)?.firstDay;
+  }
+
   if (firstDayOfWeek == null) {
-    firstDayOfWeek = getWeekInfo(locale)?.firstDay ?? 0;
+    firstDayOfWeek = 0;
   }
 
   // Normalize to index 0 for Sunday.
   return firstDayOfWeek % 7;
 }
 
-function getWeekInfo(code) {
-  const locale = new Intl.Locale(code);
-  // @ts-ignore
+function getWeekInfo(code: string) {
+  const locale = new Intl.Locale(code) as any;
   return locale.getWeekInfo?.() || locale.weekInfo;
 }
 
 // Meridiem
 
-export function getMeridiem(arg, options = {}) {
+export function getMeridiem(arg: DateLike, options: MeridiemOptions = {}) {
   const { style, lower } = options;
 
   let part = getPart(arg, 'dayPeriod', {
@@ -95,23 +109,29 @@ export function getMeridiem(arg, options = {}) {
     minute: 'numeric',
   });
   const isLatin = /^[a|p]m$/i.test(part);
+
   if (style === 'short' && isLatin) {
     part = part.slice(0, 1);
   }
+
   if (lower) {
     part = part.toLowerCase();
   }
+
   return part;
 }
 
-// Accepts an instance of either Date or DateTime.
-export function getPart(arg, type, options) {
+interface GetPartOptions extends IntlOptions {
+  style?: string;
+}
+
+export function getPart(arg: DateLike, type: string, options: GetPartOptions) {
   const { timeZone, style, locale = 'en', ...rest } = options;
   const formatter = new Intl.DateTimeFormat(locale, {
     ...normalizeIntlOptions(locale, rest),
     timeZone,
   });
-  const parts = formatter.formatToParts(arg);
+  const parts = formatter.formatToParts(arg as Date);
   const part = parts.find((p) => {
     return p.type === type;
   });
@@ -126,21 +146,23 @@ export function getPart(arg, type, options) {
   return value;
 }
 
-function normalizeIntlOptions(locale, options) {
-  options.month = normalizeCompact(locale, options.month);
-  options.weekday = normalizeCompact(locale, options.weekday);
-  return options;
+function normalizeIntlOptions(locale: string, options: IntlOptions) {
+  options.month = normalizeCompact(locale, options.month) as MonthName;
+  options.weekday = normalizeCompact(locale, options.weekday) as WeekdayName;
+  return options as Intl.DateTimeFormatOptions;
 }
 
 // Utils
 
-export function resolveIntlOptions(options) {
-  const { locale, timeZone } = options;
+export function resolveIntlOptions(options: DateTimeOptions) {
+  let { locale, timeZone, firstDayOfWeek } = options;
 
   const resolved = new Intl.DateTimeFormat(locale, {
     timeZone,
   }).resolvedOptions();
 
-  options.locale ||= resolved.locale;
-  options.timeZone ||= resolved.timeZone;
+  locale ||= resolved.locale;
+  timeZone ||= resolved.timeZone;
+
+  return { locale, timeZone, firstDayOfWeek };
 }

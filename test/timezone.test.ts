@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { isAmbiguousTimeZone } from '../src/timezone';
 
-function assertAmbiguous(str, expected) {
+function assertAmbiguous(str: string, expected: boolean) {
   expect(isAmbiguousTimeZone(str)).toBe(expected);
 }
 

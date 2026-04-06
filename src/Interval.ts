@@ -1,22 +1,13 @@
 import DateTime from './DateTime';
+import { CalendarMonthOptions, DateResolvable, Unit } from './types';
 import { normalizeUnit } from './units';
-
-/**
- * @typedef {DateTime|Date|number|string} DateLike
- */
-
-/**
- * @typedef {DateLike|null} OptionalDateLike
- */
 
 export default class Interval {
   /**
    * Gets an interval representing the year of the
    * input.
-   *
-   * @param {OptionalDateLike} [date]
    */
-  static getYear(date) {
+  static getYear(date?: DateResolvable) {
     return new Interval(
       new DateTime(date).startOfYear(),
       new DateTime(date).endOfYear(),
@@ -27,16 +18,12 @@ export default class Interval {
    * Gets an interval representing the full calendar
    * month from the first day of the week at the start
    * to the last day of the week at the end.
-   *
-   * @param {OptionalDateLike} [date]
-   * @param {Object} [options]
-   * @param {string} [options.locale] - Locale to derive the start of the week.
-   * @param {string} [options.timeZone] - IANA timezone to pass to the DateTime.
-   * @param {number} [options.firstDayOfWeek] - Hard coded first day of the week.
-   * @param {boolean} [options.normalize] - Normalizes output to always have 6 weeks.
    */
-  static getCalendarMonth(date, options = {}) {
-    const { normalize, ...dateOptions } = options;
+  static getCalendarMonth(
+    date?: DateResolvable,
+    options?: CalendarMonthOptions,
+  ) {
+    const { normalize, ...dateOptions } = options || {};
 
     let interval = new Interval(
       new DateTime(date, dateOptions).startOfCalendarMonth(),
@@ -58,12 +45,9 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the month of the
-   * input.
-   *
-   * @param {OptionalDateLike} [date]
+   * Gets an interval representing the month of the input.
    */
-  static getMonth(date) {
+  static getMonth(date: DateResolvable) {
     return new Interval(
       new DateTime(date).startOfMonth(),
       new DateTime(date).endOfMonth(),
@@ -71,12 +55,9 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the week of the
-   * input.
-   *
-   * @param {OptionalDateLike} [date]
+   * Gets an interval representing the week of the input.
    */
-  static getWeek(date) {
+  static getWeek(date: DateResolvable) {
     return new Interval(
       new DateTime(date).startOfWeek(),
       new DateTime(date).endOfWeek(),
@@ -84,17 +65,17 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the full day of
-   * the input.
-   *
-   * @param {OptionalDateLike} [date]
+   * Gets an interval representing the full day of the input.
    */
-  static getDay(date) {
+  static getDay(date: DateResolvable) {
     return new Interval(
       new DateTime(date).startOfDay(),
       new DateTime(date).endOfDay(),
     );
   }
+
+  start: DateTime;
+  end: DateTime;
 
   /**
    * Creates an interval from various input. If two arguments are passed they
@@ -103,22 +84,55 @@ export default class Interval {
    * string in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals)
    * or another interval.
    *
-   * @param {...(Interval|DateLike)} args
+   * @example
+   *
+   * new Interval(new DateTime('2023-01-01'), new DateTime('2023-01-02'));
+   * new Interval('2023-01-01/2023-01-02');
+   * new Interval(interval);
+   */
+  constructor();
+
+  /**
+   * Creates an interval from an
+   * [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals).
    *
    * @example
+   *
    * new Interval('2023-01-01/2023-01-02');
-   * new Interval(new DateTime('2023-01-01'), new DateTime('2023-01-02'));
+   *
    */
-  constructor(...args) {
+  constructor(input: string);
+
+  /**
+   * Creates a copy of the interval.
+   *
+   * @example
+   *
+   * new Interval(interval);
+   *
+   */
+  constructor(input: Interval);
+
+  /**
+   * Creates a new interval with a discrete start and end.
+   *
+   * @example
+   *
+   * new Interval(new DateTime('2023-01-01'), new DateTime('2023-01-02'));
+   *
+   */
+  constructor(start: DateResolvable, end: DateResolvable);
+
+  constructor(...args: any[]) {
     let start;
     let end;
+
     if (args.length === 1) {
       const arg = args[0];
       if (arg instanceof Interval) {
         start = arg.start;
         end = arg.end;
       } else if (isIsoInterval(arg)) {
-        // @ts-ignore
         [start, end] = arg.split('/');
       } else {
         start = arg;
@@ -150,7 +164,7 @@ export default class Interval {
    * Returns the interval as a human readable string.
    */
   toString() {
-    return `${this.start} - ${this.end}`;
+    return `${this.start.toString()} - ${this.end.toString()}`;
   }
 
   /**
@@ -175,10 +189,8 @@ export default class Interval {
 
   /**
    * Returns true if the interval overlaps the passed argument.
-   *
-   * @param {Interval|OptionalDateLike} [arg]
    */
-  overlaps(arg) {
+  overlaps(arg: Interval | DateResolvable) {
     if (arg instanceof Interval) {
       return arg.end > this.start && arg.start < this.end;
     } else if (arg) {
@@ -191,10 +203,8 @@ export default class Interval {
 
   /**
    * Returns true if the argument passed is contained by the interval.
-   *
-   * @param {Interval|OptionalDateLike} [arg]
    */
-  contains(arg) {
+  contains(arg: Interval | DateResolvable) {
     if (arg instanceof Interval) {
       return arg.start >= this.start && arg.end <= this.end;
     } else if (arg) {
@@ -207,29 +217,21 @@ export default class Interval {
 
   /**
    * Returns the union of this interval and the specified interval.
-   *
-   * @param {Interval} interval
    */
-  union(interval) {
+  union(interval: Interval) {
     return new Interval(
-      // @ts-ignore
-      Math.min(this.start, interval.start),
-      // @ts-ignore
-      Math.max(this.end, interval.end),
+      Math.min(this.start.getTime(), interval.start.getTime()),
+      Math.max(this.end.getTime(), interval.end.getTime()),
     );
   }
 
   /**
    * Returns the intersection of this interval and the specified interval.
    * Returns null if intervals don't intersect.
-   *
-   * @param {Interval} interval
    */
-  intersection(interval) {
-    // @ts-ignore
-    const start = Math.max(this.start, interval.start);
-    // @ts-ignore
-    const end = Math.min(this.end, interval.end);
+  intersection(interval: Interval) {
+    const start = Math.max(this.start.getTime(), interval.start.getTime());
+    const end = Math.min(this.end.getTime(), interval.end.getTime());
 
     if (start > end) {
       return null;
@@ -244,16 +246,12 @@ export default class Interval {
    * "months" is a special unit with no defined duration so the result will
    * be computed by walking the months in the interval, otherwise the duration
    * will be computed numerically.
-   *
-   * @param {("years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds")} [unit]
-   * @returns {number}
    */
-  duration(unit) {
+  duration(unit?: Unit): number {
     if (unit) {
       return getDurationByUnit(this, unit);
     } else {
-      // @ts-ignore
-      return this.end - this.start;
+      return this.end.getTime() - this.start.getTime();
     }
   }
 
@@ -313,10 +311,8 @@ export default class Interval {
    * equal to the interval. If another interval is passed and overlaps
    * either end of the interval, a single element will be returned which
    * is the difference between the interval and the passed argument.
-   *
-   * @param {Interval|DateLike} arg
    */
-  split(arg) {
+  split(arg: Interval | DateResolvable) {
     let interval;
     if (arg instanceof Interval) {
       interval = arg;
@@ -326,11 +322,19 @@ export default class Interval {
     }
 
     if (interval.start < this.start) {
-      // @ts-ignore
-      return [new Interval(Math.max(this.start, interval.end), this.end)];
+      return [
+        new Interval(
+          Math.max(this.start.getTime(), interval.end.getTime()),
+          this.end,
+        ),
+      ];
     } else if (interval.end > this.end) {
-      // @ts-ignore
-      return [new Interval(this.start, Math.min(this.end, interval.start))];
+      return [
+        new Interval(
+          this.start,
+          Math.min(this.end.getTime(), interval.start.getTime()),
+        ),
+      ];
     } else {
       return [
         new Interval(this.start, interval.start),
@@ -341,10 +345,8 @@ export default class Interval {
 
   /**
    * Divides the interval into equal parts.
-   *
-   * @param {number} parts
    */
-  divide(parts) {
+  divide(parts: number) {
     const result = [];
     const duration = Math.round(this.duration() / parts);
     let time = this.start.getTime();
@@ -356,7 +358,7 @@ export default class Interval {
     return result;
   }
 
-  isEqual(interval) {
+  isEqual(interval: Interval) {
     if (interval instanceof Interval) {
       return (
         this.start.isEqual(interval.start) && this.end.isEqual(interval.end)
@@ -426,14 +428,12 @@ export default class Interval {
    * Returns an array of intervals representing the specified units
    * contained within the interval. Note that this may extend beyond
    * the boundaries of the interval.
-   *
-   * @param {("year"|"month"|"week"|"day"|"hour"|"minute"|"second")} unit
    */
-  getUnits(unit) {
+  getUnits(unit: Unit) {
     unit = normalizeUnit(unit);
 
-    let last;
-    let result = [];
+    let last!: Interval;
+    let result: Interval[] = [];
 
     walkUnits(this, unit, (current) => {
       const interval = new Interval(current.startOf(unit), current.endOf(unit));
@@ -441,9 +441,7 @@ export default class Interval {
       last = interval;
     });
 
-    // @ts-ignore
     if (last?.end < this.end) {
-      // @ts-ignore
       const dt = last.start.advance(1, unit);
       result.push(new Interval(dt.startOf(unit), dt.endOf(unit)));
     }
@@ -452,7 +450,7 @@ export default class Interval {
   }
 }
 
-function getDurationByUnit(interval, unit) {
+function getDurationByUnit(interval: Interval, unit: Unit) {
   unit = normalizeUnit(unit);
 
   const unitInterval = new Interval(
@@ -469,7 +467,7 @@ function getDurationByUnit(interval, unit) {
   }
 }
 
-function getDurationByWalkingUnits(interval, unit) {
+function getDurationByWalkingUnits(interval: Interval, unit: Unit) {
   let result = 0;
   walkUnits(interval, unit, () => {
     result += 1;
@@ -477,7 +475,11 @@ function getDurationByWalkingUnits(interval, unit) {
   return result;
 }
 
-function walkUnits(interval, unit, fn) {
+function walkUnits(
+  interval: Interval,
+  unit: Unit,
+  fn: (current: DateTime) => void,
+) {
   const { start, end } = interval;
 
   let current = start;
@@ -487,6 +489,6 @@ function walkUnits(interval, unit, fn) {
   }
 }
 
-function isIsoInterval(arg) {
+function isIsoInterval(arg: any) {
   return typeof arg === 'string' && arg.includes('/');
 }

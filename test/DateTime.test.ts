@@ -338,7 +338,7 @@ describe('DateTime', () => {
 
       describe('compact', () => {
         it('should have correct compact forms for other languages', async () => {
-          function assertCompact(locale, expected) {
+          function assertCompact(locale: string, expected: string[]) {
             expect(
               DateTime.getWeekdays({
                 style: 'compact',
@@ -502,6 +502,7 @@ describe('DateTime', () => {
           locale: 'ja-JP',
           timeZone: 'America/New_York',
         });
+
         DateTime.setOptions({
           locale: null,
           timeZone: 'America/New_York',
@@ -739,6 +740,41 @@ describe('DateTime', () => {
     });
   });
 
+  describe('toDateString', () => {
+    it('should return default date format', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toDateString()).toBe('Jan 1, 2020');
+    });
+  });
+
+  describe('toTimeString', () => {
+    it('should return default time format', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toTimeString()).toBe('9:00am');
+    });
+  });
+
+  describe('toLocaleDateString', () => {
+    it('should ???????', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toLocaleDateString()).toBe('1/1/2020');
+    });
+  });
+
+  describe('toLocaleTimeString', () => {
+    it('should ???????', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toLocaleTimeString()).toBe('9:00:00 AM');
+    });
+  });
+
+  describe('toUTCString', () => {
+    it('should ???????', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toUTCString()).toBe('Wed, 01 Jan 2020 00:00:00 GMT');
+    });
+  });
+
   describe('Basic Formatting', () => {
     describe('default', () => {
       it('default is medium datetime', () => {
@@ -816,6 +852,7 @@ describe('DateTime', () => {
     });
 
     it('should not unset global timezone with undefined', () => {
+      // @ts-expect-error test
       DateTime.setTimeZone();
       expect(DateTime.getTimeZone()).toBe('Asia/Tokyo');
     });
@@ -868,6 +905,7 @@ describe('DateTime', () => {
     });
 
     it('should not unset global timezone with undefined', () => {
+      // @ts-expect-error test
       DateTime.setLocale();
       expect(DateTime.getLocale()).toBe('en-US');
     });
@@ -896,6 +934,7 @@ describe('DateTime', () => {
     });
 
     it('use system locale when not set', () => {
+      // @ts-expect-error test
       DateTime.setLocale();
       const str = '2020-01-01T00:00:00.000Z';
       expect(new DateTime(str).toString()).toMatch(
@@ -1189,6 +1228,7 @@ describe('DateTime', () => {
 
     it('should error on unknown unit', () => {
       expect(() => {
+        // @ts-expect-error test
         new DateTime().startOf('foo');
       }).toThrow('Unknown unit "foo"');
     });
@@ -1224,6 +1264,7 @@ describe('DateTime', () => {
 
     it('should error on unknown unit', () => {
       expect(() => {
+        // @ts-expect-error test
         new DateTime().endOf('foo');
       }).toThrow('Unknown unit "foo"');
     });
@@ -1271,6 +1312,7 @@ describe('DateTime', () => {
       expect(new DateTime('').isValid()).toBe(false);
       expect(new DateTime('2020').isValid()).toBe(true);
       expect(new DateTime(undefined).isValid()).toBe(true);
+      // @ts-expect-error test
       expect(new DateTime(null).isValid()).toBe(true);
     });
   });
@@ -1281,6 +1323,7 @@ describe('DateTime', () => {
       expect(new DateTime('').isInvalid()).toBe(true);
       expect(new DateTime('2020').isInvalid()).toBe(false);
       expect(new DateTime(undefined).isInvalid()).toBe(false);
+      // @ts-expect-error test
       expect(new DateTime(null).isInvalid()).toBe(false);
     });
   });
@@ -1309,10 +1352,12 @@ describe('DateTime', () => {
     });
 
     it('other', () => {
+      // @ts-expect-error test
       expect(new DateTime('2025-01-01').isEqual(null)).toBe(false);
-      expect(new DateTime('2025-01-01').isEqual(NaN)).toBe(false);
+      // @ts-expect-error test
       expect(new DateTime('2025-01-01').isEqual(false)).toBe(false);
       expect(new DateTime('2025-01-01').isEqual(undefined)).toBe(false);
+      expect(new DateTime('2025-01-01').isEqual(NaN)).toBe(false);
     });
   });
 
@@ -1917,7 +1962,7 @@ describe('DateTime', () => {
       // Advancing months may cause a shift when
       // not enough days so need to calculate the
       // offset dynamically.
-      function getMonthOffset(dt1, dt2) {
+      function getMonthOffset(dt1: DateTime, dt2: DateTime) {
         const month1 = dt1.getMonth();
         const month2 = dt2.getMonth();
         if (month1 <= month2) {
@@ -2591,6 +2636,7 @@ describe('DateTime', () => {
     it('valueOf', () => {
       const d1 = new DateTime('2020-01-01T00:00:00.000Z');
       const d2 = new DateTime('2020-01-02T00:00:00.000Z');
+      // @ts-expect-error test
       expect(d2 - d1).toBe(24 * 60 * 60 * 1000);
     });
 
