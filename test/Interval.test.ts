@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import DateTime from '../src/DateTime';
 import Interval from '../src/Interval';
-import { mockTime, unmockTime } from './helpers/time';
 
 beforeEach(() => {
   DateTime.setLocale('en-US');
@@ -57,14 +56,11 @@ describe('Interval', () => {
 
   describe('constructor', () => {
     describe('no arguments', () => {
-      it('should be the current instant if no arguments passed', () => {
-        mockTime('2025-01-01T00:00:00.000Z');
-        const interval = new Interval();
-        expect(interval.toISOString()).toBe(
-          '2025-01-01T00:00:00.000Z/2025-01-01T00:00:00.000Z',
-        );
-        expect(interval.duration()).toBe(0);
-        unmockTime();
+      it('should throw on no arguments', () => {
+        expect(() => {
+          // @ts-expect-error test
+          new Interval();
+        }).toThrow('Requires 1-2 arguments.');
       });
     });
 
@@ -96,37 +92,8 @@ describe('Interval', () => {
         expect(interval2).not.toBe(interval1);
         expect(interval2).toEqual(interval1);
       });
-
-      it('should assume ending now when a date-like is passed', () => {
-        mockTime('2026-01-01T00:00:00.000Z');
-
-        let interval;
-
-        interval = new Interval('2025-01-01T00:00:00.000Z');
-        expect(interval.toISOString()).toBe(
-          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
-        );
-
-        interval = new Interval(new Date('2025-01-01T00:00:00.000Z'));
-        expect(interval.toISOString()).toBe(
-          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
-        );
-
-        interval = new Interval(
-          new DateTime('2025-01-01T00:00:00.000Z').getTime(),
-        );
-        expect(interval.toISOString()).toBe(
-          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
-        );
-
-        interval = new Interval(new DateTime('2025-01-01T00:00:00.000Z'));
-        expect(interval.toISOString()).toBe(
-          '2025-01-01T00:00:00.000Z/2026-01-01T00:00:00.000Z',
-        );
-
-        unmockTime();
-      });
     });
+
     describe('two arguments', () => {
       it('should be able to create from strings', () => {
         const interval = new Interval(
@@ -293,6 +260,7 @@ describe('Interval', () => {
     });
 
     it('should return false for falsy value', () => {
+      // @ts-expect-error test
       expect(Interval.getDay().overlaps()).toBe(false);
     });
   });
@@ -347,6 +315,7 @@ describe('Interval', () => {
     });
 
     it('should return false for falsy value', () => {
+      // @ts-expect-error test
       expect(Interval.getDay().contains()).toBe(false);
     });
   });
@@ -703,12 +672,13 @@ describe('Interval', () => {
     });
 
     it('other', () => {
-      expect(
-        new Interval(
-          '2025-01-01T00:00:00.000Z',
-          '2026-01-01T00:00:00.000Z',
-        ).isEqual(null),
-      ).toBe(false);
+      const interval = new Interval(
+        '2025-01-01T00:00:00.000Z',
+        '2026-01-01T00:00:00.000Z',
+      );
+
+      // @ts-expect-error test
+      expect(interval.isEqual(null)).toBe(false);
     });
   });
 
@@ -870,6 +840,7 @@ describe('Interval', () => {
         '2027-01-01T00:00:00.000Z',
       );
       expect(() => {
+        // @ts-expect-error test
         interval.getUnits('foo');
       }).toThrow('Unknown unit "foo"');
     });

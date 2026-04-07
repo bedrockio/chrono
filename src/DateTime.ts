@@ -29,6 +29,7 @@ import { formatWithTokens } from './tokens';
 import {
   AdvanceBy,
   DateFields,
+  DateLike,
   DateResolvable,
   DateTimeOptions,
   FormatOptions,
@@ -57,26 +58,47 @@ const ONE_WEEK = 7 * ONE_DAY;
 const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
 
 /**
- * A timezone and locale aware DateTime.
- * This class assumes support for:
+ * A timezone and locale aware date and time.
  *
- * - `Intl.DateTimeFormat`
- * - `Intl.RelativeTimeFormat`
+ * `DateTime` wraps a native `Date` and provides immutable, fluent
+ * methods for parsing, formatting, comparison, and arithmetic. Every
+ * method that appears to mutate actually returns a new instance —
+ * the original is never modified.
  *
- *  @class
+ * Locale and timezone may be provided per instance, or set globally
+ * via {@link DateTime.setLocale} and {@link DateTime.setTimeZone}.
+ *
+ * @example
+ *
+ * import { DateTime } from '@bedrockio/chrono';
+ *
+ * const dt = new DateTime('2026-04-07T09:30:00Z', {
+ *   timeZone: 'America/New_York',
+ * });
+ *
+ * dt.formatLong();                         // April 7, 2026 at 5:30am
+ * dt.advance(1, 'day').format('M/d/yyyy'); // 4/8/2026
  */
 export default class DateTime {
   static options: DateTimeOptions = {};
 
+  // Static configuration
+
   /**
-   * Gets the global timezone.
+   * Returns the global timezone, or `undefined` if none is set.
    */
   static getTimeZone() {
     return this.options.timeZone;
   }
 
   /**
-   * Sets the global timezone.
+   * Sets the global timezone, used as the default for all `DateTime`
+   * instances that don't specify their own. Pass `null` to clear.
+   *
+   * @example
+   *
+   * DateTime.setTimeZone('America/New_York');
+   * DateTime.setTimeZone(null); // Clear
    */
   static setTimeZone(timeZone: string | null) {
     this.setOptions({
@@ -85,14 +107,20 @@ export default class DateTime {
   }
 
   /**
-   * Gets the global locale.
+   * Returns the global locale, or `undefined` if none is set.
    */
   static getLocale() {
     return this.options.locale;
   }
 
   /**
-   * Sets the global locale.
+   * Sets the global locale, used as the default for all `DateTime`
+   * instances that don't specify their own. Pass `null` to clear.
+   *
+   * @example
+   *
+   * DateTime.setLocale('en-US');
+   * DateTime.setLocale(null); // Clear
    */
   static setLocale(locale: string | null) {
     this.setOptions({
@@ -101,25 +129,37 @@ export default class DateTime {
   }
 
   /**
-   * Gets global options.
+   * Returns the currently set global options.
    */
   static getOptions() {
     return this.options;
   }
 
   /**
-   * Sets global options.
+   * Merges the given options into the global options used as defaults
+   * for all `DateTime` instances. Existing fields are preserved unless
+   * explicitly overwritten. Pass `null` for any field to clear it. See
+   * {@link GlobalDateTimeOptions} for the full list of fields.
+   *
+   * @example
+   *
+   * DateTime.setOptions({
+   *   locale: 'en-US',
+   *   timeZone: 'America/New_York',
+   * });
    */
   static setOptions(options: GlobalDateTimeOptions) {
     for (let [k, value] of Object.entries(options)) {
       const key = k as keyof DateTimeOptions;
       if (value === null) {
         delete this.options[key];
-      } else if (value) {
+      } else if (value !== undefined) {
         this.options[key] = value;
       }
     }
   }
+
+  // Static factories
 
   /**
    * Returns the minimum value passed in as a DateTime.
@@ -204,77 +244,74 @@ export default class DateTime {
   offset: number;
   options: DateTimeOptions;
 
+  // Constructor
+
   /**
-   * Creates a DateTime from:
+   * Creates a DateTime representing the current moment.
    *
-   * - A parseable `string`.
-   * - A timestamp as a `number`.
-   * - A `Date` object.
-   * - A `DateTime` object.
-   * - Enumerated arguments.
-   *
-   * If the input is a string that specifies a timezone or offset it will be used
-   * as is. Otherwise if the `timeZone` option is specified or a global timezone
-   * is set it will be parsed in that timezone. If no timezone can be derived the
-   * system offset will be used as a final fallback.
-   *
-   * Note also that ISO-8601 formats that do not include a time are also parsed in
-   * a manner that is consistent with the above, however **inconsistent** with the
-   * `Date` constructor which parses these as UTC for historical reasons.
+   * Other constructor forms accept a parseable value, individual date
+   * components, or an options object — see the additional overloads.
    *
    * @example
    *
-   * new DateTime(); // Current datetime
-   * new DateTime('January 1, 2025');
-   * new DateTime(1735657200000);
-   * new DateTime(2025, 0, 1);
-   *
+   * new DateTime();
    */
   constructor();
 
   /**
-   * Creates a DateTime with local options.
+   * Creates a DateTime representing the current moment with the given
+   * locale and timezone options. See {@link DateTimeOptions} for the
+   * full list of fields.
    *
    * @example
    *
    * new DateTime({
    *   locale: 'en-US',
-   *   timeZone: 'America/New_York'
+   *   timeZone: 'America/New_York',
    * });
    */
   constructor(options: DateTimeOptions);
 
   /**
-   * Creates a DateTime from input which may be:
+   * Creates a DateTime from an existing value, which may be a parseable
+   * string, a millisecond timestamp, a `Date`, or another `DateTime`.
    *
-   * - A parseable string.
-   * - A timestamp as a number.
-   * - A Date object.
-   * - Another DateTime object.
+   * If the input is a string that specifies a timezone or offset it is
+   * used as-is. Otherwise the `timeZone` option (or the global timezone)
+   * is applied. If neither is set, the system offset is used as a final
+   * fallback.
+   *
+   * Note that ISO-8601 strings without a time component are parsed
+   * consistently with the rules above — **inconsistent** with the native
+   * `Date` constructor, which interprets them as UTC for historical
+   * reasons.
    *
    * @example
    *
-   * new DateTime(1735689600000);
    * new DateTime('2025-01-01');
-   *
+   * new DateTime(1735689600000);
+   * new DateTime(existingDate);
    */
   constructor(input: DateResolvable);
 
   /**
-   * Creates a DateTime from input with local options.
+   * Creates a DateTime from an existing value with locale and timezone
+   * options. See the single-argument overload for parsing rules and
+   * {@link DateTimeOptions} for the full list of option fields.
    *
    * @example
    *
    * new DateTime('Jan 1 2025', {
    *   locale: 'en-US',
-   *   timeZone: 'America/New_York'
+   *   timeZone: 'America/New_York',
    * });
    */
   constructor(input: DateResolvable, options: DateTimeOptions);
 
   /**
-   * Creates a DateTime from enumerated arguments. Note that
-   * as with the native date constructor months are 0 indexed.
+   * Creates a DateTime from individual date components. As with the
+   * native `Date` constructor, months are **0-indexed** — January is `0`,
+   * December is `11`.
    *
    * @example
    *
@@ -313,8 +350,7 @@ export default class DateTime {
     });
 
     if (isEnumeratedArgs(input)) {
-      const enumerated = input as unknown as [number];
-      date = new Date(...enumerated);
+      date = new Date(...input);
       setPseudoTimezone(date, options);
     } else if (typeof input === 'string') {
       date = parseDate(input, options);
@@ -330,7 +366,7 @@ export default class DateTime {
     this.offset = getTimezoneOffset(date, options);
   }
 
-  // Compatibility
+  // JS Date compatibility
 
   /**
    * Returns a number representing the timestamp of the DateTime in milliseconds.
@@ -340,15 +376,21 @@ export default class DateTime {
   }
 
   /**
-   * Sets the timestamp of the DateTime as a number in milliseconds.
+   * Returns a new DateTime at the given UTC millisecond timestamp.
+   * Differs from {@link DateTime.setTime} in that the supplied
+   * timestamp is interpreted as UTC and the result is then re-offset
+   * into the DateTime's local timezone.
+   *
+   * @example
+   *
+   * dt.setUTCTime(Date.UTC(2026, 0, 1));
    */
-  setTime(time: string | number) {
-    if (typeof time === 'string') {
-      const { params, utc } = parseTime(time);
-      return setComponents(this, params, utc);
-    } else {
-      return new DateTime(time, this.options);
-    }
+  setUTCTime(time: number) {
+    // Note the target time may have a different offset
+    // so do an initial set before adding the offset.
+    const dt = this.setTime(time);
+    const offset = dt.getTimezoneOffset();
+    return dt.setTime(time + offset * ONE_MINUTE);
   }
 
   /**
@@ -366,23 +408,47 @@ export default class DateTime {
     return this.format();
   }
 
-  // TODO: ensure these fit into the system
+  /**
+   * Returns a string representing the date portion of
+   * this date interpreted in the local timezone.
+   */
   toDateString() {
     return this.toDateMedium();
   }
 
+  /**
+   * Returns a string representing the time portion of
+   * this date interpreted in the local timezone.
+   */
   toTimeString() {
     return this.toTimeMedium();
   }
 
-  toLocaleDateString() {
-    return this.date.toLocaleDateString();
+  /**
+   * Returns a string with a language-sensitive representation
+   * of the date portion of this date in the local timezone.
+   */
+  toLocaleDateString(
+    locales?: Intl.LocalesArgument,
+    options?: Intl.DateTimeFormatOptions,
+  ) {
+    return this.date.toLocaleDateString(locales, options);
   }
 
-  toLocaleTimeString() {
-    return this.date.toLocaleTimeString();
+  /**
+   * Returns a string with a language-sensitive representation
+   * of the time portion of this date in the local timezone.
+   */
+  toLocaleTimeString(
+    locales?: Intl.LocalesArgument,
+    options?: Intl.DateTimeFormatOptions,
+  ) {
+    return this.date.toLocaleTimeString(locales, options);
   }
 
+  /**
+   * Returns a string representing this date in the RFC 7231 format.
+   */
   toUTCString() {
     return this.date.toUTCString();
   }
@@ -395,18 +461,20 @@ export default class DateTime {
   }
 
   /**
+   * Returns the numeric value of the DateTime instance.
+   */
+  valueOf() {
+    return this.getTime();
+  }
+
+  // BSON serialization
+
+  /**
    * Returns a native Date for BSON serialization.
    * @see https://github.com/mongodb/js-bson
    */
   toBSON() {
     return this.date;
-  }
-
-  /**
-   * Returns the numeric value of the DateTime instance.
-   */
-  valueOf() {
-    return this.getTime();
   }
 
   // Formatting
@@ -416,7 +484,8 @@ export default class DateTime {
    * representation of the date component of the DateTime in UTC.
    *
    * @example
-   * 2025-01-01
+   *
+   * dt.toISODate(); // "2025-01-01"
    */
   toISODate() {
     const str = this.toISOString();
@@ -428,7 +497,8 @@ export default class DateTime {
    * representation of the time component of the DateTime in UTC.
    *
    * @example
-   * 12:30:00.000
+   *
+   * dt.toISOTime(); // "12:30:00.000"
    */
   toISOTime() {
     const str = this.toISOString();
@@ -437,16 +507,13 @@ export default class DateTime {
 
   /**
    * Formats the DateTime in [ISO format](https://en.wikipedia.org/wiki/ISO_8601)
-   * and the local timezone.
+   * but using the local timezone instead of UTC.
    *
    * @example
-   * 2026-01-01T09:00:00.000
    *
-   * @example
-   * 2026-01-01T09:00:00
-   *
-   * @example
-   * 2026-01-01T09:00
+   * dt.toLocalString();             // "2026-01-01T09:00:00.000"
+   * dt.toLocalString('seconds');    // "2026-01-01T09:00:00"
+   * dt.toLocalString('minutes');    // "2026-01-01T09:00"
    */
   toLocalString(precision?: TimePrecision) {
     const local = toUTC(this).toISOString().slice(0, -1);
@@ -454,21 +521,22 @@ export default class DateTime {
   }
 
   /**
-   * Formats the date component in ISO format but in local timezone.
+   * Formats the date component in ISO format using the local timezone.
    *
    * @example
-   * 2025-01-01
    *
+   * dt.toLocalDate(); // "2025-01-01"
    */
   toLocalDate() {
     return toUTC(this).toISOString().split('T')[0];
   }
 
   /**
-   * Formats the time component in ISO format but in local timezone.
+   * Formats the time component in ISO format using the local timezone.
    *
    * @example
-   * 12:30:00.000
+   *
+   * dt.toLocalTime(); // "12:30:00.000"
    */
   toLocalTime(precision?: TimePrecision) {
     const local = this.toLocalString().split('T')[1];
@@ -486,8 +554,8 @@ export default class DateTime {
    * Formats the date component in long style.
    *
    * @example
-   * January 1, 2020
-   * dateTime.toDateLong();
+   *
+   * dt.toDateLong(); // "January 1, 2020"
    */
   toDateLong(extra?: FormatOptions) {
     return this.format({
@@ -500,8 +568,8 @@ export default class DateTime {
    * Formats the date component in medium style.
    *
    * @example
-   * Jan 1, 2020
-   * dateTime.toDateMedium();
+   *
+   * dt.toDateMedium(); // "Jan 1, 2020"
    */
   toDateMedium(extra?: FormatOptions) {
     return this.format({
@@ -514,8 +582,8 @@ export default class DateTime {
    * Formats the date component in short style.
    *
    * @example
-   * 1/1/2020
-   * dateTime.toDateShort();
+   *
+   * dt.toDateShort(); // "1/1/2020"
    */
   toDateShort(extra?: FormatOptions) {
     return this.format({
@@ -535,8 +603,8 @@ export default class DateTime {
    * Formats the time component in long style.
    *
    * @example
-   * 9:00:00am
-   * dateTime.toTimeLong();
+   *
+   * dt.toTimeLong(); // "9:00:00am"
    */
   toTimeLong(extra?: FormatOptions) {
     return this.format({
@@ -549,8 +617,8 @@ export default class DateTime {
    * Formats the time component in medium style.
    *
    * @example
-   * 9:00am
-   * dateTime.toTimeLong();
+   *
+   * dt.toTimeMedium(); // "9:00am"
    */
   toTimeMedium(extra?: FormatOptions) {
     return this.format({
@@ -563,8 +631,8 @@ export default class DateTime {
    * Formats the time component in short style.
    *
    * @example
-   * 9am
-   * dateTime.toTimeShort();
+   *
+   * dt.toTimeShort(); // "9am"
    */
   toTimeShort(extra?: FormatOptions) {
     return this.format({
@@ -575,26 +643,14 @@ export default class DateTime {
 
   /**
    * Formats the time component with the time zone.
-   '
-   * @example
-   * 9:00am EST
-   * dateTime.toTimeWithZone();
    *
    * @example
-   * 9:00am Eastern Standard Time
-   * dateTime.toTimeWithZone('long');
    *
-   * @example
-   * 9:00am ET
-   * dateTime.toTimeWithZone('shortGeneric');
-   *
-   * @example
-   * 9:00am Eastern Time
-   * dateTime.toTimeWithZone('longGeneric');
-   *
-   * @example
-   * 09:00am EST
-   * dateTime.toTimeWithZone({ hour: '2-digit' });
+   * dt.toTimeWithZone();              // "9:00am EST"
+   * dt.toTimeWithZone('long');        // "9:00am Eastern Standard Time"
+   * dt.toTimeWithZone('shortGeneric'); // "9:00am ET"
+   * dt.toTimeWithZone('longGeneric'); // "9:00am Eastern Time"
+   * dt.toTimeWithZone({ hour: '2-digit' }); // "09:00am EST"
    */
   toTimeWithZone(arg?: TimeZoneName | FormatOptions) {
     const extra = resolveTimeZoneParams(arg);
@@ -605,19 +661,13 @@ export default class DateTime {
   }
 
   /**
-   * Formats the month and year components of the DateTime by locales.
+   * Formats the month and year components of the DateTime by locale.
    *
    * @example
-   * January 2025
-   * dateTime.toMonthYear();
    *
-   * @example
-   * Jan 2025
-   * dateTime.toMonthYear('short');
-   *
-   * @example
-   * Jan 25
-   * dateTime.toMonthYear({ month: 'short', year: '2-digit' });
+   * dt.toMonthYear();          // "January 2025"
+   * dt.toMonthYear('short');   // "Jan 2025"
+   * dt.toMonthYear({ month: 'short', year: '2-digit' }); // "Jan 25"
    */
   toMonthYear(arg?: MonthName | FormatOptions) {
     const extra = resolveMonthParams(arg);
@@ -628,19 +678,13 @@ export default class DateTime {
   }
 
   /**
-   * Formats the month and day components of the DateTime by locales.
+   * Formats the month and day components of the DateTime by locale.
    *
    * @example
-   * January 15
-   * dateTime.toMonthDay();
    *
-   * @example
-   * Jan 15
-   * dateTime.toMonthDay('short');
-   *
-   * @example
-   * January 15 at 9am
-   * dateTime.toMonthDay({ hour: 'numeric' });
+   * dt.toMonthDay();          // "January 15"
+   * dt.toMonthDay('short');   // "Jan 15"
+   * dt.toMonthDay({ hour: 'numeric' }); // "January 15 at 9am"
    */
   toMonthDay(arg?: MonthName | FormatOptions) {
     const extra = resolveMonthParams(arg);
@@ -655,8 +699,7 @@ export default class DateTime {
    *
    * @example
    *
-   * dateTime.formatLong();
-   * January 1, 2020 at 9:00am
+   * dt.formatLong(); // "January 1, 2020 at 9:00am"
    */
   formatLong(extra?: FormatOptions) {
     return this.format({
@@ -670,8 +713,7 @@ export default class DateTime {
    *
    * @example
    *
-   * dateTime.formatMedium();
-   * Jan 1, 2020, 9:00am
+   * dt.formatMedium(); // "Jan 1, 2020, 9:00am"
    */
   formatMedium(extra?: FormatOptions) {
     return this.format({
@@ -685,8 +727,7 @@ export default class DateTime {
    *
    * @example
    *
-   * dateTime.formatShort();
-   * 1/1/2020, 9:00am
+   * dt.formatShort(); // "1/1/2020, 9:00am"
    */
   formatShort(extra?: FormatOptions) {
     return this.format({
@@ -697,26 +738,14 @@ export default class DateTime {
 
   /**
    * Formats the DateTime with the time zone.
-   '
-   * @example
-   * dateTime.formatWithZone();
-   * January 1, 2020 at 9:00am EST
    *
    * @example
-   * dateTime.formatWithZone('long');
-   * January 1, 2020 at 9:00am Eastern Standard Time
    *
-   * @example
-   * dateTime.formatWithZone('shortGeneric');
-   * January 1, 2020 at 9:00am ET
-   *
-   * @example
-   * dateTime.formatWithZone('longGeneric');
-   * January 1, 2020 at 9:00am Eastern Time
-   *
-   * @example
-   * dateTime.formatTimeWithZone({ month: 'short' });
-   * Jan 1, 2020 at 9:00am Eastern Time
+   * dt.formatWithZone();              // "January 1, 2020 at 9:00am EST"
+   * dt.formatWithZone('long');        // "January 1, 2020 at 9:00am Eastern Standard Time"
+   * dt.formatWithZone('shortGeneric'); // "January 1, 2020 at 9:00am ET"
+   * dt.formatWithZone('longGeneric'); // "January 1, 2020 at 9:00am Eastern Time"
+   * dt.formatWithZone({ month: 'short' }); // "Jan 1, 2020 at 9:00am Eastern Time"
    */
   formatWithZone(arg?: TimeZoneName | FormatOptions) {
     const extra = resolveTimeZoneParams(arg);
@@ -727,30 +756,64 @@ export default class DateTime {
   }
 
   /**
-   * Formats the DateTime to standard locale-based format.
+   * Formats the DateTime using the standard locale-based format.
+   *
+   * @example
+   *
+   * dt.format(); // "January 1, 2020 at 9:00am"
    */
   format(): string;
 
   /**
-   * Format the DateTime by locale options similar to
-   * [DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#options).
+   * Formats the DateTime using locale options, mirroring
+   * [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#options).
    *
    * @example
    *
-   *  dt.format({
-   *    year: 'numeric',
-   *    month: '2-digit',
-   *  });
+   * dt.format({ year: 'numeric', month: '2-digit' }); // "01/2026"
    */
   format(format: FormatOptions, options?: DateTimeOptions): string;
 
   /**
-   * Format the DateTime with a token based format.
+   * Formats the DateTime using a token string. Tokens are substituted
+   * with locale-aware date and time parts; any other characters are
+   * passed through unchanged. Wrap a substring in single or double
+   * quotes to escape it from token replacement.
    *
    * @example
    *
-   *  dt.format('M/d/yyyy');
-   *  dt.format('hh:mm');
+   *  dt.format('M/d/yyyy');     // 4/7/2026
+   *  dt.format('hh:mm a');      // 09:30 am
+   *  dt.format("yyyy 'at' H:mm"); // 2026 at 9:30
+   *
+   * ### Token reference
+   *
+   * | Token   | Example   | Description                                |
+   * | ------- | --------- | ------------------------------------------ |
+   * | `yyyy`  | `2026`    | 4-digit year                               |
+   * | `yy`    | `26`      | 2-digit year                               |
+   * | `M`     | `4`       | Month, no padding                          |
+   * | `MM`    | `04`      | Month, zero-padded                         |
+   * | `d`     | `7`       | Day of month, no padding                   |
+   * | `dd`    | `07`      | Day of month, zero-padded                  |
+   * | `h`     | `9`       | Hour (12-hour clock), no padding           |
+   * | `hh`    | `09`      | Hour (12-hour clock), zero-padded          |
+   * | `H`     | `9`       | Hour (24-hour clock), no padding           |
+   * | `HH`    | `09`      | Hour (24-hour clock), zero-padded          |
+   * | `m`     | `5`       | Minute, no padding                         |
+   * | `mm`    | `05`      | Minute, zero-padded                        |
+   * | `s`     | `8`       | Second, no padding                         |
+   * | `ss`    | `08`      | Second, zero-padded                        |
+   * | `a`     | `am`      | Meridiem, lower case                       |
+   * | `A`     | `AM`      | Meridiem, upper case                       |
+   * | `Z`     | `+5`      | Timezone offset, compact                   |
+   * | `ZZ`    | `+0500`   | Timezone offset, no separator              |
+   * | `ZZZ`   | `+05:00`  | Timezone offset, colon separator           |
+   * | `ZZZZ`  | `EST`     | Timezone abbreviation, short               |
+   * | `ZZZZZ` | `Eastern Standard Time` | Timezone name, long          |
+   *
+   * For finer-grained control over output (e.g. AM/PM rendering style),
+   * see the {@link FormatOptions} overload.
    */
   format(format: string): string;
 
@@ -772,10 +835,33 @@ export default class DateTime {
     }
   }
 
-  // Relative Formatting
+  // Relative formatting
 
   /**
-   * Formats the DateTime in a relative format. Allowed options are:
+   * Formats the DateTime relative to another point in time (defaults to
+   * now), producing strings like `"5 minutes ago"` or `"in 3 days"`.
+   *
+   * When the DateTime falls outside the `min`/`max` bounds, the result
+   * falls back to an absolute format: a time of day for same-day values,
+   * a month-and-day for same-year values, or a full date otherwise.
+   *
+   * See {@link RelativeOptions} for available options.
+   *
+   * @example
+   *
+   * dt.relative();
+   * // "5 minutes ago"
+   *
+   * // With a 6-hour window, values older than 6 hours fall back to absolute:
+   * dt.relative({
+   *   min: new DateTime().rewind(6, 'hours'),
+   * });
+   * // Progressively renders:
+   * //   "1 minute ago"
+   * //   "5 hours ago"
+   * //   "11:00pm"
+   * //   "March 15"
+   * //   "June 15 2018"
    */
   relative(options?: RelativeOptions) {
     return formatRelative(this, {
@@ -787,34 +873,44 @@ export default class DateTime {
   // Advancing
 
   /**
-   * Advances the DateTime. When the first argument is a number it must
-   * be followed by a unit advancing by that many units. If the first
-   * argument is an object it will advance the date by multiple units.
+   * Advances the DateTime by a number of units.
    *
    * @example
    * new DateTime().advance(6, 'months')
+   */
+  advance(by: number, unit: Unit): DateTime;
+  /**
+   * Advances the DateTime by multiple units at once.
+   *
+   * @example
    * new DateTime().advance({
    *   months: 6,
    *   days: 15
    * })
    */
-  advance(by: AdvanceBy, unit?: Unit) {
+  advance(by: DateFields): DateTime;
+  advance(by: AdvanceBy, unit?: Unit): DateTime {
     return advanceDate(this, 1, by, unit);
   }
 
   /**
-   * Rewinds the DateTime. When the first argument is a number it must
-   * be followed by a unit rewinding by that many units. If the first
-   * argument is an object it will rewind the date by multiple units.
+   * Rewinds the DateTime by a number of units.
    *
    * @example
    * new DateTime().rewind(6, 'months')
+   */
+  rewind(by: number, unit: Unit): DateTime;
+  /**
+   * Rewinds the DateTime by multiple units at once.
+   *
+   * @example
    * new DateTime().rewind({
    *   months: 6,
    *   days: 15
    * })
    */
-  rewind(by: AdvanceBy, unit?: Unit) {
+  rewind(by: DateFields): DateTime;
+  rewind(by: AdvanceBy, unit?: Unit): DateTime {
     return advanceDate(this, -1, by, unit);
   }
 
@@ -822,6 +918,10 @@ export default class DateTime {
 
   /**
    * Rewinds the DateTime to the start of the specified unit.
+   *
+   * @example
+   *
+   * dt.startOf('month'); // First millisecond of the current month
    */
   startOf(unit: Unit) {
     return startOf(this, unit);
@@ -829,12 +929,16 @@ export default class DateTime {
 
   /**
    * Advances the DateTime to the end of the specified unit.
+   *
+   * @example
+   *
+   * dt.endOf('day'); // Last millisecond of the current day
    */
   endOf(unit: Unit) {
     return endOf(this, unit);
   }
 
-  // Convenience methods
+  // Calendar boundaries
 
   /**
    * Rewinds the DateTime to the start of the year.
@@ -908,7 +1012,7 @@ export default class DateTime {
     return endOf(this, 'day');
   }
 
-  // Other
+  // Validation & utilities
 
   /**
    * Returns the number of days in the month.
@@ -918,7 +1022,7 @@ export default class DateTime {
   }
 
   /**
-   * Resets the time to 00:00:00.000. Equivalent to `startOfDay`.
+   * Resets the time to 00:00:00.000. Equivalent to {@link startOfDay}.
    */
   resetTime() {
     return this.setArgs(this.getFullYear(), this.getMonth(), this.getDate());
@@ -939,7 +1043,7 @@ export default class DateTime {
   }
 
   /**
-   * Returns true if the DateTime is equivalent to the passed value..
+   * Returns true if the DateTime is equivalent to the passed value.
    */
   isEqual(arg: DateResolvable) {
     return this.getTime() === new DateTime(arg).getTime();
@@ -952,7 +1056,7 @@ export default class DateTime {
     return new DateTime(this.date, this.options);
   }
 
-  // Getters
+  // JS Date getters
 
   /**
    * Gets the year of the DateTime.
@@ -977,14 +1081,14 @@ export default class DateTime {
   }
 
   /**
-   * Gets the date of the DateTime.
+   * Gets the day of the month of the DateTime.
    */
   getDate() {
     return toUTC(this).getUTCDate();
   }
 
   /**
-   * Gets the day of week of the DateTime from 0 to 6.
+   * Gets the day of the week of the DateTime, where 0 is Sunday.
    */
   getDay() {
     return toUTC(this).getUTCDay();
@@ -1033,14 +1137,14 @@ export default class DateTime {
   }
 
   /**
-   * Gets the date in UTC.
+   * Gets the day of the month in UTC.
    */
   getUTCDate() {
     return this.date.getUTCDate();
   }
 
   /**
-   * Gets the day in UTC.
+   * Gets the day of the week in UTC, where 0 is Sunday.
    */
   getUTCDay() {
     return this.date.getUTCDay();
@@ -1074,6 +1178,8 @@ export default class DateTime {
     return this.date.getUTCMilliseconds();
   }
 
+  // JS Date setters
+
   /**
    * Sets the year of the DateTime.
    */
@@ -1099,7 +1205,7 @@ export default class DateTime {
   }
 
   /**
-   * Sets the date of the DateTime.
+   * Sets the day of the month of the DateTime.
    */
   setDate(date: number) {
     const utc = toUTC(this);
@@ -1138,7 +1244,7 @@ export default class DateTime {
     return this.setUTCTime(utc.setUTCMilliseconds(milliseconds));
   }
 
-  // UTC Setters
+  // JS Date UTC setters
 
   /**
    * Sets full year of the DateTime in UTC.
@@ -1157,7 +1263,7 @@ export default class DateTime {
   }
 
   /**
-   * Sets date of the DateTime in UTC.
+   * Sets the day of the month in UTC.
    */
   setUTCDate(utcDate: number) {
     const date = new Date(this.date);
@@ -1196,38 +1302,61 @@ export default class DateTime {
     return this.setTime(date.setUTCMilliseconds(milliseconds));
   }
 
+  // Custom setters
+
   /**
-   * Sets components of the DateTime by name.
+   * Returns a new DateTime at the given timestamp. Accepts either a
+   * millisecond number or a parseable time string. In the string form
+   * the time-of-day components are applied to the existing date.
+   *
+   * @example
+   *
+   * dt.setTime(1735657200000); // Replace with millisecond timestamp
+   * dt.setTime('14:30');       // Replace time of day, keep date
+   */
+  setTime(time: string | number) {
+    if (typeof time === 'string') {
+      const { params, utc } = parseTime(time);
+      return setComponents(this, params, utc);
+    } else {
+      return new DateTime(time, this.options);
+    }
+  }
+
+  /**
+   * Returns a new DateTime with the given component fields applied.
+   * Unspecified components are preserved from the original.
+   *
+   * @example
+   *
+   * dt.set({ year: 2026, month: 0 }); // Same dt with year/month replaced
    */
   set(components: DateFields) {
     return setComponents(this, components);
   }
 
   /**
-   * Create a new date from arguments. This is identical
-   * to using the overloaded constructor, however where
-   * numeric values there are relative to the system time,
-   * the result here will be relative to the derived timezone.
+   * Creates a new DateTime from numeric arguments. Identical to the
+   * enumerated-argument constructor, except that the values are
+   * interpreted in the DateTime's timezone (or the global timezone)
+   * rather than the system timezone.
    *
-   * For example:
+   * This lets you construct a DateTime from numeric values without the
+   * system clock leaking into the result. Internally the values are
+   * applied in UTC and then offset by the resolved timezone.
    *
-   * - System time is GMT-5
-   * - DateTime.setTimeZone('Asia/Tokyo') (GMT+9)
+   * @example
    *
-   * new Date(2020, 0, 1)     -> "2019-12-31T19:00:00Z"
-   * this.setArgs(2020, 0, 1) -> "2020-01-01T09:00:00Z"
-   *
-   * This effectively allows creating a DateTime by numeric
-   * values while ignoring the system time (and preserving
-   * the timezone and locale). The strategy here is to first
-   * set the values in UTC, then subtract the offset, which
-   * is derived from either the DateTime's internal timezone
-   * or the global timezone.
+   * // System time is GMT-5, global timezone set to Asia/Tokyo (GMT+9):
+   * new Date(2020, 0, 1);    // 2019-12-31T19:00:00Z (system-relative)
+   * dt.setArgs(2020, 0, 1);  // 2020-01-01T09:00:00Z (Tokyo-relative)
    */
   setArgs(...args: number[]) {
     const enumerated = args as [number, ...number[]];
     return this.setUTCTime(Date.UTC(...enumerated));
   }
+
+  // Timezone
 
   /**
    * Returns the IANA timezone.
@@ -1276,6 +1405,8 @@ export default class DateTime {
     return this.setTimeZone(timeZone);
   }
 
+  // Names
+
   /**
    * Returns the English name of the month. `style` follows Intl format
    * with `compact` as a special 2 character form. Default is `long`.
@@ -1302,20 +1433,6 @@ export default class DateTime {
     return obj?.[INSTANCE_KEY];
   }
 
-  setUTCTime(time: number) {
-    // Note the target time may have a different offset
-    // so do an initial set before adding the offset.
-    const dt = this.setTime(time);
-    const offset = dt.getTimezoneOffset();
-    return dt.setTime(time + offset * ONE_MINUTE);
-  }
-
-  // TODO: document and organize compat here
-
-  getVarDate(): VarDate {
-    throw new Error('getVarDate is not supported');
-  }
-
   [Symbol.toPrimitive](hint: 'number'): number;
   [Symbol.toPrimitive](hint: 'string' | 'default'): string;
   [Symbol.toPrimitive](hint: string): number | string {
@@ -1323,11 +1440,11 @@ export default class DateTime {
   }
 }
 
-function isOptionsObject(arg: any) {
-  return arg && typeof arg === 'object' && !isDateLike(arg);
+function isOptionsObject(arg: unknown): arg is DateTimeOptions {
+  return arg !== null && typeof arg === 'object' && !isDateLike(arg);
 }
 
-function isEnumeratedArgs(args: any) {
+function isEnumeratedArgs(args: unknown): args is [number, number, ...number[]] {
   if (!Array.isArray(args) || args.length < 2) {
     return false;
   }
@@ -1336,7 +1453,7 @@ function isEnumeratedArgs(args: any) {
   });
 }
 
-function isDateLike(arg: any) {
+function isDateLike(arg: unknown): arg is DateLike {
   return arg instanceof Date || arg instanceof DateTime;
 }
 
@@ -1470,21 +1587,9 @@ function formatRelative(dt: DateTime, options: RelativeOptions = {}) {
   const ms = dt.getTime() - now.getTime();
   const msAbs = Math.abs(ms);
 
-  // Fall back to non-relative formats if outside defined
-  // bounds. If we are within a day show a time format,
-  // otherwise show a date fromat. For example:
-  //
-  // dt.relative({
-  //  min: new DateTime().rewind(6, 'hours')
-  // })
-  //
-  // Will progressively render:
-
-  // - 1 minute ago
-  // - 5 hours ago
-  // - 11:00pm
-  // - March 15
-  // - June 15 2018
+  // Outside the min/max window we fall back to absolute formats:
+  // a time of day for same-day values, a month-and-day for same-year
+  // values, otherwise a full date. See `relative()` JSDoc for examples.
   if (dt < min!) {
     if (dt > now.startOfDay()) {
       return dt.toTimeMedium();

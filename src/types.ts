@@ -53,20 +53,42 @@ export type EnumeratedArgs = [
 ];
 
 export interface GlobalDateTimeOptions {
-  /** Locale */
+  /**
+   * BCP-47 locale tag (e.g. `"en-US"`, `"ja-JP"`) used as the default locale
+   * for all DateTime instances. Pass `null` to clear and fall back to the
+   * system locale.
+   */
   locale?: string | null;
-  /** Timezone */
+  /**
+   * IANA timezone identifier (e.g. `"America/New_York"`, `"UTC"`) used as the
+   * default timezone for all DateTime instances. Pass `null` to clear and
+   * fall back to the system timezone.
+   */
   timeZone?: string | null;
-  /** First day of the week */
+  /**
+   * Day to treat as the first day of the week, where `0` is Sunday and `6`
+   * is Saturday. Used by `startOf('week')`, calendar generation, etc.
+   * Defaults to the locale's convention.
+   */
   firstDayOfWeek?: number;
 }
 
 export interface DateTimeOptions {
-  /** Locale */
+  /**
+   * BCP-47 locale tag (e.g. `"en-US"`). Overrides the global locale for
+   * this instance only. Defaults to the global locale, then the system locale.
+   */
   locale?: string;
-  /** Timezone */
+  /**
+   * IANA timezone identifier (e.g. `"America/New_York"`). Overrides the
+   * global timezone for this instance only. Defaults to the global timezone,
+   * then the system timezone.
+   */
   timeZone?: string;
-  /** First day of the week */
+  /**
+   * Day to treat as the first day of the week, where `0` is Sunday and `6`
+   * is Saturday. Defaults to the locale's convention.
+   */
   firstDayOfWeek?: number;
 }
 
@@ -76,11 +98,17 @@ export interface CalendarMonthOptions extends DateTimeOptions {
 }
 
 export interface RelativeOptions extends DateTimeOptions {
-  /**  Offset to format relative to. Defaults to the current time. */
+  /** Offset to format relative to. Defaults to the current time. */
   now?: DateResolvable;
-  /** When set will return undefined if the DateTime is before this date. */
+  /**
+   * Lower bound for relative formatting. DateTimes earlier than this
+   * fall back to an absolute format instead of a relative phrase.
+   */
   min?: DateResolvable;
-  /** When set will return undefined if the DateTime is after this date. */
+  /**
+   * Upper bound for relative formatting. DateTimes later than this
+   * fall back to an absolute format instead of a relative phrase.
+   */
   max?: DateResolvable;
   /** Passed to Intl.RelativeTimeFormat. Defaults to `auto` but may also be `always`. */
   numeric?: 'auto' | 'always';
@@ -113,9 +141,21 @@ export interface IntlOptions
 }
 
 export type FormatOptions = Intl.DateTimeFormatOptions & {
-  /** Locale */
+  /**
+   * BCP-47 locale tag used for formatting. Defaults to the DateTime's
+   * locale, then the global locale, then the system locale.
+   */
   locale?: string;
-  /** Format style for AM/PM display */
+  /**
+   * Controls how AM/PM is rendered. These are extra options that fill gaps
+   * in `Intl.DateTimeFormat`, which has limited AM/PM styling for English.
+   * Examples below show the result for 9 in the morning:
+   *
+   * - `"short"`  — `9a`
+   * - `"caps"`   — `9AM`
+   * - `"space"`  — `9 am`
+   * - `"period"` — `9 a.m.`
+   */
   meridiem?: 'short' | 'period' | 'caps' | 'space';
 };
 

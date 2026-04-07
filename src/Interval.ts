@@ -2,10 +2,28 @@ import DateTime from './DateTime';
 import { CalendarMonthOptions, DateResolvable, Unit } from './types';
 import { normalizeUnit } from './units';
 
+/**
+ * An immutable range between two {@link DateTime} instances.
+ *
+ * An `Interval` always has a concrete start and end.
+ *
+ * @example
+ *
+ * import { Interval, DateTime } from '@bedrockio/chrono';
+ *
+ * const year = Interval.getYear('2026-04-07');
+ * year.contains(new DateTime('2026-12-31')); // true
+ * year.days();                               // 365
+ */
 export default class Interval {
+  // Static factories
+
   /**
-   * Gets an interval representing the year of the
-   * input.
+   * Returns an interval spanning the year of the input date.
+   *
+   * @example
+   *
+   * Interval.getYear('2026-04-07'); // 2026-01-01 → 2026-12-31
    */
   static getYear(date?: DateResolvable) {
     return new Interval(
@@ -15,9 +33,14 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the full calendar
-   * month from the first day of the week at the start
-   * to the last day of the week at the end.
+   * Returns an interval spanning the full calendar month containing
+   * the input date — the first day of the week at the start of the
+   * month through the last day of the week at the end. Useful for
+   * rendering month grids in calendar UIs.
+   *
+   * @example
+   *
+   * Interval.getCalendarMonth('2026-04-07'); // 2026-03-29 → 2026-05-02
    */
   static getCalendarMonth(
     date?: DateResolvable,
@@ -45,7 +68,11 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the month of the input.
+   * Returns an interval spanning the month of the input date.
+   *
+   * @example
+   *
+   * Interval.getMonth('2026-04-07'); // 2026-04-01 → 2026-04-30
    */
   static getMonth(date: DateResolvable) {
     return new Interval(
@@ -55,7 +82,11 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the week of the input.
+   * Returns an interval spanning the week of the input date.
+   *
+   * @example
+   *
+   * Interval.getWeek('2026-04-07'); // 2026-04-05 → 2026-04-11
    */
   static getWeek(date: DateResolvable) {
     return new Interval(
@@ -65,7 +96,11 @@ export default class Interval {
   }
 
   /**
-   * Gets an interval representing the full day of the input.
+   * Returns an interval spanning the full day of the input date.
+   *
+   * @example
+   *
+   * Interval.getDay('2026-04-07'); // 2026-04-07 00:00 → 23:59:59.999
    */
   static getDay(date: DateResolvable) {
     return new Interval(
@@ -77,49 +112,35 @@ export default class Interval {
   start: DateTime;
   end: DateTime;
 
-  /**
-   * Creates an interval from various input. If two arguments are passed they
-   * indicate the start and end of the interval and can be any format accepted
-   * by the DateTime constructor. If a single argument is passed it must be a
-   * string in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals)
-   * or another interval.
-   *
-   * @example
-   *
-   * new Interval(new DateTime('2023-01-01'), new DateTime('2023-01-02'));
-   * new Interval('2023-01-01/2023-01-02');
-   * new Interval(interval);
-   */
-  constructor();
+  // Constructor
 
   /**
    * Creates an interval from an
-   * [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals).
+   * [ISO-8601 time interval string](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals).
    *
    * @example
    *
    * new Interval('2023-01-01/2023-01-02');
-   *
    */
   constructor(input: string);
 
   /**
-   * Creates a copy of the interval.
+   * Creates a copy of an existing interval.
    *
    * @example
    *
-   * new Interval(interval);
-   *
+   * new Interval(otherInterval);
    */
   constructor(input: Interval);
 
   /**
-   * Creates a new interval with a discrete start and end.
+   * Creates an interval from a discrete start and end. Each argument
+   * accepts any value the {@link DateTime} constructor accepts.
    *
    * @example
    *
    * new Interval(new DateTime('2023-01-01'), new DateTime('2023-01-02'));
-   *
+   * new Interval('2023-01-01', '2023-01-02');
    */
   constructor(start: DateResolvable, end: DateResolvable);
 
@@ -135,12 +156,13 @@ export default class Interval {
       } else if (isIsoInterval(arg)) {
         [start, end] = arg.split('/');
       } else {
-        start = arg;
-        end = Date.now();
+        throw new Error('Single argument must be an Interval or a string.');
       }
-    } else {
+    } else if (args.length === 2) {
       start = args[0];
       end = args[1];
+    } else {
+      throw new Error('Requires 1-2 arguments.');
     }
 
     start = new DateTime(start);
@@ -156,6 +178,9 @@ export default class Interval {
     this.end = end;
   }
 
+  /**
+   * Returns a copy of the interval.
+   */
   clone() {
     return new Interval(this.start, this.end);
   }
@@ -305,12 +330,22 @@ export default class Interval {
   }
 
   /**
-   * Splits the interval into multiple parts by the passed argument.
-   * If the passed argument is a specific date and falls outside the
-   * bounds of the interval a single element will be returned which is
-   * equal to the interval. If another interval is passed and overlaps
-   * either end of the interval, a single element will be returned which
-   * is the difference between the interval and the passed argument.
+   * Splits this interval using the passed argument as a cut and
+   * returns the resulting intervals.
+   *
+   * A date-like cut produces two intervals — the parts before and
+   * after the cut. A cut that falls outside this interval is a no-op
+   * and returns a single-element array equal to this interval.
+   *
+   * An interval cut removes the overlap from this interval. If the
+   * cut interval lies fully inside, the result is the parts before
+   * and after it. If the cut interval overlaps a single edge, the
+   * result is the trimmed remainder as a single element.
+   *
+   * @example
+   *
+   * year.split(july);     // [Jan–July, July–Dec]
+   * year.split(jan2024);  // [Jan–Dec] (cut is outside, no-op)
    */
   split(arg: Interval | DateResolvable) {
     let interval;
@@ -358,6 +393,9 @@ export default class Interval {
     return result;
   }
 
+  /**
+   * Returns true if the two intervals have the same start and end.
+   */
   isEqual(interval: Interval) {
     if (interval instanceof Interval) {
       return (
@@ -426,8 +464,10 @@ export default class Interval {
 
   /**
    * Returns an array of intervals representing the specified units
-   * contained within the interval. Note that this may extend beyond
-   * the boundaries of the interval.
+   * contained within this interval. Each returned interval is aligned
+   * to its unit boundaries — for example `getUnits('day')` on a
+   * 9am–11am slice will return a single interval spanning the full
+   * day, not the 2-hour slice.
    */
   getUnits(unit: Unit) {
     unit = normalizeUnit(unit);

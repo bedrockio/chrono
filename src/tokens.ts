@@ -60,7 +60,10 @@ const TOKENS: Record<string, Tokenizer> = {
       hour12: true,
     });
   },
-  // Hour 24
+  // Hour 24, unpadded.
+  // Intl pads the hour to 2 digits when `minute` is also requested in the
+  // format string, so we strip the leading zero ourselves to keep `H`
+  // unpadded. See "5:05 AM" / "0:05 AM" cases in DateTime.test.ts.
   H(dt: DateTime, options: IntlOptions) {
     let str = getPart(dt, 'hour', {
       ...options,
@@ -77,7 +80,10 @@ const TOKENS: Record<string, Tokenizer> = {
       hourCycle: 'h23',
     });
   },
-  // Minute
+  // Minute.
+  // Intl produces ambiguous, prose-like output when `minute` is requested
+  // alone, so we always pair it with `hour` to force a numeric `minute`
+  // part. The hour value itself is discarded by `getPart`.
   m(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'minute', {
       ...options,
@@ -92,7 +98,9 @@ const TOKENS: Record<string, Tokenizer> = {
       minute: '2-digit',
     });
   },
-  // Second
+  // Second.
+  // Same workaround as `minute` — pair with `minute` so Intl returns a
+  // numeric `second` part instead of prose.
   s(dt: DateTime, options: IntlOptions) {
     return getPart(dt, 'second', {
       ...options,

@@ -1,6 +1,7 @@
 ## 0.12.0
 
-- Typescript rewrite
+- Typescript rewrite.
+- Cleaned up docs.
 
 ## 0.11.4
 

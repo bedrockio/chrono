@@ -8,17 +8,26 @@
     "build": "scripts/build",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json && tsc-alias -f -p tsconfig.esm.json",
-    "build:types": "tsc -p tsconfig.types.json",
     "build:docs": "typedoc",
     "prepublishOnly": "yarn build"
   },
   "type": "module",
   "main": "./dist/cjs/index.js",
-  "types": "./types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/esm/index.d.ts",
   "exports": {
-    "types": "./types/index.d.ts",
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js"
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
   },
   "repository": "https://github.com/bedrockio/chrono",
   "author": "Andrew Plummer <plummer.andrew@gmail.com>",
