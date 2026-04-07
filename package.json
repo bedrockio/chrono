@@ -14,7 +14,10 @@
   "type": "module",
   "main": "./dist/cjs/index.js",
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ],
   "types": "./dist/esm/index.d.ts",
   "exports": {
