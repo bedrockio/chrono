@@ -1,7 +1,8 @@
 import type DateTime from './DateTime';
+import type Time from './Time';
 
-export type DateFields = Partial<Record<Unit, number>>;
-export type AdvanceBy = number | DateFields;
+export type DateParams = Partial<Record<Unit, number>>;
+export type AdvanceBy = number | DateParams;
 
 export type Unit =
   | 'year'
@@ -41,6 +42,13 @@ export type TimePrecision =
 
 export type DateLike = DateTime | Date;
 export type DateResolvable = DateTime | Date | number | string | undefined;
+export type TimeResolvable =
+  | DateTime
+  | Date
+  | Time
+  | number
+  | string
+  | undefined;
 
 export type EnumeratedArgs = [
   number,
@@ -185,5 +193,21 @@ export interface MeridiemOptions {
   /** Timezone. */
   timeZone?: string;
 }
+
+// Time
+
+export type TimeUnit =
+  | 'hour'
+  | 'hours'
+  | 'minute'
+  | 'minutes'
+  | 'second'
+  | 'seconds'
+  | 'millisecond'
+  | 'milliseconds';
+
+export type SingularTimeUnit = 'hour' | 'minute' | 'second' | 'millisecond';
+
+export type TimeFields = Partial<Record<TimeUnit, number>>;
 
 export type { DateTime };

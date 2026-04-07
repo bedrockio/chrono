@@ -23,13 +23,14 @@ import {
 } from './locale';
 
 import { parseDate, parseTime } from './parse';
+import { DATETIME_SYMBOL } from './symbols';
 import { getTimezoneOffset, setPseudoTimezone } from './timezone';
 import { formatWithTokens } from './tokens';
 
 import {
   AdvanceBy,
-  DateFields,
   DateLike,
+  DateParams,
   DateResolvable,
   DateTimeOptions,
   FormatOptions,
@@ -55,8 +56,6 @@ const ONE_HOUR = 60 * ONE_MINUTE;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_WEEK = 7 * ONE_DAY;
 
-const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
-
 /**
  * A timezone and locale aware date and time.
  *
@@ -76,7 +75,7 @@ const INSTANCE_KEY = Symbol.for('@bedrockio/chrono');
  *   timeZone: 'America/New_York',
  * });
  *
- * dt.formatLong();                         // April 7, 2026 at 5:30am
+ * dt.toLong();                             // April 7, 2026 at 5:30am
  * dt.advance(1, 'day').format('M/d/yyyy'); // 4/8/2026
  */
 export default class DateTime {
@@ -402,31 +401,82 @@ export default class DateTime {
   }
 
   /**
-   * Returns a default formatted string that represents the DateTime.
+   * Returns the DateTime as a human-readable string. Defaults to the
+   * long locale format (e.g. "January 1, 2020 at 9:00am").
+   *
+   * Note: this deliberately diverges from native `Date.prototype.toString()`,
+   * which returns a verbose system-locale string like
+   * `"Wed Jan 01 2020 09:00:00 GMT-0500 (Eastern Standard Time)"`. The
+   * native form is rarely useful as a default; chrono optimizes for
+   * implicit stringification (template literals, logs, errors). Use
+   * `dt.date.toString()` if you need the literal native format.
    */
   toString() {
     return this.format();
   }
 
   /**
-   * Returns a string representing the date portion of
-   * this date interpreted in the local timezone.
+   * Equivalent to `toISOString()`. Used by `JSON.stringify()`.
+   */
+  toJSON() {
+    return this.date.toISOString();
+  }
+
+  /**
+   * Returns the numeric value of the DateTime instance (milliseconds
+   * since the Unix epoch).
+   */
+  valueOf() {
+    return this.getTime();
+  }
+
+  // Native Date passthroughs
+  //
+  // These exist for parity with `Date` so that a DateTime can stand
+  // in for a Date in code that calls these methods. Each delegates
+  // directly to the underlying native `Date` instance and produces
+  // exactly what the spec defines (including any implementation-defined
+  // portions). For chrono-flavored output, prefer `format()`,
+  // `toLong()`, `toMedium()`, etc.
+
+  /**
+   * Returns a string in RFC 7231 format. Passthrough to native
+   * `Date.toUTCString()`.
+   */
+  toUTCString() {
+    return this.date.toUTCString();
+  }
+
+  /**
+   * Returns the date portion as a string. Passthrough to native
+   * `Date.toDateString()`.
    */
   toDateString() {
-    return this.toDateMedium();
+    return this.date.toDateString();
   }
 
   /**
-   * Returns a string representing the time portion of
-   * this date interpreted in the local timezone.
+   * Returns the time portion as a string. Passthrough to native
+   * `Date.toTimeString()`.
    */
   toTimeString() {
-    return this.toTimeMedium();
+    return this.date.toTimeString();
   }
 
   /**
-   * Returns a string with a language-sensitive representation
-   * of the date portion of this date in the local timezone.
+   * Returns a locale-sensitive string. Passthrough to native
+   * `Date.toLocaleString()`.
+   */
+  toLocaleString(
+    locales?: Intl.LocalesArgument,
+    options?: Intl.DateTimeFormatOptions,
+  ) {
+    return this.date.toLocaleString(locales, options);
+  }
+
+  /**
+   * Returns a locale-sensitive date string. Passthrough to native
+   * `Date.toLocaleDateString()`.
    */
   toLocaleDateString(
     locales?: Intl.LocalesArgument,
@@ -436,35 +486,14 @@ export default class DateTime {
   }
 
   /**
-   * Returns a string with a language-sensitive representation
-   * of the time portion of this date in the local timezone.
+   * Returns a locale-sensitive time string. Passthrough to native
+   * `Date.toLocaleTimeString()`.
    */
   toLocaleTimeString(
     locales?: Intl.LocalesArgument,
     options?: Intl.DateTimeFormatOptions,
   ) {
     return this.date.toLocaleTimeString(locales, options);
-  }
-
-  /**
-   * Returns a string representing this date in the RFC 7231 format.
-   */
-  toUTCString() {
-    return this.date.toUTCString();
-  }
-
-  /**
-   * Equivalent to `toISOString`.
-   */
-  toJSON() {
-    return this.date.toISOString();
-  }
-
-  /**
-   * Returns the numeric value of the DateTime instance.
-   */
-  valueOf() {
-    return this.getTime();
   }
 
   // BSON serialization
@@ -646,10 +675,10 @@ export default class DateTime {
    *
    * @example
    *
-   * dt.toTimeWithZone();              // "9:00am EST"
-   * dt.toTimeWithZone('long');        // "9:00am Eastern Standard Time"
+   * dt.toTimeWithZone();               // "9:00am EST"
+   * dt.toTimeWithZone('long');         // "9:00am Eastern Standard Time"
    * dt.toTimeWithZone('shortGeneric'); // "9:00am ET"
-   * dt.toTimeWithZone('longGeneric'); // "9:00am Eastern Time"
+   * dt.toTimeWithZone('longGeneric');  // "9:00am Eastern Time"
    * dt.toTimeWithZone({ hour: '2-digit' }); // "09:00am EST"
    */
   toTimeWithZone(arg?: TimeZoneName | FormatOptions) {
@@ -699,9 +728,9 @@ export default class DateTime {
    *
    * @example
    *
-   * dt.formatLong(); // "January 1, 2020 at 9:00am"
+   * dt.toLong(); // "January 1, 2020 at 9:00am"
    */
-  formatLong(extra?: FormatOptions) {
+  toLong(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_LONG,
       ...extra,
@@ -713,9 +742,9 @@ export default class DateTime {
    *
    * @example
    *
-   * dt.formatMedium(); // "Jan 1, 2020, 9:00am"
+   * dt.toMedium(); // "Jan 1, 2020, 9:00am"
    */
-  formatMedium(extra?: FormatOptions) {
+  toMedium(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_MEDIUM,
       ...extra,
@@ -727,9 +756,9 @@ export default class DateTime {
    *
    * @example
    *
-   * dt.formatShort(); // "1/1/2020, 9:00am"
+   * dt.toShort(); // "1/1/2020, 9:00am"
    */
-  formatShort(extra?: FormatOptions) {
+  toShort(extra?: FormatOptions) {
     return this.format({
       ...DATETIME_SHORT,
       ...extra,
@@ -741,13 +770,13 @@ export default class DateTime {
    *
    * @example
    *
-   * dt.formatWithZone();              // "January 1, 2020 at 9:00am EST"
-   * dt.formatWithZone('long');        // "January 1, 2020 at 9:00am Eastern Standard Time"
-   * dt.formatWithZone('shortGeneric'); // "January 1, 2020 at 9:00am ET"
-   * dt.formatWithZone('longGeneric'); // "January 1, 2020 at 9:00am Eastern Time"
-   * dt.formatWithZone({ month: 'short' }); // "Jan 1, 2020 at 9:00am Eastern Time"
+   * dt.toLongWithZone();               // "January 1, 2020 at 9:00am EST"
+   * dt.toLongWithZone('long');         // "January 1, 2020 at 9:00am Eastern Standard Time"
+   * dt.toLongWithZone('shortGeneric'); // "January 1, 2020 at 9:00am ET"
+   * dt.toLongWithZone('longGeneric');  // "January 1, 2020 at 9:00am Eastern Time"
+   * dt.toLongWithZone({ month: 'short' }); // "Jan 1, 2020 at 9:00am Eastern Time"
    */
-  formatWithZone(arg?: TimeZoneName | FormatOptions) {
+  toLongWithZone(arg?: TimeZoneName | FormatOptions) {
     const extra = resolveTimeZoneParams(arg);
     return this.format({
       ...DATETIME_LONG,
@@ -879,6 +908,7 @@ export default class DateTime {
    * new DateTime().advance(6, 'months')
    */
   advance(by: number, unit: Unit): DateTime;
+
   /**
    * Advances the DateTime by multiple units at once.
    *
@@ -888,7 +918,7 @@ export default class DateTime {
    *   days: 15
    * })
    */
-  advance(by: DateFields): DateTime;
+  advance(by: DateParams): DateTime;
   advance(by: AdvanceBy, unit?: Unit): DateTime {
     return advanceDate(this, 1, by, unit);
   }
@@ -909,7 +939,7 @@ export default class DateTime {
    *   days: 15
    * })
    */
-  rewind(by: DateFields): DateTime;
+  rewind(by: DateParams): DateTime;
   rewind(by: AdvanceBy, unit?: Unit): DateTime {
     return advanceDate(this, -1, by, unit);
   }
@@ -1331,7 +1361,7 @@ export default class DateTime {
    *
    * dt.set({ year: 2026, month: 0 }); // Same dt with year/month replaced
    */
-  set(components: DateFields) {
+  set(components: DateParams) {
     return setComponents(this, components);
   }
 
@@ -1425,18 +1455,19 @@ export default class DateTime {
 
   // Private
 
-  // Allow instanceof check to work across imports.
+  [DATETIME_SYMBOL] = true;
 
-  [INSTANCE_KEY] = true;
-
+  // Uses a global Symbol.for key so that instanceof works across
+  // different installations or bundled copies of chrono — the usual
+  // prototype-chain check fails in those cases.
   static [Symbol.hasInstance](obj: any) {
-    return obj?.[INSTANCE_KEY];
+    return obj?.[DATETIME_SYMBOL];
   }
 
   [Symbol.toPrimitive](hint: 'number'): number;
   [Symbol.toPrimitive](hint: 'string' | 'default'): string;
   [Symbol.toPrimitive](hint: string): number | string {
-    return hint === 'number' ? this.getTime() : this.toISOString();
+    return hint === 'number' ? this.valueOf() : this.toISOString();
   }
 }
 
@@ -1444,7 +1475,9 @@ function isOptionsObject(arg: unknown): arg is DateTimeOptions {
   return arg !== null && typeof arg === 'object' && !isDateLike(arg);
 }
 
-function isEnumeratedArgs(args: unknown): args is [number, number, ...number[]] {
+function isEnumeratedArgs(
+  args: unknown,
+): args is [number, number, ...number[]] {
   if (!Array.isArray(args) || args.length < 2) {
     return false;
   }
@@ -1502,9 +1535,7 @@ function advanceDate(dt: DateTime, dir: number, by: AdvanceBy, unit?: Unit) {
   return dt;
 }
 
-function setComponents(dt: DateTime, components: DateFields, utc?: boolean) {
-  components = normalizeComponents(components);
-
+function setComponents(dt: DateTime, components: DateParams, utc?: boolean) {
   const names = Object.keys(components) as Unit[];
 
   names.sort((a, b) => {
@@ -1526,22 +1557,6 @@ function setComponents(dt: DateTime, components: DateFields, utc?: boolean) {
   return dt;
 }
 
-function normalizeComponents(components: DateFields) {
-  const seconds = components.seconds || components.second;
-
-  if (seconds) {
-    const fraction = seconds % 1;
-    if (fraction !== 0) {
-      components = {
-        ...components,
-        milliseconds: Math.round(fraction * 1000),
-      };
-    }
-  }
-
-  return components;
-}
-
 function setComponent(dt: DateTime, name: SingularUnit, value: number) {
   switch (name) {
     case 'year':
@@ -1555,7 +1570,7 @@ function setComponent(dt: DateTime, name: SingularUnit, value: number) {
     case 'minute':
       return dt.setMinutes(value);
     case 'second':
-      return dt.setSeconds(value);
+      return setSeconds(dt, value);
     case 'millisecond':
       return dt.setMilliseconds(value);
   }
@@ -1574,10 +1589,40 @@ function setUTCComponent(dt: DateTime, name: SingularUnit, value: number) {
     case 'minute':
       return dt.setUTCMinutes(value);
     case 'second':
-      return dt.setUTCSeconds(value);
+      return setUTCSeconds(dt, value);
     case 'millisecond':
       return dt.setUTCMilliseconds(value);
   }
+}
+
+function setSeconds(dt: DateTime, seconds: number) {
+  const { integer, fraction } = splitSeconds(seconds);
+
+  dt = dt.setSeconds(integer);
+
+  if (fraction) {
+    dt = dt.setMilliseconds(fraction);
+  }
+
+  return dt;
+}
+
+function setUTCSeconds(dt: DateTime, seconds: number) {
+  const { integer, fraction } = splitSeconds(seconds);
+
+  dt = dt.setUTCSeconds(integer);
+
+  if (fraction) {
+    dt = dt.setUTCMilliseconds(fraction);
+  }
+
+  return dt;
+}
+
+function splitSeconds(seconds: number) {
+  const integer = Math.floor(seconds);
+  const fraction = Math.round((seconds % 1) * 1000);
+  return { integer, fraction };
 }
 
 function formatRelative(dt: DateTime, options: RelativeOptions = {}) {

@@ -1,4 +1,5 @@
 import DateTime from './DateTime';
+import { INTERVAL_SYMBOL } from './symbols';
 import { CalendarMonthOptions, DateResolvable, Unit } from './types';
 import { normalizeUnit } from './units';
 
@@ -487,6 +488,25 @@ export default class Interval {
     }
 
     return result;
+  }
+
+  // Private
+
+  [INTERVAL_SYMBOL] = true;
+
+  // Uses a global Symbol.for key so that instanceof works across
+  // different installations or bundled copies of chrono — the usual
+  // prototype-chain check fails in those cases.
+  static [Symbol.hasInstance](obj: any) {
+    return obj?.[INTERVAL_SYMBOL];
+  }
+
+  // An interval is a range, not a scalar, so it only coerces to a
+  // string. Numeric coercion is deliberately unsupported — callers
+  // must explicitly pick `interval.duration()`, `interval.start`, or
+  // another dimension.
+  [Symbol.toPrimitive]() {
+    return this.toISOString();
   }
 }
 

@@ -1,7 +1,17 @@
 ## 0.12.0
 
 - Typescript rewrite.
-- Cleaned up docs.
+- new Time class representing a generic time.
+- formatLong → toLong.
+- formatMedium → toMedium.
+- formatShort → toShort.
+- formatWithZone → toLongWithZone.
+- toDateString and toTimeString are now true passthroughs to native Date
+  methods. Previously they returned chrono's medium format. Use
+  toDateMedium/toTimeMedium.
+- Interval constructor now requires an explicit start/end.
+- Various smaller formatting/parsing fixes.
+- Various docs cleanups.
 
 ## 0.11.4
 

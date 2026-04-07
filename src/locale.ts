@@ -2,7 +2,7 @@
 // convenience methods on DateTime (toDateLong, formatMedium, etc.).
 // These are not part of the public API.
 
-import { DateTime, FormatOptions } from './types';
+import { DateLike, FormatOptions } from './types';
 
 export const DATE_LONG = {
   year: 'numeric',
@@ -62,8 +62,7 @@ export const MONTH_DAY = {
   day: 'numeric',
 } as const;
 
-export function formatWithLocale(dt: DateTime, options: FormatOptions = {}) {
-  const { date } = dt;
+export function formatWithLocale(date: DateLike, options: FormatOptions = {}) {
   const { locale, meridiem, ...rest } = options;
 
   // Note that Intl.DateTimeFormat which Date uses can be

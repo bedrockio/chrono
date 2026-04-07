@@ -1,5 +1,5 @@
 import { isAmbiguousTimeZone, setPseudoTimezone } from './timezone';
-import { DateFields, DateTimeOptions, Unit } from './types';
+import { DateTimeOptions } from './types';
 import { getUnitForIndex } from './units';
 
 // Allow any dates parseable by Javascript, however
@@ -90,12 +90,22 @@ function stripIncompleteInput(str: string) {
 
 // Time string parsing
 
-const TIME_REG = /^(\d{2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?$/;
+const TIME_REG =
+  /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?(?: ?(a|p)\.?m?\.?)?$/i;
+
+interface TimeParams {
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
+}
 
 interface ParsedTime {
   utc?: boolean;
-  params: DateFields;
+  params: TimeParams;
 }
+
+type TimeUnit = keyof TimeParams;
 
 export function parseTime(str: string): ParsedTime {
   if (!str) {
@@ -117,16 +127,29 @@ export function parseTime(str: string): ParsedTime {
   }
 
   const utc = !!match[5];
+  const ampm = (match[6] || '').trim().toLowerCase();
+  const isAm = ampm === 'a';
+  const isPm = ampm === 'p';
   const arr = match?.slice(1, 5);
 
-  const params: DateFields = {};
+  const params = {} as TimeParams;
 
   for (let i = 0; i < arr.length; i++) {
-    const value = match?.[i + 1];
+    const str = match?.[i + 1];
 
-    if (value) {
-      const unit = getUnitForIndex(i + 4) as Unit;
-      params[unit] = parseInt(value);
+    const unit = getUnitForIndex(i + 4) as TimeUnit;
+
+    if (str) {
+      let value = parseInt(str);
+
+      if (isAm && value === 12) {
+        value = 0;
+      } else if (isPm && value < 12) {
+        value += 12;
+      }
+      params[unit] = value;
+    } else {
+      params[unit] = 0;
     }
   }
 
