@@ -108,6 +108,7 @@ export default class Time {
       this.minutes = args[1];
       this.seconds = args[2] ?? 0;
       this.milliseconds = args[3] ?? 0;
+      this.normalize();
     } else if (typeof args[0] === 'string') {
       try {
         const parsed = parseTime(args[0]);
@@ -115,6 +116,7 @@ export default class Time {
         this.minutes = parsed.params.minute;
         this.seconds = parsed.params.second;
         this.milliseconds = parsed.params.millisecond;
+        this.normalize();
       } catch {
         this.hours = NaN;
         this.minutes = NaN;
@@ -127,6 +129,7 @@ export default class Time {
       this.minutes = Math.floor(num / ONE_MINUTE) % 60;
       this.seconds = Math.floor(num / ONE_SECOND) % 60;
       this.milliseconds = num % 1000;
+      this.normalize();
     } else if (args[0] instanceof Time) {
       const time = args[0];
       this.hours = time.hours;
@@ -140,6 +143,13 @@ export default class Time {
       this.seconds = dt.getSeconds();
       this.milliseconds = dt.getMilliseconds();
     }
+  }
+
+  /**
+   * Returns the Time as a human readable string.
+   */
+  toString() {
+    return this.format();
   }
 
   /**
@@ -160,6 +170,10 @@ export default class Time {
    * ISO-8601 compliant but matches the overflow contract of the class.
    */
   toISOString() {
+    if (this.isInvalid()) {
+      return 'Invalid Time';
+    }
+
     const hh = pad(this.hours);
     const mm = pad(this.minutes);
     const ss = pad(this.seconds);
@@ -452,6 +466,10 @@ export default class Time {
   format(format: string): string;
 
   format(format?: string | FormatOptions): string {
+    if (this.isInvalid()) {
+      return 'Invalid Time';
+    }
+
     if (typeof format === 'string') {
       return formatWithTokens(this.toDate(), format);
     } else {
@@ -524,6 +542,45 @@ export default class Time {
 
   // Private
 
+  normalize() {
+    if (this.isInvalid()) {
+      return;
+    }
+
+    this.hours = Math.trunc(this.hours);
+    this.minutes = Math.trunc(this.minutes);
+    this.seconds = Math.trunc(this.seconds);
+    this.milliseconds = Math.trunc(this.milliseconds);
+
+    if (this.milliseconds < 0) {
+      this.seconds += Math.floor(this.milliseconds / 1000);
+      this.milliseconds = (1000 + (this.milliseconds % 1000)) % 1000;
+    } else if (this.milliseconds > 999) {
+      this.seconds += Math.floor(this.milliseconds / 1000);
+      this.milliseconds %= 1000;
+    }
+
+    if (this.seconds < 0) {
+      this.minutes += Math.floor(this.seconds / 60);
+      this.seconds = (60 + (this.seconds % 60)) % 60;
+    } else if (this.seconds > 59) {
+      this.minutes += Math.floor(this.seconds / 60);
+      this.seconds %= 60;
+    }
+
+    if (this.minutes < 0) {
+      this.hours += Math.floor(this.minutes / 60);
+      this.minutes = (60 + (this.minutes % 60)) % 60;
+    } else if (this.minutes > 59) {
+      this.hours += Math.floor(this.minutes / 60);
+      this.minutes %= 60;
+    }
+
+    if (this.valueOf() < 0) {
+      throw new Error('Absolute time value cannot be less than 0.');
+    }
+  }
+
   [TIME_SYMBOL] = true;
 
   // Uses a global Symbol.for key so that instanceof works across
@@ -545,6 +602,14 @@ function pad(num: number, place: number = 2) {
 }
 
 function setComponents(time: Time, components: TimeParams) {
+  // Merge components onto current state and construct once.
+  const merged = {
+    hour: time.hours,
+    minute: time.minutes,
+    second: time.seconds,
+    millisecond: time.milliseconds,
+  };
+
   const names = Object.keys(components) as TimeUnit[];
 
   names.sort((a, b) => {
@@ -555,23 +620,16 @@ function setComponents(time: Time, components: TimeParams) {
     const value = components[name] as number;
 
     name = normalizeUnit(name) as SingularTimeUnit;
-    time = setComponent(time, name, value);
+
+    merged[name] = value;
   }
 
-  return time;
-}
-
-function setComponent(time: Time, name: SingularTimeUnit, value: number): Time {
-  switch (name) {
-    case 'hour':
-      return time.setHours(value);
-    case 'minute':
-      return time.setMinutes(value);
-    case 'second':
-      return time.setSeconds(value);
-    case 'millisecond':
-      return time.setMilliseconds(value);
-  }
+  return new Time(
+    merged.hour,
+    merged.minute,
+    merged.second,
+    merged.millisecond,
+  );
 }
 
 function startOf(time: Time, unit: SingularTimeUnit) {

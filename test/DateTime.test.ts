@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import DateTime from '../src/DateTime';
-import { mockTime, unmockTime } from './helpers/time';
+import { mockTime, unmockTime } from './helpers/mocks';
 
 beforeEach(() => {
   DateTime.setLocale('en-US');
@@ -754,24 +754,31 @@ describe('DateTime', () => {
     });
   });
 
-  describe('toLocaleDateString', () => {
-    it('should ???????', () => {
+  describe('toLocaleString', () => {
+    it('should be a native Date passthrough', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(dt.toLocaleDateString()).toBe('1/1/2020');
+      expect(dt.toLocaleString()).toBe(dt.date.toLocaleString());
+    });
+  });
+
+  describe('toLocaleDateString', () => {
+    it('should be a native Date passthrough', () => {
+      const dt = new DateTime('2020-01-01T00:00:00.000Z');
+      expect(dt.toLocaleDateString()).toBe(dt.date.toLocaleDateString());
     });
   });
 
   describe('toLocaleTimeString', () => {
-    it('should ???????', () => {
+    it('should be a native Date passthrough', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(dt.toLocaleTimeString()).toBe('9:00:00 AM');
+      expect(dt.toLocaleTimeString()).toBe(dt.date.toLocaleTimeString());
     });
   });
 
   describe('toUTCString', () => {
-    it('should ???????', () => {
+    it('should be a native Date passthrough', () => {
       const dt = new DateTime('2020-01-01T00:00:00.000Z');
-      expect(dt.toUTCString()).toBe('Wed, 01 Jan 2020 00:00:00 GMT');
+      expect(dt.toUTCString()).toBe(dt.date.toUTCString());
     });
   });
 
@@ -1335,6 +1342,26 @@ describe('DateTime', () => {
       expect(new DateTime(undefined).isInvalid()).toBe(false);
       // @ts-expect-error test
       expect(new DateTime(null).isInvalid()).toBe(false);
+    });
+
+    it('should format invalid DateTimes as "Invalid DateTime"', () => {
+      const dt = new DateTime('bad');
+      expect(dt.toString()).toBe('Invalid DateTime');
+      expect(dt.toISOString()).toBe('Invalid DateTime');
+      expect(dt.toJSON()).toBe('Invalid DateTime');
+      expect(dt.format()).toBe('Invalid DateTime');
+      expect(dt.format('h:mm a')).toBe('Invalid DateTime');
+      expect(dt.format({ year: 'numeric' })).toBe('Invalid DateTime');
+      expect(dt.toLong()).toBe('Invalid DateTime');
+      expect(dt.toMedium()).toBe('Invalid DateTime');
+      expect(dt.toShort()).toBe('Invalid DateTime');
+      expect(dt.toDateLong()).toBe('Invalid DateTime');
+      expect(dt.toTimeLong()).toBe('Invalid DateTime');
+      expect(dt.toLongWithZone()).toBe('Invalid DateTime');
+      expect(dt.toTimeWithZone()).toBe('Invalid DateTime');
+      expect(dt.toMonthYear()).toBe('Invalid DateTime');
+      expect(dt.toMonthDay()).toBe('Invalid DateTime');
+      expect(`${dt}`).toBe('Invalid DateTime');
     });
   });
 

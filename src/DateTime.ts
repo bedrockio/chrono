@@ -397,6 +397,9 @@ export default class DateTime {
    * representation of the DateTime in UTC.
    */
   toISOString() {
+    if (this.isInvalid()) {
+      return 'Invalid DateTime';
+    }
     return this.date.toISOString();
   }
 
@@ -419,7 +422,7 @@ export default class DateTime {
    * Equivalent to `toISOString()`. Used by `JSON.stringify()`.
    */
   toJSON() {
-    return this.date.toISOString();
+    return this.toISOString();
   }
 
   /**
@@ -847,6 +850,10 @@ export default class DateTime {
   format(format: string): string;
 
   format(format?: string | FormatOptions, options?: DateTimeOptions): string {
+    if (this.isInvalid()) {
+      return 'Invalid DateTime';
+    }
+
     // Merge default options.
     options = {
       ...this.options,

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import DateTime from '../src/DateTime';
 import Time from '../src/Time';
-import { mockTime, unmockTime } from './helpers/time';
+import { mockTime, unmockTime } from './helpers/mocks';
 
 beforeEach(() => {
   DateTime.setLocale('en-US');
@@ -93,6 +93,14 @@ describe('Time', () => {
         const ms = 24 * 60 * 60 * 1000 - 1;
         expect(new Time(ms).toISOString()).toBe('23:59:59.999');
       });
+
+      it('should truncate fractional numeric durations', () => {
+        expect(new Time(1500.5).toISOString()).toBe('00:00:01.500');
+      });
+
+      it('should throw for a negative numeric duration', () => {
+        expect(() => new Time(-1500)).toThrow();
+      });
     });
 
     describe('enumerated arguments', () => {
@@ -136,6 +144,25 @@ describe('Time', () => {
       it('should preserve overflow values when cloning', () => {
         const original = new Time(25, 30);
         expect(new Time(original).toISOString()).toBe('25:30:00.000');
+      });
+    });
+
+    describe('normalization', () => {
+      it('should normalize parsed strings with out-of-bounds components', () => {
+        expect(new Time('09:99').toISOString()).toBe('10:39:00.000');
+        expect(new Time('09:00:99').toISOString()).toBe('09:01:39.000');
+      });
+
+      it('should truncate fractional component values', () => {
+        expect(new Time(9, 30.5).toISOString()).toBe('09:30:00.000');
+        expect(new Time(9, 30.7, 30.9, 500.9).toISOString()).toBe(
+          '09:30:30.500',
+        );
+      });
+
+      it('should throw when constructed with components that produce a negative time', () => {
+        expect(() => new Time(-1, 0)).toThrow();
+        expect(() => new Time(0, -1)).toThrow();
       });
     });
 
@@ -226,12 +253,59 @@ describe('Time', () => {
         '25:00:00.000',
       );
     });
+
+    it('should carry over when overshooting', () => {
+      const time = new Time(9, 0);
+      expect(time.set({ minutes: 60 }).toISOString()).toBe('10:00:00.000');
+      expect(time.set({ seconds: 60 }).toISOString()).toBe('09:01:00.000');
+      expect(time.set({ milliseconds: 1000 }).toISOString()).toBe(
+        '09:00:01.000',
+      );
+    });
+
+    it('should cascade down for negative values', () => {
+      const time = new Time(9, 30);
+      expect(time.set({ minutes: -1 }).toISOString()).toBe('08:59:00.000');
+      expect(time.set({ seconds: -1 }).toISOString()).toBe('09:29:59.000');
+      expect(time.set({ milliseconds: -1 }).toISOString()).toBe('09:29:59.999');
+    });
+
+    it('should truncate fractional component values', () => {
+      const time = new Time(9, 0);
+      expect(time.set({ minutes: 30.7 }).toISOString()).toBe('09:30:00.000');
+      expect(time.set({ seconds: 30.9 }).toISOString()).toBe('09:00:30.000');
+    });
+
+    it('should throw when the result would be a negative time', () => {
+      const time = new Time(0, 30);
+      expect(() => time.set({ minutes: -60 })).toThrow();
+      expect(() => time.set({ hours: -1 })).toThrow();
+    });
+
+    it('should validate atomically rather than per-component', () => {
+      // hours: -1 alone would be negative, but combined with minutes: 120
+      // (which cascades to +2 hours) the final state is valid (1:00:00).
+      const time = new Time(0, 30);
+      expect(time.set({ hours: -1, minutes: 120 }).toISOString()).toBe(
+        '01:00:00.000',
+      );
+    });
   });
 
   describe('setHours', () => {
     it('should replace the hours and preserve other components', () => {
       const time = new Time(9, 45, 30, 500);
       expect(time.setHours(14).toISOString()).toBe('14:45:30.500');
+    });
+
+    it('should preserve hours greater than 24 without wrapping', () => {
+      const time = new Time(9, 0);
+      expect(time.setHours(25).toISOString()).toBe('25:00:00.000');
+    });
+
+    it('should throw when the result would be a negative time', () => {
+      const time = new Time(9, 0);
+      expect(() => time.setHours(-1)).toThrow();
     });
   });
 
@@ -240,12 +314,70 @@ describe('Time', () => {
       const time = new Time(9, 45, 30, 500);
       expect(time.setMinutes(0).toISOString()).toBe('09:00:30.500');
     });
+
+    it('should carry over into hours when overshooting 59', () => {
+      const time = new Time(9, 0);
+      expect(time.setMinutes(60).toISOString()).toBe('10:00:00.000');
+      expect(time.setMinutes(70).toISOString()).toBe('10:10:00.000');
+      expect(time.setMinutes(180).toISOString()).toBe('12:00:00.000');
+    });
+
+    it('should cascade down when given a negative value', () => {
+      const time = new Time(9, 30);
+      expect(time.setMinutes(-1).toISOString()).toBe('08:59:00.000');
+      expect(time.setMinutes(-60).toISOString()).toBe('08:00:00.000');
+      expect(time.setMinutes(-90).toISOString()).toBe('07:30:00.000');
+    });
+
+    it('should throw when the result would be a negative time', () => {
+      const time = new Time(0, 30);
+      expect(() => time.setMinutes(-60)).toThrow();
+    });
   });
 
   describe('setSeconds', () => {
     it('should replace the seconds and preserve other components', () => {
       const time = new Time(9, 45, 30, 500);
       expect(time.setSeconds(0).toISOString()).toBe('09:45:00.500');
+    });
+
+    it('should carry over into minutes when overshooting 59', () => {
+      const time = new Time(9, 0, 0);
+      expect(time.setSeconds(60).toISOString()).toBe('09:01:00.000');
+      expect(time.setSeconds(75).toISOString()).toBe('09:01:15.000');
+    });
+
+    it('should cascade down when given a negative value', () => {
+      const time = new Time(9, 0, 30);
+      expect(time.setSeconds(-1).toISOString()).toBe('08:59:59.000');
+    });
+
+    it('should throw when the result would be a negative time', () => {
+      const time = new Time(0, 0, 30);
+      expect(() => time.setSeconds(-60)).toThrow();
+    });
+  });
+
+  describe('setMilliseconds', () => {
+    it('should replace the milliseconds and preserve other components', () => {
+      const time = new Time(9, 45, 30, 500);
+      expect(time.setMilliseconds(0).toISOString()).toBe('09:45:30.000');
+    });
+
+    it('should carry over into seconds when overshooting 999', () => {
+      const time = new Time(9, 0, 0, 0);
+      expect(time.setMilliseconds(1000).toISOString()).toBe('09:00:01.000');
+      expect(time.setMilliseconds(1500).toISOString()).toBe('09:00:01.500');
+    });
+
+    it('should cascade down when given a negative value', () => {
+      const time = new Time(9, 0, 0, 500);
+      expect(time.setMilliseconds(-1).toISOString()).toBe('08:59:59.999');
+    });
+
+    it('should throw when the result would be a negative time', () => {
+      const time = new Time(0, 0, 0, 500);
+      expect(() => time.setMilliseconds(-1000)).toThrow();
     });
   });
 
@@ -415,6 +547,12 @@ describe('Time', () => {
     });
   });
 
+  describe('toString', () => {
+    it('should return the medium format', () => {
+      expect(new Time(9, 0).toString()).toBe('9:00am');
+    });
+  });
+
   describe('format presets', () => {
     it('should format long', () => {
       expect(new Time(9, 0).toLong()).toBe('9:00:00am');
@@ -426,6 +564,21 @@ describe('Time', () => {
 
     it('should format short', () => {
       expect(new Time(9, 0).toShort()).toBe('9am');
+    });
+  });
+
+  describe('invalid', () => {
+    it('should format invalid Times as "Invalid Time"', () => {
+      const time = new Time('bad');
+      expect(time.toString()).toBe('Invalid Time');
+      expect(time.toISOString()).toBe('Invalid Time');
+      expect(time.format()).toBe('Invalid Time');
+      expect(time.format('h:mm a')).toBe('Invalid Time');
+      expect(time.format({ hour: 'numeric' })).toBe('Invalid Time');
+      expect(time.toLong()).toBe('Invalid Time');
+      expect(time.toMedium()).toBe('Invalid Time');
+      expect(time.toShort()).toBe('Invalid Time');
+      expect(`${time}`).toBe('Invalid Time');
     });
   });
 });
