@@ -253,6 +253,26 @@ export default class Time {
     return setComponents(this, components);
   }
 
+  /**
+   * Returns a new Time clamped to the standard 24-hour day. Times that
+   * exceed 24:00:00.000 become 23:59:59.999; times that fell below 0
+   * become 00:00:00.000. Already in-range times are returned unchanged.
+   *
+   * Times that are invalid due to NaN (e.g. parse failures) are returned
+   * unchanged — there is no meaningful value to clamp from.
+   */
+  clamp() {
+    const value = this.valueOf();
+    if (Number.isNaN(value)) {
+      return this;
+    } else if (value < 0) {
+      return new Time(0);
+    } else if (value >= ONE_DAY) {
+      return new Time(ONE_DAY - 1);
+    }
+    return this;
+  }
+
   // Validation & utilities
 
   /**

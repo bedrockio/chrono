@@ -225,6 +225,32 @@ describe('Time', () => {
     });
   });
 
+  describe('clamp', () => {
+    it('should leave times within a single day unchanged', () => {
+      expect(new Time(0, 0).clamp().toISOString()).toBe('00:00:00.000');
+      expect(new Time(9, 0).clamp().toISOString()).toBe('09:00:00.000');
+      expect(new Time(23, 59, 59, 999).clamp().toISOString()).toBe(
+        '23:59:59.999',
+      );
+    });
+
+    it('should clamp overflowing times to 23:59:59.999', () => {
+      expect(new Time(24, 0).clamp().toISOString()).toBe('23:59:59.999');
+      expect(new Time(25, 30).clamp().toISOString()).toBe('23:59:59.999');
+      expect(new Time(48, 0).clamp().toISOString()).toBe('23:59:59.999');
+    });
+
+    it('should clamp negative-result times to 00:00:00.000', () => {
+      const time = new Time(0, 0).setMinutes(-1);
+      expect(time.clamp().toISOString()).toBe('00:00:00.000');
+    });
+
+    it('should leave NaN-invalid times unchanged', () => {
+      const time = new Time('bad');
+      expect(time.clamp().isInvalid()).toBe(true);
+    });
+  });
+
   describe('set', () => {
     it('should replace specified components and preserve others', () => {
       const time = new Time(9, 45, 30, 500);
