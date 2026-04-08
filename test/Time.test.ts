@@ -64,6 +64,7 @@ describe('Time', () => {
         expect(new Time('12pm').toISOString()).toBe('12:00:00.000');
         expect(new Time('12:30am').toISOString()).toBe('00:30:00.000');
         expect(new Time('12:30pm').toISOString()).toBe('12:30:00.000');
+        expect(new Time('5:00pm').toISOString()).toBe('17:00:00.000');
       });
 
       it('should parse but ignore zulu time', () => {

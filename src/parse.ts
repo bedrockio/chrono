@@ -142,11 +142,14 @@ export function parseTime(str: string): ParsedTime {
     if (str) {
       let value = parseInt(str);
 
-      if (isAm && value === 12) {
-        value = 0;
-      } else if (isPm && value < 12) {
-        value += 12;
+      if (unit === 'hour') {
+        if (isAm && value === 12) {
+          value = 0;
+        } else if (isPm && value < 12) {
+          value += 12;
+        }
       }
+
       params[unit] = value;
     } else {
       params[unit] = 0;
