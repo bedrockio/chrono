@@ -9,6 +9,7 @@ Concepts
 - [Documentation](#documentation)
 - [DateTime](#datetime)
 - [Interval](#interval)
+- [Time](#time)
 
 ## Installation
 
@@ -50,13 +51,38 @@ DateTime.setLocale('en-US');
 
 ### Date Formatting
 
-The `format` method accepts two styles of input.
+For common formats there are convenience methods. For full control, the
+`format` method accepts a locale options object or a token string.
+
+#### Convenience Methods
+
+```js
+const dt = new DateTime('2020-01-01T14:00:00.000Z', {
+  timeZone: 'America/New_York',
+});
+
+dt.toLong();   // "January 1, 2020 at 9:00am"
+dt.toMedium(); // "Jan 1, 2020, 9:00am"
+dt.toShort();  // "1/1/2020, 9:00am"
+
+dt.toDateLong();   // "January 1, 2020"
+dt.toDateMedium(); // "Jan 1, 2020"
+dt.toDateShort();  // "1/1/2020"
+
+dt.toTimeLong();   // "9:00:00am"
+dt.toTimeMedium(); // "9:00am"
+dt.toTimeShort();  // "9am"
+
+dt.toLongWithZone();       // "January 1, 2020 at 9:00am GMT-5"
+dt.toLongWithZone('long'); // "January 1, 2020 at 9:00am Eastern Standard Time"
+dt.toTimeWithZone();       // "9:00am GMT-5"
+```
 
 #### Locale Formatting
 
-Passing an object will use `Intl.DateTimeFormat` and format a human readable
-string in a specific locale. It may be a custom object or defined presets. The
-locale used in order will be:
+Passing an object to `format` uses `Intl.DateTimeFormat` to produce a
+human-readable string in a specific locale. The locale used in order
+will be:
 
 - Passed in the options to `format`
 - The internal locale of the `DateTime`
@@ -64,51 +90,29 @@ locale used in order will be:
 - The system locale
 
 ```js
-const dt = new DateTime('2020-01-01T00:00:00.000Z');
+const dt = new DateTime('2020-01-01T14:00:00.000Z', {
+  timeZone: 'America/New_York',
+});
 
-// December 31, 2019 at 7:00pm
-dt.format(DateTime.DATETIME_MED);
-
-// January 1, 2020
 dt.format({
   year: 'numeric',
   month: 'long',
   day: 'numeric',
 });
+// "January 1, 2020"
 ```
-
-Supported presets are:
-
-| Preset               | Example                           |
-| -------------------- | --------------------------------- |
-| DATE_MED             | January 1, 2020                   |
-| DATE_SHORT           | Jan 1, 2020                       |
-| DATE_NARROW          | 1/1/2020                          |
-| DATE_MED_WEEKDAY     | Wednesday, January 1, 2020        |
-| TIME_MED             | 9:00am                            |
-| TIME_SHORT           | 9:00a                             |
-| TIME_HOUR            | 9pm                               |
-| TIME_SHORT_HOUR      | 9p                                |
-| TIME_WITH_ZONE       | 9:00am Japan Standard Time        |
-| DATETIME_MED         | January 1, 2020 9:00pm            |
-| DATETIME_SHORT       | Jan 1, 2020 9:00pm                |
-| DATETIME_NARROW      | 1/1/2020 9:00pm                   |
-| DATETIME_MED_WEEKDAY | Wednesday, January 1, 2020 9:00pm |
-| MONTH_YEAR           | January 2020                      |
-| MONTH_YEAR_SHORT     | Jan 2020                          |
 
 #### Token Formatting
 
 Passing a string will format the date using tokens and ignoring locales.
 
 ```js
-const dt = new DateTime('2020-01-01T00:00:00.000Z');
+const dt = new DateTime('2020-01-01T14:00:00.000Z', {
+  timeZone: 'America/New_York',
+});
 
-// 5:05 am
-dt.format('h:mm a');
-
-// 1/1/2020
-dt.format('M/d/yyyy');
+dt.format('h:mm a');   // "9:00 am"
+dt.format('M/d/yyyy'); // "1/1/2020"
 ```
 
 Supported tokens are:
@@ -131,11 +135,23 @@ Supported tokens are:
 | ss    | padded second                                |
 | a     | lowercase meridiem (am/pm)                   |
 | A     | uppercase meridiem (AM/PM)                   |
-| Z     | narrow timezone offset (`+5`)                |
-| ZZ    | short timezone offset (`+5000`)              |
-| ZZZ   | long timezone offset (`+5:00`)               |
+| Z     | narrow timezone offset (`-5`)                |
+| ZZ    | short timezone offset (`-0500`)              |
+| ZZZ   | long timezone offset (`-05:00`)              |
 | ZZZZ  | short timezone name (`EST`)                  |
 | ZZZZZ | long timezone name (`Eastern Standard Time`) |
+
+### Native Date Compatibility
+
+`DateTime` provides passthroughs to the standard `Date` methods
+(`toUTCString`, `toLocaleString`, `toJSON`, etc.) so that it can stand
+in for a `Date` in code that calls them. Each delegates directly to the
+underlying `Date` and produces exactly what the spec defines.
+
+The one exception is `toString`, which deliberately diverges from the
+native form to produce a more readable result for implicit
+stringification (template literals, logs, errors). Use `dt.date.toString()`
+if you need the literal native format.
 
 ## Interval
 
@@ -150,5 +166,31 @@ const nextYear = new DateTime().advance(1, 'year');
 const interval = new Interval(lastYear, nextYear);
 
 // The number of days in this interval.
-const days = interval.getDays();
+const days = interval.days();
+```
+
+## Time
+
+The `Time` object represents a generic time of day, with no associated
+date or timezone. It is useful for representing times in the abstract —
+for scheduling, display, or comparison — without binding to a specific
+calendar moment.
+
+```js
+import { Time } from '@bedrockio/chrono';
+
+const noon = new Time(12, 0);
+const meeting = new Time('9:30am');
+const duration = new Time(35100000); // 9:45:00.000
+
+// Like DateTime, Time is immutable.
+const later = meeting.advance(15, 'minutes'); // "9:45am"
+```
+
+Hours greater than 24 are allowed and preserved (not normalized), which
+lets a `Time` represent times that spill past midnight — useful for
+broadcast schedules or late-night programming:
+
+```js
+new Time('25:30').toISOString(); // "25:30:00.000"
 ```

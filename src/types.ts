@@ -177,7 +177,7 @@ export interface MonthOptions {
 export interface WeekdayOptions {
   /** If not passed will use the global locale or fall back to the system locale. */
   locale?: string;
-  /** An explicit start day of the week, 0 for sunday, 6 for Saturday. Will fall back to the locale defined first day. */
+  /** An explicit start day of the week, 0 for Sunday, 6 for Saturday. Will fall back to the locale defined first day. */
   start?: number;
   /** Will be passed as `weekday` to Intl.DateTimeFormat. Default `long`. */
   style?: 'long' | 'short' | 'compact' | 'narrow';
@@ -208,6 +208,6 @@ export type TimeUnit =
 
 export type SingularTimeUnit = 'hour' | 'minute' | 'second' | 'millisecond';
 
-export type TimeFields = Partial<Record<TimeUnit, number>>;
+export type TimeParams = Partial<Record<TimeUnit, number>>;
 
 export type { DateTime };

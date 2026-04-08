@@ -7,7 +7,7 @@ import { formatWithTokens } from './tokens';
 import {
   FormatOptions,
   SingularTimeUnit,
-  TimeFields,
+  TimeParams,
   TimeResolvable,
   TimeUnit,
 } from './types';
@@ -235,7 +235,7 @@ export default class Time {
    *
    * time.set({ hours: 12, minutes: 30 });
    */
-  set(components: TimeFields) {
+  set(components: TimeParams) {
     return setComponents(this, components);
   }
 
@@ -318,7 +318,7 @@ export default class Time {
    *   minutes: 15
    * })
    */
-  advance(by: TimeFields): Time;
+  advance(by: TimeParams): Time;
   advance(by: AdvanceBy, unit?: TimeUnit): Time {
     return advanceTime(this, 1, by, unit);
   }
@@ -341,7 +341,7 @@ export default class Time {
    *   minutes: 15
    * })
    */
-  rewind(by: TimeFields): Time;
+  rewind(by: TimeParams): Time;
   rewind(by: AdvanceBy, unit?: TimeUnit): Time {
     return advanceTime(this, -1, by, unit);
   }
@@ -544,7 +544,7 @@ function pad(num: number, place: number = 2) {
   return num.toString().padStart(place, '0');
 }
 
-function setComponents(time: Time, components: TimeFields) {
+function setComponents(time: Time, components: TimeParams) {
   const names = Object.keys(components) as TimeUnit[];
 
   names.sort((a, b) => {
@@ -618,7 +618,7 @@ function endOf(time: Time, unit: SingularTimeUnit) {
   }
 }
 
-type AdvanceBy = number | TimeFields;
+type AdvanceBy = number | TimeParams;
 
 function advanceTime(time: Time, dir: number, by: AdvanceBy, unit?: TimeUnit) {
   if (typeof by === 'number' && typeof unit === 'string') {
