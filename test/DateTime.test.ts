@@ -1710,6 +1710,33 @@ describe('DateTime', () => {
         expect(dt.toShort()).toBe('1/1/2020, 9:00am');
       });
     });
+
+    describe('clock option', () => {
+      it('should format the long preset in 24-hour clock', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toLong({ clock: '24h' })).toBe('January 1, 2020 at 09:00');
+      });
+
+      it('should format the medium preset in 24-hour clock', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(dt.toMedium({ clock: '24h' })).toBe('Jan 1, 2020, 09:00');
+      });
+
+      it('should compose with the locale option', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.format({
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            locale: 'de-DE',
+            clock: '24h',
+          }),
+        ).toMatch(/9:00/);
+      });
+    });
   });
 
   describe('month-year formatting', () => {

@@ -567,6 +567,38 @@ describe('Time', () => {
     });
   });
 
+  describe('clock option', () => {
+    it('should format the long preset in 24-hour clock', () => {
+      const time = new Time(21, 0);
+      expect(time.toLong({ clock: '24h' })).toBe('21:00:00');
+    });
+
+    it('should format the medium preset in 24-hour clock', () => {
+      const time = new Time(21, 0);
+      expect(time.toMedium({ clock: '24h' })).toBe('21:00');
+    });
+
+    it('should format the short preset in 24-hour clock', () => {
+      const time = new Time(21, 0);
+      expect(time.toShort({ clock: '24h' })).toBe('21');
+    });
+
+    it('should apply to format() with no other options', () => {
+      const time = new Time(21, 0);
+      expect(time.format({ clock: '24h' })).toBe('21:00');
+    });
+
+    it('should compose with the locale option', () => {
+      const time = new Time(21, 0);
+      expect(time.format({ locale: 'de-DE', clock: '24h' })).toBe('21:00');
+    });
+
+    it('should force 12-hour clock when explicitly requested', () => {
+      const time = new Time(21, 0);
+      expect(time.toMedium({ clock: '12h' })).toBe('9:00pm');
+    });
+  });
+
   describe('invalid', () => {
     it('should format invalid Times as "Invalid Time"', () => {
       const time = new Time('bad');

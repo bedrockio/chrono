@@ -469,7 +469,15 @@ export default class Time {
     if (typeof format === 'string') {
       return formatWithTokens(this.toDate(), format);
     } else {
-      format ||= TIME_MEDIUM as FormatOptions;
+      // Intl options are additive so only apply default
+      // format if either none is specified or no hour OR
+      // minute formatting is specified.
+      if (!format || (!format.hour && !format.minute)) {
+        format = {
+          ...TIME_MEDIUM,
+          ...format,
+        };
+      }
       return formatWithLocale(this.toDate(), format);
     }
   }

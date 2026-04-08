@@ -165,6 +165,11 @@ export type FormatOptions = Intl.DateTimeFormatOptions & {
    * - `"period"` — `9 a.m.`
    */
   meridiem?: 'short' | 'period' | 'caps' | 'space';
+  /**
+   * Forces 12-hour or 24-hour clock for time output, overriding the
+   * locale's default. Maps to Intl's `hour12` option.
+   */
+  clock?: '12h' | '24h';
 };
 
 export interface MonthOptions {

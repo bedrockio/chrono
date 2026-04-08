@@ -63,7 +63,13 @@ export const MONTH_DAY = {
 } as const;
 
 export function formatWithLocale(date: DateLike, options: FormatOptions = {}) {
-  const { locale, meridiem, ...rest } = options;
+  const { locale, clock, meridiem, ...rest } = options;
+
+  if (clock === '12h') {
+    rest.hour12 = true;
+  } else if (clock === '24h') {
+    rest.hour12 = false;
+  }
 
   // Note that Intl.DateTimeFormat which Date uses can be
   // passed unknown options without complaining.
