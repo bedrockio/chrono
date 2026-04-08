@@ -42,6 +42,23 @@ describe('Time', () => {
         expect(new Time('7PM').toISOString()).toBe('19:00:00.000');
       });
 
+      it('should parse without meridiem or colon', () => {
+        expect(new Time('130').toISOString()).toBe('01:30:00.000');
+        expect(new Time('730').toISOString()).toBe('07:30:00.000');
+        expect(new Time('1230').toISOString()).toBe('12:30:00.000');
+      });
+
+      it('should parse with meridiem but no colon', () => {
+        expect(new Time('130a').toISOString()).toBe('01:30:00.000');
+        expect(new Time('130am').toISOString()).toBe('01:30:00.000');
+        expect(new Time('130p').toISOString()).toBe('13:30:00.000');
+        expect(new Time('130pm').toISOString()).toBe('13:30:00.000');
+        expect(new Time('730am').toISOString()).toBe('07:30:00.000');
+        expect(new Time('730pm').toISOString()).toBe('19:30:00.000');
+        expect(new Time('1230am').toISOString()).toBe('00:30:00.000');
+        expect(new Time('1230pm').toISOString()).toBe('12:30:00.000');
+      });
+
       it('should parse 12am as midnight and 12pm as noon', () => {
         expect(new Time('12am').toISOString()).toBe('00:00:00.000');
         expect(new Time('12pm').toISOString()).toBe('12:00:00.000');

@@ -91,7 +91,7 @@ function stripIncompleteInput(str: string) {
 // Time string parsing
 
 const TIME_REG =
-  /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?(?: ?(a|p)\.?m?\.?)?$/i;
+  /^([012]?\d)(?::?(\d{2}))?(?::(\d{2}))?(?:\.(\d{3}))?(Z)?(?: ?(a|p)\.?m?\.?)?$/i;
 
 interface TimeParams {
   hour: number;
