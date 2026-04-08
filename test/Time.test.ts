@@ -98,8 +98,8 @@ describe('Time', () => {
         expect(new Time(1500.5).toISOString()).toBe('00:00:01.500');
       });
 
-      it('should throw for a negative numeric duration', () => {
-        expect(() => new Time(-1500)).toThrow();
+      it('should be invalid for a negative numeric duration', () => {
+        expect(new Time(-1500).isInvalid()).toBe(true);
       });
     });
 
@@ -160,9 +160,9 @@ describe('Time', () => {
         );
       });
 
-      it('should throw when constructed with components that produce a negative time', () => {
-        expect(() => new Time(-1, 0)).toThrow();
-        expect(() => new Time(0, -1)).toThrow();
+      it('should be invalid when constructed with components that produce a negative time', () => {
+        expect(new Time(-1, 0).isInvalid()).toBe(true);
+        expect(new Time(0, -1).isInvalid()).toBe(true);
       });
     });
 
@@ -276,10 +276,10 @@ describe('Time', () => {
       expect(time.set({ seconds: 30.9 }).toISOString()).toBe('09:00:30.000');
     });
 
-    it('should throw when the result would be a negative time', () => {
+    it('should be invalid when the result would be a negative time', () => {
       const time = new Time(0, 30);
-      expect(() => time.set({ minutes: -60 })).toThrow();
-      expect(() => time.set({ hours: -1 })).toThrow();
+      expect(time.set({ minutes: -60 }).isInvalid()).toBe(true);
+      expect(time.set({ hours: -1 }).isInvalid()).toBe(true);
     });
 
     it('should validate atomically rather than per-component', () => {
@@ -303,9 +303,9 @@ describe('Time', () => {
       expect(time.setHours(25).toISOString()).toBe('25:00:00.000');
     });
 
-    it('should throw when the result would be a negative time', () => {
+    it('should be invalid when the result would be a negative time', () => {
       const time = new Time(9, 0);
-      expect(() => time.setHours(-1)).toThrow();
+      expect(time.setHours(-1).isInvalid()).toBe(true);
     });
   });
 
@@ -329,9 +329,9 @@ describe('Time', () => {
       expect(time.setMinutes(-90).toISOString()).toBe('07:30:00.000');
     });
 
-    it('should throw when the result would be a negative time', () => {
+    it('should be invalid when the result would be a negative time', () => {
       const time = new Time(0, 30);
-      expect(() => time.setMinutes(-60)).toThrow();
+      expect(time.setMinutes(-60).isInvalid()).toBe(true);
     });
   });
 
@@ -352,9 +352,9 @@ describe('Time', () => {
       expect(time.setSeconds(-1).toISOString()).toBe('08:59:59.000');
     });
 
-    it('should throw when the result would be a negative time', () => {
+    it('should be invalid when the result would be a negative time', () => {
       const time = new Time(0, 0, 30);
-      expect(() => time.setSeconds(-60)).toThrow();
+      expect(time.setSeconds(-60).isInvalid()).toBe(true);
     });
   });
 
@@ -375,9 +375,9 @@ describe('Time', () => {
       expect(time.setMilliseconds(-1).toISOString()).toBe('08:59:59.999');
     });
 
-    it('should throw when the result would be a negative time', () => {
+    it('should be invalid when the result would be a negative time', () => {
       const time = new Time(0, 0, 0, 500);
-      expect(() => time.setMilliseconds(-1000)).toThrow();
+      expect(time.setMilliseconds(-1000).isInvalid()).toBe(true);
     });
   });
 
@@ -579,6 +579,11 @@ describe('Time', () => {
       expect(time.toMedium()).toBe('Invalid Time');
       expect(time.toShort()).toBe('Invalid Time');
       expect(`${time}`).toBe('Invalid Time');
+    });
+
+    it('should format negative-result Times as "Invalid Time"', () => {
+      expect(new Time(-1).toString()).toBe('Invalid Time');
+      expect(new Time(0, 0).setMinutes(-1).toString()).toBe('Invalid Time');
     });
   });
 });

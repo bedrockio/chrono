@@ -259,12 +259,8 @@ export default class Time {
    * Returns true if the Time is invalid.
    */
   isInvalid() {
-    return (
-      Number.isNaN(this.hours) ||
-      Number.isNaN(this.minutes) ||
-      Number.isNaN(this.seconds) ||
-      Number.isNaN(this.milliseconds)
-    );
+    const value = this.valueOf();
+    return Number.isNaN(value) || value < 0;
   }
 
   /**
@@ -574,10 +570,6 @@ export default class Time {
     } else if (this.minutes > 59) {
       this.hours += Math.floor(this.minutes / 60);
       this.minutes %= 60;
-    }
-
-    if (this.valueOf() < 0) {
-      throw new Error('Absolute time value cannot be less than 0.');
     }
   }
 
