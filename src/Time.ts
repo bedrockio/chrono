@@ -211,6 +211,23 @@ export default class Time {
     return this.milliseconds;
   }
 
+  /**
+   * Returns the time components as a plain object suitable for passing
+   * to {@link DateTime#set}.
+   *
+   * @example
+   *
+   * dt.set(new Time(14, 30).toParams());
+   */
+  toParams() {
+    return {
+      hour: this.hours,
+      minute: this.minutes,
+      second: this.seconds,
+      millisecond: this.milliseconds,
+    };
+  }
+
   // Setters
 
   /**

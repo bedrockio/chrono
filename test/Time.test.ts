@@ -319,6 +319,34 @@ describe('Time', () => {
     });
   });
 
+  describe('toParams', () => {
+    it('should return an object with singular component keys', () => {
+      const time = new Time(14, 30, 45, 250);
+      expect(time.toParams()).toEqual({
+        hour: 14,
+        minute: 30,
+        second: 45,
+        millisecond: 250,
+      });
+    });
+
+    it('should default seconds and milliseconds to zero', () => {
+      const time = new Time(9, 15);
+      expect(time.toParams()).toEqual({
+        hour: 9,
+        minute: 15,
+        second: 0,
+        millisecond: 0,
+      });
+    });
+
+    it('should preserve hours greater than 24 without wrapping', () => {
+      const time = new Time(26, 0);
+      expect(time.toParams().hour).toBe(26);
+    });
+
+  });
+
   describe('setHours', () => {
     it('should replace the hours and preserve other components', () => {
       const time = new Time(9, 45, 30, 500);
