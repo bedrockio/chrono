@@ -12,6 +12,7 @@
 - Interval constructor now requires an explicit start/end.
 - Various smaller formatting/parsing fixes.
 - Various docs cleanups.
+- Perf - Memoizing formatter.
 
 ## 0.11.4
 

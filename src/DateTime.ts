@@ -1,5 +1,6 @@
 import {
   getFirstDayOfWeek,
+  getFormatter,
   getMeridiem,
   getMonthName,
   getWeekdayName,
@@ -211,7 +212,7 @@ export default class DateTime {
 
     locale ||= DateTime.options.locale;
 
-    const formatter = new Intl.DateTimeFormat(locale, {
+    const formatter = getFormatter(locale, {
       month: style,
     });
 

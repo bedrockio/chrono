@@ -1,3 +1,5 @@
+import memoize from 'lodash-es/memoize';
+
 // Months
 
 import {
@@ -127,7 +129,7 @@ interface GetPartOptions extends IntlOptions {
 
 export function getPart(arg: DateLike, type: string, options: GetPartOptions) {
   const { timeZone, style, locale = 'en', ...rest } = options;
-  const formatter = new Intl.DateTimeFormat(locale, {
+  const formatter = getFormatter(locale, {
     ...normalizeIntlOptions(locale, rest),
     timeZone,
   });
@@ -157,7 +159,7 @@ function normalizeIntlOptions(locale: string, options: IntlOptions) {
 export function resolveIntlOptions(options: DateTimeOptions) {
   let { locale, timeZone, firstDayOfWeek } = options;
 
-  const resolved = new Intl.DateTimeFormat(locale, {
+  const resolved = getFormatter(locale, {
     timeZone,
   }).resolvedOptions();
 
@@ -166,3 +168,15 @@ export function resolveIntlOptions(options: DateTimeOptions) {
 
   return { locale, timeZone, firstDayOfWeek };
 }
+
+// Caching Intl.DateTimeFormat construction as it is expensive.
+// https://v8.dev/blog/intl
+
+export const getFormatter = memoize(
+  (locale, options) => {
+    return new Intl.DateTimeFormat(locale, options);
+  },
+  (...args) => {
+    return JSON.stringify(args);
+  },
+);
