@@ -1737,6 +1737,17 @@ describe('DateTime', () => {
         ).toMatch(/9:00/);
       });
     });
+
+    describe('timeZone option', () => {
+      it('should override locally set timezone', () => {
+        const dt = new DateTime('2020-01-01T00:00:00.000Z');
+        expect(
+          dt.toLong({
+            timeZone: 'Europe/Paris',
+          }),
+        ).toBe('January 1, 2020 at 1:00am');
+      });
+    });
   });
 
   describe('month-year formatting', () => {

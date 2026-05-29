@@ -866,8 +866,8 @@ export default class DateTime {
     } else {
       format ||= DATETIME_LONG as FormatOptions;
       return formatWithLocale(this, {
-        ...format,
         ...options,
+        ...format,
       });
     }
   }

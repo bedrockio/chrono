@@ -1,3 +1,7 @@
+## 0.12.2
+
+- Format options must override instance.
+
 ## 0.12.1
 
 - Lodash imports fix.
