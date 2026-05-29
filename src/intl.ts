@@ -1,4 +1,4 @@
-import memoize from 'lodash-es/memoize';
+import { memoize } from 'lodash-es';
 
 // Months
 

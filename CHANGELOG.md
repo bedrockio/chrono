@@ -1,3 +1,7 @@
+## 0.12.1
+
+- Lodash imports fix.
+
 ## 0.12.0
 
 - Typescript rewrite.
