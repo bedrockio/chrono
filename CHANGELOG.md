@@ -1,3 +1,7 @@
+## 0.12.3
+
+- Lodash new fix.
+
 ## 0.12.2
 
 - Format options must override instance.
