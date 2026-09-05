@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/chrono",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Minimal library for working with dates.",
   "scripts": {
     "test": "vitest run",
@@ -39,7 +39,7 @@
     "@bedrockio/eslint-plugin": "^1.5.5",
     "@bedrockio/prettier-config": "^1.1.1",
     "@sinonjs/fake-timers": "^15.3.0",
-    "@types/lodash-es": "^4.17.12",
+    "@types/lodash.memoize": "^4.1.9",
     "@types/node": "^24.7.2",
     "eslint": "^9.37.0",
     "prettier": "^3.6.2",
